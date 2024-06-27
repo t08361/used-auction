@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../widgets/item_list.dart';
 import '../screens/search_screen.dart';
 import '../screens/add_item_screen.dart';
+import '../screens/notification_screen.dart';
+
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -26,10 +28,14 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(Icons.add),
+            icon: Icon(Icons.notifications),
             color: Colors.black,
             onPressed: () {
-
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => NotificationScreen(),
+                ),
+              );
             },
           ),
         ],
