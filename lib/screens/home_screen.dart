@@ -14,6 +14,7 @@ class HomeScreen extends StatelessWidget {
             '몽당마켓',
             style: TextStyle(color: Colors.black)
         ),
+        automaticallyImplyLeading: false, // 뒤로가기 버튼을 없애기
         elevation: 0,
         backgroundColor: Colors.white,
         actions: [

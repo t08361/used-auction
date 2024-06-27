@@ -27,7 +27,7 @@ class ItemList extends StatelessWidget {
               color: Colors.white,
               //borderRadius: BorderRadius.circular(10),
             ),
-            height: 110.0, // 아이템의 높이 설정
+            height: 120.0, // 아이템의 높이 설정
             child: Row(
               children: [
                 Container(
@@ -51,18 +51,28 @@ class ItemList extends StatelessWidget {
                     children: [
                       Text(
                         item.title,
-                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold), // 텍스트 크기 조정
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), // 텍스트 크기 조정
                       ),
-                      SizedBox(height: 5),
+                      SizedBox(height: 3),
                       Text(
                         item.description,
-                        style: TextStyle(fontSize: 16), // 텍스트 크기 조정
+                        style: TextStyle(fontSize: 14), // 텍스트 크기 조정
                       ),
-                      SizedBox(height: 5),
+                      SizedBox(height: 3),
                       Text(
-                        '\$${item.price.toString()}',
-                        style: TextStyle(fontSize: 18, color: Colors.green), // 텍스트 크기 및 색상 조정
+                        '시초가 : '+item.price.toString()+'원',
+                        style: TextStyle(fontSize: 15, color: Colors.green), // 텍스트 크기 및 색상 조정
                       ),
+                      SizedBox(height: 3),
+                      Text(
+                        '현재 최고가 : '+'32220'+'원',
+                        style: TextStyle(fontSize: 15, color: Colors.red), // 텍스트 크기 및 색상 조정
+                      ),
+                      Text(
+                        "남은 시간 : 32분",
+                        style: TextStyle(fontSize: 14), // 텍스트 크기 조정
+                      ),
+
                     ],
                   ),
                 ),
