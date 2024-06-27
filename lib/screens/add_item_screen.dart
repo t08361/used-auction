@@ -49,7 +49,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   void _submitData(BuildContext context) {
     final title = _titleController.text;
     final description = _descriptionController.text;
-    final price = double.tryParse(_priceController.text);
+    final price = int.tryParse(_priceController.text);
 
     if (title.isEmpty || description.isEmpty || price == null || price <= 0 || _selectedImage == null) {
       print("Invalid input:");
