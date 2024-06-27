@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
   static const routeName = '/chat';
+  final String chatName;
+
+  ChatScreen({required this.chatName});
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -25,7 +28,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat'),
+        title: Text(widget.chatName),
       ),
       body: Column(
         children: [
@@ -40,7 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(30.0),
             child: Row(
               children: [
                 Expanded(
