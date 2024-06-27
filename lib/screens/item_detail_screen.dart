@@ -10,8 +10,14 @@ class ItemDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(item.title),
+        title: Text(
+            item.title,
+            style: TextStyle(color: Colors.black)
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

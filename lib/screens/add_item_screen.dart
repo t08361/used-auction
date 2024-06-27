@@ -77,7 +77,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('아이템 추가'),
+        title: Text(
+            '상품 등록',
+            style: TextStyle(color: Colors.black)
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -86,15 +91,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
             children: [
               TextField(
                 controller: _titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                decoration: InputDecoration(labelText: '제목'),
               ),
               TextField(
                 controller: _descriptionController,
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: InputDecoration(labelText: '자세한 설명'),
               ),
               TextField(
                 controller: _priceController,
-                decoration: InputDecoration(labelText: 'Price'),
+                decoration: InputDecoration(labelText: '시초가'),
                 keyboardType: TextInputType.number,
               ),
               SizedBox(height: 10),
@@ -105,15 +110,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 height: 100,
                 fit: BoxFit.cover,
               )
-                  : Text('No Image Selected'),
+                  : Text('사진를 올려주세요!'),
               TextButton(
                 onPressed: _pickImage,
-                child: Text('Select Image'),
+                child: Text('사진 선택'),
               ),
               SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () => _submitData(context),
-                child: Text('Add Item'),
+                child: Text('상품 등록'),
               ),
             ],
           ),

@@ -6,7 +6,12 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('몽당마켓'),
+        title: Text(
+            '몽당마켓',
+            style: TextStyle(color: Colors.black)
+        ),
+        elevation: 0,
+        backgroundColor: Colors.white,
       ),
       body: ItemList(),
     );
