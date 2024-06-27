@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 class ChatScreen extends StatefulWidget {
   static const routeName = '/chat';
   final String chatName;
+  final String bidPrice;
+  final String image;
 
-  ChatScreen({required this.chatName});
+  ChatScreen({
+    required this.chatName,
+    required this.bidPrice,
+    required this.image,
+  });
 
   @override
   _ChatScreenState createState() => _ChatScreenState();
@@ -28,10 +34,47 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.chatName),
+        title: Row(
+          children: [
+            CircleAvatar(
+              radius: 20,
+              backgroundImage: AssetImage(widget.image),
+            ),
+            SizedBox(width: 5),
+            CircleAvatar(
+              radius: 20,
+              backgroundImage: AssetImage(widget.image),
+            ),
+            SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.chatName),
+                Text(
+                  '낙찰가 : '+widget.bidPrice,
+                  style: TextStyle(fontSize: 12),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
+          TextButton(
+          onPressed: () {
+              print('Styled Text Button Pressed');
+          },
+          child: Text('거래완료'),
+        style: TextButton.styleFrom(
+        primary: Colors.white, // 텍스트 색상
+        backgroundColor: Colors.green, // 배경 색상
+        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // 패딩
+        textStyle: TextStyle(
+          fontSize: 18, // 텍스트 크기
+        ),
+      ),
+    ),
           Expanded(
             child: ListView.builder(
               itemCount: _messages.length,
