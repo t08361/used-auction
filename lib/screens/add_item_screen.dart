@@ -81,6 +81,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
             '상품 등록',
             style: TextStyle(color: Colors.black)
         ),
+        iconTheme: IconThemeData(
+          color: Colors.black, // 뒤로가기 버튼 색상을 검은색으로 설정
+        ),
         elevation: 0,
         backgroundColor: Colors.white,
       ),

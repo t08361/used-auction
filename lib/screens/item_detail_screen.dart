@@ -14,6 +14,9 @@ class ItemDetailScreen extends StatelessWidget {
             item.title,
             style: TextStyle(color: Colors.black)
         ),
+        iconTheme: IconThemeData(
+          color: Colors.black, // 뒤로가기 버튼 색상을 검은색으로 설정
+        ),
         elevation: 0,
         backgroundColor: Colors.white,
       ),
