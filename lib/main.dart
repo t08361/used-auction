@@ -4,7 +4,8 @@ import 'providers/item_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/add_item_screen.dart';
 import 'screens/my_page_screen.dart';
-import '../screens/search_screen.dart';
+import 'screens/search_screen.dart';
+import '../screens/chat_screen.dart';
 
 //provider를 설정하여 앱 전체에 상태관리 제공이 가능하도록 하기위한 코드
 void main() {
@@ -41,7 +42,7 @@ class _MainScreenState extends State<MainScreen> {
 
   static List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    AddItemScreen(),
+    ChatScreen(),
     MyPageScreen(),
   ];
 
@@ -60,15 +61,15 @@ class _MainScreenState extends State<MainScreen> {
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: '홈',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Add Item',
+            icon: Icon(Icons.chat_bubble_rounded),
+            label: '채팅',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'My Page',
+            label: '마이페이지',
           ),
         ],
         currentIndex: _selectedIndex,
