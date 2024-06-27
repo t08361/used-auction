@@ -61,20 +61,6 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       body: Column(
         children: [
-          TextButton(
-          onPressed: () {
-              print('Styled Text Button Pressed');
-          },
-          child: Text('거래완료'),
-        style: TextButton.styleFrom(
-        primary: Colors.white, // 텍스트 색상
-        backgroundColor: Colors.green, // 배경 색상
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // 패딩
-        textStyle: TextStyle(
-          fontSize: 18, // 텍스트 크기
-        ),
-      ),
-    ),
           Expanded(
             child: ListView.builder(
               itemCount: _messages.length,
@@ -84,6 +70,25 @@ class _ChatScreenState extends State<ChatScreen> {
                 );
               },
             ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton(
+                onPressed: () {
+                  print('Styled Text Button Pressed');
+                },
+                child: Text('거래완료'),
+                style: TextButton.styleFrom(
+                  primary: Colors.white, // 텍스트 색상
+                  backgroundColor: Colors.green, // 배경 색상
+                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // 패딩
+                  textStyle: TextStyle(
+                    fontSize: 18, // 텍스트 크기
+                  ),
+                ),
+              ),
+            ],
           ),
           Padding(
             padding: const EdgeInsets.all(30.0),
