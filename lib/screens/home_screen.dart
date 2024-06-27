@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/item_list.dart';
 import '../screens/search_screen.dart';
+import '../screens/add_item_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -34,6 +35,16 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: ItemList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => AddItemScreen()),
+          );
+        },
+        child: Icon(Icons.add),
+        backgroundColor: Colors.red, // 버튼 배경 색상 변경
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // 버튼 위치 설정
     );
   }
 }
