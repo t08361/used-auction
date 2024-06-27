@@ -4,6 +4,7 @@ import 'providers/item_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/add_item_screen.dart';
 import 'screens/my_page_screen.dart';
+import '../screens/search_screen.dart';
 
 //provider를 설정하여 앱 전체에 상태관리 제공이 가능하도록 하기위한 코드
 void main() {
