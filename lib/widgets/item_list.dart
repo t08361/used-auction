@@ -27,7 +27,7 @@ class ItemList extends StatelessWidget {
               color: Colors.white,
               //borderRadius: BorderRadius.circular(10),
             ),
-            height: 120.0, // 아이템의 높이 설정
+            height: 135.0, // 아이템의 높이 설정
             child: Row(
               children: [
                 Container(
