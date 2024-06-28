@@ -80,8 +80,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 },
                 child: Text('거래완료'),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.white, // 텍스트 색상
-                  backgroundColor: Colors.green, // 배경 색상
+
+                  foregroundColor: Colors.white, backgroundColor: Colors.green, // 배경 색상
                   padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0), // 패딩
                   textStyle: TextStyle(
                     fontSize: 18, // 텍스트 크기
