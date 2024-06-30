@@ -55,6 +55,8 @@ class ItemList extends StatelessWidget {
                       Text(
                         item.description,
                         style: TextStyle(fontSize: 14), // 텍스트 크기 조정
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1, // 한 줄까지만 표시하고 나머지는 ...로 표시
                       ),
                       const SizedBox(height: 3),
                       Text(
