@@ -76,7 +76,7 @@ class UserPage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: AssetImage('assets/profile.jpg'), // 프로필 사진 경로 설정
+                  backgroundImage: AssetImage('assets/images/charlie.png'), // 프로필 사진 경로 설정
                 ),
                 SizedBox(width: 16),
                 Column(

@@ -25,13 +25,13 @@ class PurchaseHistoryPage extends StatelessWidget {
         title: '상품 2',
         date: '2023-02-01',
         price: 20000.0,
-        imageUrl: 'assets/images/charlie.png'  // 예시 이미지 경로
+        imageUrl: 'assets/images/tent.png'  // 예시 이미지 경로
     ),
     PurchaseItem(
         title: '상품 3',
         date: '2023-03-01',
         price: 15000.0,
-        imageUrl: 'assets/images/charlie.png'  // 예시 이미지 경로
+        imageUrl: 'assets/images/tools.png'  // 예시 이미지 경로
     ),
   ];
 
