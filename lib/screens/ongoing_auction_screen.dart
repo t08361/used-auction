@@ -31,14 +31,14 @@ class AuctionPage extends StatelessWidget {
         startDate: '2023-02-01',
         endDate: '2023-02-10', // 종료 날짜 추가
         currentBid: 20000.0,
-        imageUrl: 'assets/images/charlie.png' // 예시 이미지 경로
+        imageUrl: 'assets/images/tent.png' // 예시 이미지 경로
     ),
     AuctionItem(
         title: '경매 상품 3',
         startDate: '2023-03-01',
         endDate: '2023-03-10', // 종료 날짜 추가
         currentBid: 15000.0,
-        imageUrl: 'assets/images/charlie.png' // 예시 이미지 경로
+        imageUrl: 'assets/images/tools.png' // 예시 이미지 경로
     ),
   ];
 
