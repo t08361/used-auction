@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/item.dart';
+import '../providers/user_provider.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
@@ -62,9 +64,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     // 임의의 입찰 기록 리스트
     final List<Map<String, dynamic>> bids = [
-      {'nickname': '사용자1', 'bidPrice': 9000},
+      {'nickname': userProvider.nickname, 'bidPrice': 9000},
       {'nickname': '사용자2', 'bidPrice': 9500},
       {'nickname': '사용자3', 'bidPrice': currentPrice},
     ];
@@ -87,12 +91,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.file(
-                widget.item.imageFile,
-                width: double.infinity,
-                height: 250,
-                fit: BoxFit.cover,
-              ),
+              // Image.file(
+              //   widget.item.imageFile,
+              //   width: double.infinity,
+              //   height: 250,
+              //   fit: BoxFit.cover,
+              // ),
               const SizedBox(height: 10),
               const Text(
                 '나눔이', // 여기에 실제 판매자 이름을 넣을 수 있습니다.

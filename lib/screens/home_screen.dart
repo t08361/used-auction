@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/item_provider.dart';
 import '../widgets/item_list.dart';
 import '../screens/search_screen.dart';
 import '../screens/add_item_screen.dart';
 import '../screens/notification_screen.dart';
 
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    Provider.of<ItemProvider>(context, listen: false).fetchItems();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
