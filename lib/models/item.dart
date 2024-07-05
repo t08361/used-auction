@@ -1,15 +1,14 @@
-import 'dart:convert'; // JSON 변환을 위한 import
-import 'package:meta/meta.dart'; // required 키워드를 사용하기 위한 import
-
+import 'package:flutter/material.dart';
 
 class Item {
   final String id;
   final String title;
   final String description;
   final int price;
-  final DateTime endDateTime; // 경매 종료 시간
-  final int bidUnit; // 입찰 단위
-  //final File imageFile;
+  final DateTime endDateTime; // DateTime 사용
+  final int bidUnit;
+  // final String userId; // 추가
+  // final String nickname; // 추가
 
   Item({
     required this.id,
@@ -18,31 +17,31 @@ class Item {
     required this.price,
     required this.endDateTime,
     required this.bidUnit,
-   // required this.imageFile,
+    // required this.userId, // 추가
+    // required this.nickname, // 추가
   });
 
-//item객체 데이터를 json 데이터로 변환
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'title': title,
-      'description': description,
-      'price': price,
-      'endDateTime': endDateTime.toIso8601String(),
-      'bidUnit': bidUnit,
-      //'imageFile': imageFile,
-    };
-  }
-//json 데이터를 item객체로 변환
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'title': title,
+    'description': description,
+    'price': price,
+    'endDateTime': endDateTime.toIso8601String(), // DateTime을 String으로 변환
+    'bidUnit': bidUnit,
+    // 'userId': userId, // 추가
+    // 'nickname': nickname, // 추가
+  };
+
   factory Item.fromJson(Map<String, dynamic> json) {
     return Item(
       id: json['id'],
       title: json['title'],
       description: json['description'],
       price: json['price'],
-      endDateTime: DateTime.parse(json['endDateTime']),
+      endDateTime: DateTime.parse(json['endDateTime']), // String을 DateTime으로 변환
       bidUnit: json['bidUnit'],
-      //imageFile: json['imageFile'],
+      // userId: json['userId'], // 추가
+      // nickname: json['nickname'], // 추가
     );
   }
 }

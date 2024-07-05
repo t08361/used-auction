@@ -95,66 +95,66 @@ class _AddItemScreenState extends State<AddItemScreen> {
       return;
     }
 
-    final newItem = Item(
-      id: DateTime.now().toString(),
-      title: title,
-      description: description,
-      price: price,
-      endDateTime: _endDateTime!,
-      bidUnit: bidUnit,
-
-    );
-
-    try {
-      await itemProvider.addItem(newItem); // 아이템 추가 요청
-      Provider.of<ItemProvider>(context, listen: false).fetchItems(); // 아이템 목록 갱신
-      Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => MainScreen()),
-      );
-    } catch (error) {
-      print('Failed to add item: $error');
-    }
-  }
-
-  //   final url = Uri.parse('http://localhost:8080/api/items'); // 서버 URL
+  //   final newItem = Item(
+  //     id: DateTime.now().toString(),
+  //     title: title,
+  //     description: description,
+  //     price: price,
+  //     endDateTime: _endDateTime!,
+  //     bidUnit: bidUnit,
+  //
+  //   );
   //
   //   try {
-  //     var request = http.MultipartRequest('POST', url); // 멀티파트 요청 생성
-  //
-  //     // 필드 추가
-  //     request.fields['title'] = title;
-  //     request.fields['description'] = description;
-  //     request.fields['price'] = price.toString();
-  //     request.fields['endDateTime'] = _endDateTime!.toIso8601String();
-  //     request.fields['bidUnit'] = bidUnit.toString();
-  //     request.fields['userId'] = userProvider.id; // 추가
-  //     request.fields['nickname'] = userProvider.nickname; // 추가
-  //
-  //     // 이미지 파일이 선택된 경우 파일 추가
-  //     if (_selectedImage != null) {
-  //       var mimeType = lookupMimeType(_selectedImage!.path) ?? 'application/octet-stream';
-  //       var file = await http.MultipartFile.fromPath(
-  //         'image',
-  //         _selectedImage!.path,
-  //       );
-  //       request.files.add(file);
-  //     }
-  //
-  //     var response = await request.send(); // 요청 전송
-  //
-  //     if (response.statusCode == 201) {
-  //       print('Item added successfully');
-  //       Provider.of<ItemProvider>(context, listen: false).fetchItems(); // 아이템 목록 갱신
-  //       Navigator.of(context).pushReplacement(
-  //         MaterialPageRoute(builder: (context) => MainScreen()), // MainScreen으로 이동
-  //       );
-  //     } else {
-  //       print('Failed to add item'); // 아이템 추가 실패
-  //     }
+  //     await itemProvider.addItem(newItem); // 아이템 추가 요청
+  //     Provider.of<ItemProvider>(context, listen: false).fetchItems(); // 아이템 목록 갱신
+  //     Navigator.of(context).push(
+  //       MaterialPageRoute(builder: (context) => MainScreen()),
+  //     );
   //   } catch (error) {
-  //     print('Error: $error'); // 에러 발생 시 출력
+  //     print('Failed to add item: $error');
   //   }
   // }
+
+    final url = Uri.parse('http://localhost:8080/api/items'); // 서버 URL
+
+    try {
+      var request = http.MultipartRequest('POST', url); // 멀티파트 요청 생성
+
+      // 필드 추가
+      request.fields['title'] = title;
+      request.fields['description'] = description;
+      request.fields['price'] = price.toString();
+      request.fields['endDateTime'] = _endDateTime!.toIso8601String();
+      request.fields['bidUnit'] = bidUnit.toString();
+      request.fields['userId'] = userProvider.id; // 추가
+      request.fields['nickname'] = userProvider.nickname; // 추가
+
+      // 이미지 파일이 선택된 경우 파일 추가
+      if (_selectedImage != null) {
+        var mimeType = lookupMimeType(_selectedImage!.path) ?? 'application/octet-stream';
+        var file = await http.MultipartFile.fromPath(
+          'image',
+          _selectedImage!.path,
+        );
+        request.files.add(file);
+      }
+
+      var response = await request.send(); // 요청 전송
+
+      if (response.statusCode == 201) {
+        print('Item added successfully');
+        Provider.of<ItemProvider>(context, listen: false).fetchItems(); // 아이템 목록 갱신
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => MainScreen()), // MainScreen으로 이동
+        );
+      } else {
+        print('Failed to add item'); // 아이템 추가 실패
+      }
+    } catch (error) {
+      print('Error: $error'); // 에러 발생 시 출력
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
