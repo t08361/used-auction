@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path; // 파일 경로 작업을 위한 path 
 import 'package:mime/mime.dart'; // MIME 타입 처리를 위한 mime 패키지 import
 import '../main.dart'; // 메인 화면을 import
 import '../models/item.dart'; // 아이템 모델을 import
+import '../providers/constants.dart';
 import '../providers/item_provider.dart'; // ItemProvider를 import
 import '../providers/user_provider.dart'; // 추가
 
@@ -116,7 +117,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   //   }
   // }
 
-    final url = Uri.parse('http://localhost:8080/api/items'); // 서버 URL
+    final url = Uri.parse('$baseUrl/items'); // 서버 URL
 
     try {
       var request = http.MultipartRequest('POST', url); // 멀티파트 요청 생성

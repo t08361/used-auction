@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
+import '../providers/constants.dart';
 import '../providers/user_provider.dart';
 import 'signup_screen.dart';
 import 'package:http/http.dart' as http;
@@ -45,7 +46,7 @@ class LoginScreen extends StatelessWidget {
   }
 
   Future<http.Response> loginUser(String email, String password) {
-    final url = Uri.parse('http://localhost:8080/api/users/login');
+    final url = Uri.parse('$baseUrl/users/login');
     return http.post(
       url,
       headers: <String, String>{

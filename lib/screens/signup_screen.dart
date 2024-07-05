@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
+import '../providers/constants.dart';
+
 class SignupScreen extends StatelessWidget {
   static const routeName = '/signup';
 
@@ -27,7 +29,7 @@ class SignupScreen extends StatelessWidget {
       return;
     }
 
-    final url = Uri.parse('http://localhost:8080/api/users');
+    final url = Uri.parse('$baseUrl/users');
 
     final response = await http.post(
       url,
