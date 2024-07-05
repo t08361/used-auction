@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/item_provider.dart';
+import '../providers/user_provider.dart';
 import '../screens/item_detail_screen.dart';
 
 class ItemList extends StatelessWidget {
@@ -28,19 +29,19 @@ class ItemList extends StatelessWidget {
             height: 120.0, // 아이템의 높이 설정
             child: Row(
               children: [
-                SizedBox(
-                  width: 100,
-                  height: 100,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.file(
-                      item.imageFile,
-                      width: 100,
-                      height: 100,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
+                // SizedBox(
+                //   width: 100,
+                //   height: 100,
+                //   child: ClipRRect(
+                //     borderRadius: BorderRadius.circular(8.0),
+                //     child: Image.file(
+                //       item.imageFile,
+                //       width: 100,
+                //       height: 100,
+                //       fit: BoxFit.cover,
+                //     ),
+                //   ),
+                // ),
                 const SizedBox(width: 10), // 이미지와 텍스트 간의 간격 설정
                 Expanded(
                   child: Column(

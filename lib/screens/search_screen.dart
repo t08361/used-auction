@@ -42,12 +42,12 @@ class ItemSearch extends SearchDelegate<Item?> {
       itemBuilder: (context, index) {
         final item = results[index];
         return ListTile(
-          leading: Image.file(
-            item.imageFile,
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-          ),
+          // leading: Image.file(
+          //   item.imageFile,
+          //   width: 100,
+          //   height: 100,
+          //   fit: BoxFit.cover,
+          // ),
           title: Text(item.title),
           subtitle: Text(item.description),
           trailing: Text('\$${item.price.toString()}'),
