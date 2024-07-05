@@ -25,6 +25,9 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
+    Provider.of<UserProvider>(context, listen: false).loadUser();
+
     return MaterialApp(
       title: '중고 거래 앱',
       theme: ThemeData(
