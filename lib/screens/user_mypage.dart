@@ -151,7 +151,7 @@ class UserPage extends StatelessWidget {
             ElevatedButton(
               onPressed: () => _logout(context), // 로그아웃 버튼 클릭 시 이벤트
               child: Text('로그아웃'),
-              style: ElevatedButton.styleFrom(primary: Colors.red), // 버튼 색상 설정
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red), // 버튼 색상 설정
             ),
           ],
         ),

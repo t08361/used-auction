@@ -1,9 +1,17 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   static const routeName = '/signup';
+
+  @override
+  _SignupScreenState createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
 
   final TextEditingController _idController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -12,6 +20,7 @@ class SignupScreen extends StatelessWidget {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
+  File? _selectedImage;
 
   Future<void> _signup(BuildContext context) async {
     final id = _idController.text;
@@ -54,6 +63,17 @@ class SignupScreen extends StatelessWidget {
     }
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,6 +85,17 @@ class SignupScreen extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
+              GestureDetector(
+                onTap: _pickImage,
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundImage:
+                  _selectedImage != null ? FileImage(_selectedImage!) : null,
+                  child: _selectedImage == null
+                    ? Icon(Icons.add_a_photo, size: 40,)
+                      : null,
+                ),
+              ),
               TextField(
                 controller: _idController,
                 decoration: InputDecoration(labelText: '아이디'),
@@ -107,4 +138,5 @@ class SignupScreen extends StatelessWidget {
       ),
     );
   }
+
 }
