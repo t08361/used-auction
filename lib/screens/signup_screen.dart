@@ -38,29 +38,37 @@ class _SignupScreenState extends State<SignupScreen> {
 
     final url = Uri.parse('http://localhost:8080/api/users');
 
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: json.encode({
+    var request = http.MultipartRequest('POST', url)
+      ..fields['user'] = json.encode({
         'username': id,
         'password': password,
         'nickname': nickname,
         'email': email,
         'location': location,
         'age': age,
-      }),
-    );
+      });
+
+    // 이미지 선택되었으면 이미지도 전송
+    if (_selectedImage != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+        'profile_image',
+        _selectedImage!.path,
+      ));
+    }
+
+    final response = await request.send();
 
     if (response.statusCode == 201) {
-      print('User added successfully');
+      print('회원가입 성공!');
       Navigator.of(context).pop();
     } else {
-      print('Failed to add user');
+      final responseBody = await response.stream.bytesToString();
+      print('회원가입 실패');
       print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
+      print('Response body: $responseBody');
     }
+
+
   }
 
   Future<void> _pickImage() async {
@@ -138,5 +146,4 @@ class _SignupScreenState extends State<SignupScreen> {
       ),
     );
   }
-
 }
