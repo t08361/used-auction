@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리 import
 import 'package:shared_preferences/shared_preferences.dart'; // SharedPreferences를 위한 패키지 import
+import 'dart:convert';
 
 class UserProvider with ChangeNotifier {
   String _id = ''; // 사용자 ID를 저장하는 변수
@@ -8,6 +9,7 @@ class UserProvider with ChangeNotifier {
   String _nickname = ''; // 사용자 닉네임을 저장하는 변수
   String _location = ''; // 사용자 위치를 저장하는 변수
   int _age = 0; // 사용자 나이를 저장하는 변수
+  String? _profileImage; // 프로필 이미지를 저장하는 변수
 
   // 각 변수에 대한 getter 정의
   String get id => _id;
@@ -16,9 +18,9 @@ class UserProvider with ChangeNotifier {
   String get nickname => _nickname;
   String get location => _location;
   int get age => _age;
+  String? get profileImage => _profileImage; // 프로필 이미지 getter
 
   bool _isLoggedIn = false; // 로그인 상태를 저장하는 변수
-
   bool get isLoggedIn => _isLoggedIn; // 로그인 상태에 대한 getter 정의
 
   // 사용자 정보를 설정하는 메서드
@@ -29,6 +31,7 @@ class UserProvider with ChangeNotifier {
     _nickname = userData['nickname']; // 사용자 닉네임 설정
     _location = userData['location']; // 사용자 위치 설정
     _age = userData['age']; // 사용자 나이 설정
+    _profileImage = userData['profileImage']; // 프로필 이미지 설정
     _isLoggedIn = true; // 로그인 상태로 설정
     notifyListeners(); // 상태 변경 알림
 
@@ -39,6 +42,9 @@ class UserProvider with ChangeNotifier {
     await prefs.setString('nickname', _nickname);
     await prefs.setString('location', _location);
     await prefs.setInt('age', _age);
+    if (_profileImage != null) {
+      await prefs.setString('profileImage', _profileImage!); // 프로필 이미지 저장
+    }
     await prefs.setBool('isLoggedIn', true); // SharedPreferences에 로그인 상태 저장
   }
 
@@ -50,6 +56,7 @@ class UserProvider with ChangeNotifier {
     _nickname = ''; // 사용자 닉네임 초기화
     _location = ''; // 사용자 위치 초기화
     _age = 0; // 사용자 나이 초기화
+    _profileImage = null; // 프로필 이미지 초기화
     _isLoggedIn = false; // 로그아웃 상태로 설정
     notifyListeners(); // 상태 변경 알림
 
@@ -69,6 +76,7 @@ class UserProvider with ChangeNotifier {
       _nickname = prefs.getString('nickname') ?? '';
       _location = prefs.getString('location') ?? '';
       _age = prefs.getInt('age') ?? 0;
+      _profileImage = prefs.getString('profileImage'); // 프로필 이미지 로드
       notifyListeners();
     }
   }
