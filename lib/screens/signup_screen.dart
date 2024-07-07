@@ -50,6 +50,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     // 이미지 선택되었으면 이미지도 전송
     if (_selectedImage != null) {
+      print('이미지가 선택됨');
       request.files.add(await http.MultipartFile.fromPath(
         'profile_image',
         _selectedImage!.path,

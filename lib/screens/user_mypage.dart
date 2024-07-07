@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리 import
 import 'package:provider/provider.dart'; // Provider 패키지 import
 import '../main.dart';
@@ -97,7 +99,9 @@ class UserPage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 40, // 원형 아바타의 반지름 설정
-                  backgroundImage: AssetImage('assets/images/charlie.png'), // 프로필 사진 경로 설정
+                  backgroundImage: userProvider.profileImage != null
+                      ? MemoryImage(base64Decode(userProvider.profileImage!)) as ImageProvider
+                      : AssetImage('assets/images/charlie.png'), // 프로필 이미지 경로 설정// 프로필 사진 경로 설정
                 ),
                 SizedBox(width: 16), // 간격 설정
                 Column(
