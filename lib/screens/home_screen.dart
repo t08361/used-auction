@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/item_provider.dart';
 import '../widgets/item_list.dart';
 import '../screens/search_screen.dart';
 import '../screens/add_item_screen.dart';
 import '../screens/notification_screen.dart';
 
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    Provider.of<ItemProvider>(context, listen: false).fetchItems();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
             '몽당마켓',
             style: TextStyle(color: Colors.black)
         ),
@@ -19,7 +33,7 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: Icon(Icons.search),
+            icon: const Icon(Icons.search),
             color: Colors.black,
             onPressed: () {
               showSearch(
@@ -29,7 +43,7 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(Icons.notifications),
+            icon: const Icon(Icons.notifications),
             color: Colors.black,
             onPressed: () {
               Navigator.of(context).push(
@@ -48,8 +62,8 @@ class HomeScreen extends StatelessWidget {
             MaterialPageRoute(builder: (context) => AddItemScreen()),
           );
         },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.red, // 버튼 배경 색상 변경
+        backgroundColor: Colors.red,
+        child: const Icon(Icons.add), // 버튼 배경 색상 변경
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // 버튼 위치 설정
     );

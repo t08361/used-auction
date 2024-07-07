@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/io.dart';
 import '../screens/chat_screen.dart';
 
 class ChatListScreen extends StatelessWidget {
@@ -53,9 +54,10 @@ class ChatListScreen extends StatelessWidget {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (context) => ChatScreen(
-                            chatName: chat['name']!,
-                            bidPrice: chat['bidPrice']!,
-                            image: chat['image']!,
+                            chatName: 'Chat Room',
+                            bidPrice: '10000',
+                            image: 'assets/profile.png',
+                            channel: IOWebSocketChannel.connect('ws://localhost:8080/ws'),
                           ),
                         ),
                       );
