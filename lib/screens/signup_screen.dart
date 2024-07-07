@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
+import '../providers/constants.dart';
+
 class SignupScreen extends StatefulWidget {
   static const routeName = '/signup';
 
@@ -103,7 +105,7 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final url = Uri.parse('http://localhost:8080/api/users');
+    final url = Uri.parse('$baseUrl/users');
 
     var request = http.MultipartRequest('POST', url)
       ..fields['user'] = json.encode({
@@ -181,10 +183,14 @@ class _SignupScreenState extends State<SignupScreen> {
                 onTap: _pickImage,
                 child: CircleAvatar(
                   radius: 40,
-                  backgroundImage:
-                  _selectedImage != null ? FileImage(_selectedImage!) : null,
+                  backgroundImage: _selectedImage != null
+                      ? FileImage(_selectedImage!)
+                      : null,
                   child: _selectedImage == null
-                      ? Icon(Icons.add_a_photo, size: 40,)
+                      ? Icon(
+                          Icons.add_a_photo,
+                          size: 40,
+                        )
                       : null,
                 ),
               ),

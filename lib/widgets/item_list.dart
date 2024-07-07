@@ -26,7 +26,7 @@ class ItemList extends StatelessWidget {
             decoration: const BoxDecoration(
               color: Colors.white,
             ),
-            height: 120.0, // 아이템의 높이 설정
+            height: 135.0, // 아이템의 높이 설정
             child: Row(
               children: [
                 // SizedBox(
