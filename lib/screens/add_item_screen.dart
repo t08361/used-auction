@@ -32,23 +32,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   // 이미지를 선택하는 메서드
   Future<void> _pickImage() async {
-    var status = await Permission.photos.status; // 사진 권한 상태 확인
-    if (!status.isGranted) {
-      status = await Permission.photos.request(); // 권한 요청
-    }
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    try {
-      final picker = ImagePicker(); // ImagePicker 인스턴스 생성
-      final pickedImage = await picker.pickImage(source: ImageSource.gallery); // 갤러리에서 이미지 선택
-      if (pickedImage != null) {
-        setState(() {
-          _selectedImage = File(pickedImage.path); // 선택된 이미지를 _selectedImage에 저장
-        });
-      } else {
-        print('No image selected'); // 선택된 이미지가 없을 경우 출력
-      }
-    } catch (e) {
-      print('Error picking image: $e'); // 에러 발생 시 출력
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+      });
     }
   }
 
@@ -131,15 +121,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
       request.fields['userId'] = userProvider.id; // 추가
       request.fields['nickname'] = userProvider.nickname; // 추가
 
-      // 이미지 파일이 선택된 경우 파일 추가
-      if (_selectedImage != null) {
-        var mimeType = lookupMimeType(_selectedImage!.path) ?? 'application/octet-stream';
-        var file = await http.MultipartFile.fromPath(
-          'image',
-          _selectedImage!.path,
-        );
-        request.files.add(file);
-      }
+      // // 이미지 파일이 선택된 경우 파일 추가
+      // if (_selectedImage != null) {
+      //   var mimeType = lookupMimeType(_selectedImage!.path) ?? 'application/octet-stream';
+      //   var file = await http.MultipartFile.fromPath(
+      //     'image',
+      //     _selectedImage!.path,
+      //   );
+      //   request.files.add(file);
+      // }
 
       var response = await request.send(); // 요청 전송
 
@@ -173,19 +163,19 @@ class _AddItemScreenState extends State<AddItemScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // const SizedBox(height: 10),
-              // _selectedImage != null
-              //     ? Image.file(
-              //   _selectedImage!,
-              //   width: 100,
-              //   height: 100,
-              //   fit: BoxFit.cover,
-              // )
-              //     : const Text('사진를 올려주세요!'),
-              // TextButton(
-              //   onPressed: _pickImage,
-              //   child: const Text('사진 선택'),
-              // ),
+              const SizedBox(height: 10),
+              _selectedImage != null
+                  ? Image.file(
+                _selectedImage!,
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+              )
+                  : const Text('사진를 올려주세요!'),
+              TextButton(
+                onPressed: _pickImage,
+                child: const Text('사진 선택'),
+              ),
               const SizedBox(height: 10),
               TextField(
                 controller: _titleController, // 제목 입력 컨트롤러
