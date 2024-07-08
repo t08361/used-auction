@@ -8,8 +8,7 @@ class Item {
   final DateTime endDateTime; // DateTime 사용
   final int bidUnit;
   final String? itemImage;
-  // final String userId; // 추가
-  // final String nickname; // 추가
+  final String userId; // 추가
 
   Item({
     required this.id,
@@ -19,8 +18,7 @@ class Item {
     required this.endDateTime,
     required this.bidUnit,
     this.itemImage,
-    // required this.userId, // 추가
-    // required this.nickname, // 추가
+    required this.userId, // 추가
   });
 
   Map<String, dynamic> toJson() => {
@@ -31,8 +29,7 @@ class Item {
     'endDateTime': endDateTime.toIso8601String(), // DateTime을 String으로 변환
     'bidUnit': bidUnit,
     'itemImage' : itemImage,
-    // 'userId': userId, // 추가
-    // 'nickname': nickname, // 추가
+    'userId': userId, // 추가
   };
 
   factory Item.fromJson(Map<String, dynamic> json) {
@@ -44,8 +41,7 @@ class Item {
       endDateTime: DateTime.parse(json['endDateTime']), // String을 DateTime으로 변환
       bidUnit: json['bidUnit'],
       itemImage: json['itemImage'],
-      // userId: json['userId'], // 추가
-      // nickname: json['nickname'], // 추가
+      userId: json['userId'], // 추가
     );
   }
 }
