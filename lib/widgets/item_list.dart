@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/item_provider.dart';
@@ -29,19 +31,21 @@ class ItemList extends StatelessWidget {
             height: 135.0, // 아이템의 높이 설정
             child: Row(
               children: [
-                // SizedBox(
-                //   width: 100,
-                //   height: 100,
-                //   child: ClipRRect(
-                //     borderRadius: BorderRadius.circular(8.0),
-                //     child: Image.file(
-                //       item.imageFile,
-                //       width: 100,
-                //       height: 100,
-                //       fit: BoxFit.cover,
-                //     ),
-                //   ),
-                // ),
+                SizedBox(
+                  width: 100,
+                  height: 100,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: item.itemImage != null
+                      ? Image.memory(
+                      base64Decode(item.itemImage!),
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    )
+                      : Placeholder(), // 이미지가 없을 경우
+                  ),
+                ),
                 const SizedBox(width: 10), // 이미지와 텍스트 간의 간격 설정
                 Expanded(
                   child: Column(
