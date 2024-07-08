@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/item.dart';
@@ -91,12 +93,19 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image.file(
-              //   widget.item.imageFile,
-              //   width: double.infinity,
-              //   height: 250,
-              //   fit: BoxFit.cover,
-              // ),
+              // 상품 이미지 추가 부분
+              if (widget.item.itemImage != null && widget.item.itemImage!.isNotEmpty)
+                SizedBox(
+                  width: double.infinity,
+                  height: 200,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8.0),
+                    child: Image.memory(
+                      base64Decode(widget.item.itemImage!),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
               const SizedBox(height: 10),
               const Text(
                 '나눔이', // 여기에 실제 판매자 이름을 넣을 수 있습니다.
