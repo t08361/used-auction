@@ -7,6 +7,7 @@ class Item {
   final int price;
   final DateTime endDateTime; // DateTime 사용
   final int bidUnit;
+  final String? itemImage;
   // final String userId; // 추가
   // final String nickname; // 추가
 
@@ -17,6 +18,7 @@ class Item {
     required this.price,
     required this.endDateTime,
     required this.bidUnit,
+    this.itemImage,
     // required this.userId, // 추가
     // required this.nickname, // 추가
   });
@@ -28,6 +30,7 @@ class Item {
     'price': price,
     'endDateTime': endDateTime.toIso8601String(), // DateTime을 String으로 변환
     'bidUnit': bidUnit,
+    'itemImage' : itemImage,
     // 'userId': userId, // 추가
     // 'nickname': nickname, // 추가
   };
@@ -40,6 +43,7 @@ class Item {
       price: json['price'],
       endDateTime: DateTime.parse(json['endDateTime']), // String을 DateTime으로 변환
       bidUnit: json['bidUnit'],
+      itemImage: json['itemImage'],
       // userId: json['userId'], // 추가
       // nickname: json['nickname'], // 추가
     );

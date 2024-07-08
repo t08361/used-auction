@@ -121,20 +121,18 @@ class _AddItemScreenState extends State<AddItemScreen> {
       request.fields['userId'] = userProvider.id; // 추가
       request.fields['nickname'] = userProvider.nickname; // 추가
 
-      // // 이미지 파일이 선택된 경우 파일 추가
-      // if (_selectedImage != null) {
-      //   var mimeType = lookupMimeType(_selectedImage!.path) ?? 'application/octet-stream';
-      //   var file = await http.MultipartFile.fromPath(
-      //     'image',
-      //     _selectedImage!.path,
-      //   );
-      //   request.files.add(file);
-      // }
+      // 이미지 파일이 선택된 경우 파일 추가
+      if (_selectedImage != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'item_image',
+          _selectedImage!.path,
+        ));
+      }
 
       var response = await request.send(); // 요청 전송
 
       if (response.statusCode == 201) {
-        print('Item added successfully');
+        print('상품 등록 성공');
         Provider.of<ItemProvider>(context, listen: false).fetchItems(); // 아이템 목록 갱신
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => MainScreen()), // MainScreen으로 이동
