@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:testhandproduct/providers/chat_provider.dart';
 import 'providers/item_provider.dart';
 import 'providers/user_provider.dart';
 import 'screens/home_screen.dart';
@@ -16,6 +17,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => ItemProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
+        //ChangeNotifierProvider(create: (context) => ChatProvider()), // 추가된 부분
       ],
       child: MyApp(),
     ),
@@ -34,6 +36,13 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.red,
       ),
       home: MainScreen(),
+      routes: {
+        '/login': (context) => LoginScreen(),
+        '/user': (context) => UserPage(),
+        '/home': (context) => HomeScreen(),
+        '/add-item': (context) => AddItemScreen(),
+        // Add other routes here
+      },
     );
   }
 }
@@ -48,6 +57,7 @@ class _MainScreenState extends State<MainScreen> {
 
   List<Widget> _widgetOptions(BuildContext context) {
     return <Widget>[
+
       HomeScreen(),
       ChatListScreen(),
       Consumer<UserProvider>(
