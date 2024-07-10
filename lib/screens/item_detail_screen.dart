@@ -1,8 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/item.dart';
+import '../providers/item_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/constants.dart';
 import 'package:http/http.dart' as http;
@@ -19,7 +19,6 @@ class ItemDetailScreen extends StatefulWidget {
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   int currentPrice = 10000; // 임의로 설정한 현재가
   late Duration remainingTime; // 종료까지 남은 시간 계산
-
 
   @override
   void initState() {
@@ -93,9 +92,36 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
   }
 
+  void _handleMenuSelection(String value) async {
+    final itemProvider = Provider.of<ItemProvider>(context, listen: false);
+    switch (value) {
+      case 'edit':
+      // 수정하기 기능 추가
+        break;
+      case 'delete':
+        try {
+          await itemProvider.deleteItem(widget.item.id);
+          Navigator.of(context).pop();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('삭제 완료')),
+          );
+        } catch (error) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('삭제 실패: $error')),
+          );
+        }
+        break;
+      case 'report':
+      // 신고하기 기능 추가
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final itemProvider = Provider.of<ItemProvider>(context);
+    final bool isOwner = widget.item.userId == userProvider.id;
 
     // 임의의 입찰 기록 리스트
     final List<Map<String, dynamic>> bids = [
@@ -136,9 +162,39 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
                 ),
               const SizedBox(height: 10),
-              const Text(
-                '나눔이', // 여기에 실제 판매자 이름을 넣을 수 있습니다.
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  const Text(
+                    '나눔이', // 여기에 실제 판매자 이름을 넣을 수 있습니다.
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 10),
+                  PopupMenuButton<String>(
+                    onSelected: _handleMenuSelection,
+                    itemBuilder: (BuildContext context) {
+                      if (isOwner) {
+                        return [
+                          const PopupMenuItem<String>(
+                            value: 'edit',
+                            child: Text('수정하기'),
+                          ),
+                          const PopupMenuItem<String>(
+                            value: 'delete',
+                            child: Text('삭제하기'),
+                          ),
+                        ];
+                      } else {
+                        return [
+                          const PopupMenuItem<String>(
+                            value: 'report',
+                            child: Text('신고하기'),
+                          ),
+                        ];
+                      }
+                    },
+                    child: const Icon(Icons.more_vert), // 아이콘으로 대체
+                  ),
+                ],
               ),
               const SizedBox(height: 10),
               Text(
@@ -168,7 +224,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               const SizedBox(height: 10),
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: bids.length,
                 itemBuilder: (ctx, index) {
                   final bid = bids[index];
@@ -179,12 +235,20 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 },
               ),
               const SizedBox(height: 20),
+              if(!isOwner)
               Center(
                 child: ElevatedButton(
                   onPressed: _showBidDialog,
                   child: Text('입찰'),
                 ),
               ),
+              if (isOwner)
+                Center(
+                  child: Text(
+                    'You are the owner of this item.',
+                    style: const TextStyle(fontSize: 18, color: Colors.blue),
+                  ),
+                ),
             ],
           ),
         ),
