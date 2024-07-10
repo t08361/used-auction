@@ -8,7 +8,7 @@ class Item {
   final DateTime endDateTime; // DateTime 사용
   final int bidUnit;
   final String? itemImage;
-  final String userId; // 추가
+  final String userId; // 상품등록한 사람 아이디(식별자)
 
   Item({
     required this.id,
@@ -18,7 +18,7 @@ class Item {
     required this.endDateTime,
     required this.bidUnit,
     this.itemImage,
-    required this.userId, // 추가
+    required this.userId,
   });
 
   Map<String, dynamic> toJson() => {

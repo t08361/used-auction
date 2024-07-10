@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/item.dart';
 import '../providers/user_provider.dart';
+import '../providers/constants.dart';
+import 'package:http/http.dart' as http;
 
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
@@ -15,10 +17,9 @@ class ItemDetailScreen extends StatefulWidget {
 }
 
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
-  // 임의로 설정한 현재가
-  int currentPrice = 10000;
-  // 종료까지 남은 시간 계산
-  late Duration remainingTime;
+  int currentPrice = 10000; // 임의로 설정한 현재가
+  late Duration remainingTime; // 종료까지 남은 시간 계산
+
 
   @override
   void initState() {
@@ -26,9 +27,36 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     remainingTime = widget.item.endDateTime.difference(DateTime.now());
   }
 
+  // 입찰 기록에 데이터 넣기
+  Future<void> _placeBid(int bidAmount) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final url = Uri.parse('$baseUrl/bids');
+
+    final bidData = {
+      'itemId': widget.item.id,
+      'bidderId': userProvider.id,
+      'bidAmount': bidAmount,
+      'bidTime': DateTime.now().toIso8601String(),
+    };
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(bidData),
+    );
+
+    if (response.statusCode == 201) {
+      print('입찰 성공!');
+      print('bidData: $bidData');
+    } else {
+      print('입찰 실패: ${response.body}');
+    }
+  }
+
   // 입찰 버튼을 눌렀을 때 호출되는 함수
   void _showBidDialog() {
     final _bidController = TextEditingController();
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -46,12 +74,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             child: Text('취소'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               final enteredBid = int.tryParse(_bidController.text);
               if (enteredBid != null && enteredBid >= currentPrice + widget.item.bidUnit) {
                 setState(() {
                   currentPrice = enteredBid;
                 });
+                await _placeBid(enteredBid); // 백엔드로 입찰 정보 전송
                 Navigator.of(ctx).pop();
               } else {
                 // 유효하지 않은 입찰 금액에 대한 처리를 여기에 추가할 수 있습니다.

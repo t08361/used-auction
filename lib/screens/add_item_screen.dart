@@ -1,14 +1,10 @@
 import 'dart:io'; // 파일 작업을 위한 dart:io 패키지 import
-import 'dart:convert'; // JSON 변환을 위한 dart:convert 패키지 import
 import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리 import
 import 'package:provider/provider.dart'; // 상태 관리를 위해 Provider 패키지를 import
 import 'package:image_picker/image_picker.dart'; // 이미지 선택을 위한 image_picker 패키지 import
 import 'package:permission_handler/permission_handler.dart'; // 권한 요청을 위한 permission_handler 패키지 import
 import 'package:http/http.dart' as http; // HTTP 요청을 위한 http 패키지 import
-import 'package:path/path.dart' as path; // 파일 경로 작업을 위한 path 패키지 import
-import 'package:mime/mime.dart'; // MIME 타입 처리를 위한 mime 패키지 import
 import '../main.dart'; // 메인 화면을 import
-import '../models/item.dart'; // 아이템 모델을 import
 import '../providers/constants.dart';
 import '../providers/item_provider.dart'; // ItemProvider를 import
 import '../providers/user_provider.dart'; // 추가
@@ -85,27 +81,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
       print("Bid Unit: $bidUnit");
       return;
     }
-
-  //   final newItem = Item(
-  //     id: DateTime.now().toString(),
-  //     title: title,
-  //     description: description,
-  //     price: price,
-  //     endDateTime: _endDateTime!,
-  //     bidUnit: bidUnit,
-  //
-  //   );
-  //
-  //   try {
-  //     await itemProvider.addItem(newItem); // 아이템 추가 요청
-  //     Provider.of<ItemProvider>(context, listen: false).fetchItems(); // 아이템 목록 갱신
-  //     Navigator.of(context).push(
-  //       MaterialPageRoute(builder: (context) => MainScreen()),
-  //     );
-  //   } catch (error) {
-  //     print('Failed to add item: $error');
-  //   }
-  // }
 
     final url = Uri.parse('$baseUrl/items'); // 서버 URL
 
