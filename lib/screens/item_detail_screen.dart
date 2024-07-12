@@ -5,6 +5,7 @@ import '../models/item.dart';
 import '../providers/item_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/constants.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:http/http.dart' as http;
 
 import 'ItemEditScreen.dart';
@@ -19,13 +20,52 @@ class ItemDetailScreen extends StatefulWidget {
 }
 
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
-  int currentPrice = 10000; // 임의로 설정한 현재가
+  int currentPrice = -1; // 현재 최고가를 담을 변수
   late Duration remainingTime; // 종료까지 남은 시간 계산
+  List<Map<String, dynamic>> bids = []; // 현재 입찰 기록을 담을 리스트
+  String sellerNickname = ''; // 판매자의 닉네임
 
   @override
   void initState() {
     super.initState();
     remainingTime = widget.item.endDateTime.difference(DateTime.now());
+    fetchBids(); // 입찰 기록 가져오기 호출
+    fetchSellerNickname(); // 판매자의 닉네임 가져오기
+    currentPrice = widget.item.lastPrice;
+  }
+
+  // 판매자의 닉네임 가져오기
+  Future<void> fetchSellerNickname() async {
+    final url = Uri.parse('$baseUrl/users/${widget.item.userId}');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> user = json.decode(response.body);
+      setState(() {
+        sellerNickname = user['nickname'];
+      });
+      print('판매자 닉네임 : $sellerNickname');
+    } else {
+      print('판매자 닉네임 가져오기 실패');
+    }
+  }
+
+  // 현재 상품의 입찰 기록을 가져오기
+  Future<void> fetchBids() async {
+    final url = Uri.parse('$baseUrl/bids/${widget.item.id}');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> bidList = json.decode(response.body);
+      setState(() {
+        bids = bidList.map((bid) => {
+          'nickname': bid['nickname'], // 입찰자의 닉네임
+          'bidPrice': bid['bid']['bidAmount'] // 입찰 금액
+        }).toList();
+      });
+    }else {
+      print('입찰 기록을 가져오기 실패');
+    }
   }
 
   // 입찰 기록에 데이터 넣기
@@ -47,6 +87,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
 
     if (response.statusCode == 201) {
+      setState(() {
+        currentPrice = bidAmount; // 입찰 성공 후 currentPrice 업데이트
+      });
+      fetchBids(); // 입찰 성공 후 입찰 기록 다시 가져오기
       print('입찰 성공!');
       print('bidData: $bidData');
     } else {
@@ -56,43 +100,62 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   // 입찰 버튼을 눌렀을 때 호출되는 함수
   void _showBidDialog() {
-    final _bidController = TextEditingController();
+    int _currentBidStep = 1;
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('입찰하기'),
-        content: TextField(
-          controller: _bidController,
-          keyboardType: TextInputType.number,
-          decoration: InputDecoration(labelText: '입찰 금액'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx).pop();
-            },
-            child: Text('취소'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final enteredBid = int.tryParse(_bidController.text);
-              if (enteredBid != null && enteredBid >= currentPrice + widget.item.bidUnit) {
-                setState(() {
-                  currentPrice = enteredBid;
-                });
-                await _placeBid(enteredBid); // 백엔드로 입찰 정보 전송
-                Navigator.of(ctx).pop();
-              } else {
-                // 유효하지 않은 입찰 금액에 대한 처리를 여기에 추가할 수 있습니다.
-              }
-            },
-            child: Text('입찰'),
-          ),
-        ],
-      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return AlertDialog(
+              title: Text('입찰하기'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('현재가: \$${currentPrice}'),
+                  const SizedBox(height: 10),
+                  Text('입찰 단위: \$${widget.item.bidUnit}'),
+                  const SizedBox(height: 10),
+                  NumberPicker(
+                    minValue: 1,
+                    maxValue: 100,
+                    value: _currentBidStep,
+                    onChanged: (value) {
+                      setState(() {
+                        _currentBidStep = value;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 10),
+                  Text('입찰 금액: \$${currentPrice + widget.item.bidUnit * _currentBidStep}'),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Text('취소'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    final enteredBid = currentPrice + widget.item.bidUnit * _currentBidStep;
+                    setState(() {
+                      currentPrice = enteredBid;
+                    });
+                    await _placeBid(enteredBid); // 백엔드로 입찰 정보 전송
+                    Navigator.of(ctx).pop();
+                  },
+                  child: Text('입찰'),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
+
 
   void _handleMenuSelection(String value) async {
     final itemProvider = Provider.of<ItemProvider>(context, listen: false);
@@ -132,13 +195,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final itemProvider = Provider.of<ItemProvider>(context,listen:false);
     final bool isOwner = widget.item.userId == userProvider.id;
 
-    // 임의의 입찰 기록 리스트
-    final List<Map<String, dynamic>> bids = [
-      {'nickname': userProvider.nickname, 'bidPrice': 9000},
-      {'nickname': '사용자2', 'bidPrice': 9500},
-      {'nickname': '사용자3', 'bidPrice': currentPrice},
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -173,8 +229,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               const SizedBox(height: 10),
               Row(
                 children: [
-                  const Text(
-                    '나눔이', // 여기에 실제 판매자 이름을 넣을 수 있습니다.
+                  Text(
+                    sellerNickname,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 10),
@@ -231,18 +287,20 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: bids.length,
-                itemBuilder: (ctx, index) {
-                  final bid = bids[index];
-                  return ListTile(
-                    title: Text(bid['nickname'] as String),
-                    subtitle: Text('입찰가: \$${bid['bidPrice']}'),
-                  );
-                },
-              ),
+              bids.isEmpty
+                ? const Text('아직 입찰 기록이 없습니다!', style: TextStyle(fontSize: 16, color: Colors.grey))
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: bids.length,
+                    itemBuilder: (ctx, index) {
+                      final bid = bids[index];
+                      return ListTile(
+                        title: Text(bid['nickname'] as String),
+                        subtitle: Text('입찰가: \$${bid['bidPrice']}'),
+                      );
+                    },
+                  ),
               const SizedBox(height: 20),
               if(!isOwner)
               Center(

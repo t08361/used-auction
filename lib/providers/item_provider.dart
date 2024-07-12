@@ -70,6 +70,7 @@ class ItemProvider with ChangeNotifier {
     //existingItem = null; // 기존 아이템 null 처리 (필요 시 사용)
   }
 
+
   Future<void> modifyItem(String id, String title, String description) async {
     final url = Uri.parse('$baseUrl/items/$id');
     final response = await http.put(
@@ -94,6 +95,42 @@ class ItemProvider with ChangeNotifier {
       }
     } else {
       throw Exception('Failed to update item!!');
+    }
+  }
+}
+  // 특정 아이템의 현재 최고가를 가져오는 메서드
+  Future<int> fetchCurrentPrice(String itemId) async {
+    final url = Uri.parse('$baseUrl/items/$itemId/current_price');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return json.decode(response.body) as int;
+      } else {
+        print('Failed to load current price. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to load current price');
+      }
+    } catch (error) {
+      print('Error fetching current price: $error');
+      throw error;
+    }
+  }
+
+  // 특정 아이템의 남은 시간을 가져오는 메서드
+  Future<Duration> fetchRemainingTime(String itemId) async {
+    final url = Uri.parse('$baseUrl/items/$itemId/remaining_time');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return Duration(minutes: json.decode(response.body) as int);
+      } else {
+        print('Failed to load remaining time. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to load remaining time');
+      }
+    } catch (error) {
+      print('Error fetching remaining time: $error');
+      throw error;
     }
   }
 }
