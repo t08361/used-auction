@@ -19,11 +19,31 @@ class ItemDetailScreen extends StatefulWidget {
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   int currentPrice = 10000; // 임의로 설정한 현재가
   late Duration remainingTime; // 종료까지 남은 시간 계산
+  List<Map<String, dynamic>> bids = []; // 특정 입찰기록을 담을 리스트
 
   @override
   void initState() {
     super.initState();
     remainingTime = widget.item.endDateTime.difference(DateTime.now());
+    fetchBids(); // 입찰 기록 가져오기 호출
+  }
+
+  // 현재 상품의 입찰 기록을 가져오기
+  Future<void> fetchBids() async {
+    final url = Uri.parse('$baseUrl/bids/${widget.item.id}');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final List<dynamic> bidList = json.decode(response.body);
+      setState(() {
+        bids = bidList.map((bid) => {
+          'nickname': bid['bidderId'], // 임시로 입찰자 ID를 닉네임으로 사용
+          'bidPrice': bid['bidAmount']
+        }).toList();
+      });
+    }else {
+      print('입찰 기록을 가져오기 실패');
+    }
   }
 
   // 입찰 기록에 데이터 넣기
@@ -124,11 +144,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final bool isOwner = widget.item.userId == userProvider.id;
 
     // 임의의 입찰 기록 리스트
-    final List<Map<String, dynamic>> bids = [
-      {'nickname': userProvider.nickname, 'bidPrice': 9000},
-      {'nickname': '사용자2', 'bidPrice': 9500},
-      {'nickname': '사용자3', 'bidPrice': currentPrice},
-    ];
+    // final List<Map<String, dynamic>> bids = [
+    //   {'nickname': userProvider.nickname, 'bidPrice': 9000},
+    //   {'nickname': '사용자2', 'bidPrice': 9500},
+    //   {'nickname': '사용자3', 'bidPrice': currentPrice},
+    // ];
 
     return Scaffold(
       appBar: AppBar(
