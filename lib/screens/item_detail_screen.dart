@@ -19,7 +19,7 @@ class ItemDetailScreen extends StatefulWidget {
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
   int currentPrice = 10000; // 임의로 설정한 현재가
   late Duration remainingTime; // 종료까지 남은 시간 계산
-  List<Map<String, dynamic>> bids = []; // 특정 입찰기록을 담을 리스트
+  List<Map<String, dynamic>> bids = []; // 현재 입찰 기록을 담을 리스트
 
   @override
   void initState() {
@@ -37,8 +37,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       final List<dynamic> bidList = json.decode(response.body);
       setState(() {
         bids = bidList.map((bid) => {
-          'nickname': bid['bidderId'], // 임시로 입찰자 ID를 닉네임으로 사용
-          'bidPrice': bid['bidAmount']
+          'nickname': bid['nickname'], // 입찰자의 닉네임
+          'bidPrice': bid['bid']['bidAmount'] // 입찰 금액
         }).toList();
       });
     }else {
@@ -65,6 +65,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
 
     if (response.statusCode == 201) {
+      fetchBids(); // 입찰 성공 후 입찰 기록 다시 가져오기
       print('입찰 성공!');
       print('bidData: $bidData');
     } else {
@@ -102,7 +103,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 await _placeBid(enteredBid); // 백엔드로 입찰 정보 전송
                 Navigator.of(ctx).pop();
               } else {
-                // 유효하지 않은 입찰 금액에 대한 처리를 여기에 추가할 수 있습니다.
+                // 유효하지 않은 입찰 금액에 대한 처리를 여기에 추가
               }
             },
             child: Text('입찰'),
@@ -142,13 +143,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final itemProvider = Provider.of<ItemProvider>(context);
     final bool isOwner = widget.item.userId == userProvider.id;
-
-    // 임의의 입찰 기록 리스트
-    // final List<Map<String, dynamic>> bids = [
-    //   {'nickname': userProvider.nickname, 'bidPrice': 9000},
-    //   {'nickname': '사용자2', 'bidPrice': 9500},
-    //   {'nickname': '사용자3', 'bidPrice': currentPrice},
-    // ];
 
     return Scaffold(
       appBar: AppBar(
@@ -242,18 +236,20 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: bids.length,
-                itemBuilder: (ctx, index) {
-                  final bid = bids[index];
-                  return ListTile(
-                    title: Text(bid['nickname'] as String),
-                    subtitle: Text('입찰가: \$${bid['bidPrice']}'),
-                  );
-                },
-              ),
+              bids.isEmpty
+                ? const Text('아직 입찰 기록이 없습니다!', style: TextStyle(fontSize: 16, color: Colors.grey))
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: bids.length,
+                    itemBuilder: (ctx, index) {
+                      final bid = bids[index];
+                      return ListTile(
+                        title: Text(bid['nickname'] as String),
+                        subtitle: Text('입찰가: \$${bid['bidPrice']}'),
+                      );
+                    },
+                  ),
               const SizedBox(height: 20),
               if(!isOwner)
               Center(
