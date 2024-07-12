@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/item.dart';
+import '../providers/chat_provider.dart';
 import '../providers/item_provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/constants.dart';
@@ -9,6 +10,7 @@ import 'package:numberpicker/numberpicker.dart';
 import 'package:http/http.dart' as http;
 
 import 'ItemEditScreen.dart';
+import 'chat_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
@@ -194,6 +196,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final userProvider = Provider.of<UserProvider>(context,listen:false);
     final itemProvider = Provider.of<ItemProvider>(context,listen:false);
     final bool isOwner = widget.item.userId == userProvider.id;
+    final sellerNickname = userProvider.getNicknameById(widget.item.userId);
 
     return Scaffold(
       appBar: AppBar(
@@ -303,11 +306,38 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
               const SizedBox(height: 20),
               if(!isOwner)
-              Center(
-                child: ElevatedButton(
-                  onPressed: _showBidDialog,
-                  child: Text('입찰'),
-                ),
+              Column(
+                children: [
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: _showBidDialog,
+                      child: Text('입찰'),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      // 대화하기 눌렀을 때 userProvider.id와 item.userId에 대한 대화창이 열리게하는 버튼
+                      final userProvider = Provider.of<UserProvider>(context, listen: false);
+                      //final itemProvider = Provider.of<ItemProvider>(context, listen: false);
+                      final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+                      chatProvider.createChatRoom(
+                        userProvider.id,
+                        userProvider.nickname,
+                        widget.item.userId,
+                        sellerNickname,
+                        widget.item.title,//채팅 마지막 내용이 들어가야함
+                        userProvider.profileImage ?? '',
+                      );
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ChatScreen(
+                          senderId: userProvider.id,
+                          recipientId: widget.item.userId,
+                        ),
+                      ));
+                    },
+                    child: Text('대화하기'),
+                  ),
+                ],
               ),
               if (isOwner)
                 Center(

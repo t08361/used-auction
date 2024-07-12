@@ -17,7 +17,7 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => ItemProvider()),
         ChangeNotifierProvider(create: (context) => UserProvider()),
-        //ChangeNotifierProvider(create: (context) => ChatProvider()), // 추가된 부분
+        ChangeNotifierProvider(create: (context) => ChatProvider()), // 추가된 부분
       ],
       child: MyApp(),
     ),
