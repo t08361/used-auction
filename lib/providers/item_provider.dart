@@ -90,6 +90,7 @@ class ItemProvider with ChangeNotifier {
           bidUnit: _items[index].bidUnit,
           userId: _items[index].userId,
           itemImage: _items[index].itemImage,
+          lastPrice: _items[index].lastPrice,
         );
         notifyListeners();
       }
@@ -97,7 +98,7 @@ class ItemProvider with ChangeNotifier {
       throw Exception('Failed to update item!!');
     }
   }
-}
+
   // 특정 아이템의 현재 최고가를 가져오는 메서드
   Future<int> fetchCurrentPrice(String itemId) async {
     final url = Uri.parse('$baseUrl/items/$itemId/current_price');
@@ -133,4 +134,8 @@ class ItemProvider with ChangeNotifier {
       throw error;
     }
   }
+
+
 }
+
+
