@@ -77,7 +77,7 @@ class UserPage extends StatelessWidget {
   // 로그아웃 함수
   void _logout(BuildContext context) {
     Provider.of<UserProvider>(context, listen: false).logout(); // UserProvider의 logout 메서드 호출
-    Navigator.of(context).pushReplacementNamed('/login'); // 로그인 화면으로 이동
+    Navigator.of(context).pushReplacementNamed('/homescreen'); // 로그인 화면으로 이동
   }
 
   // 사용자 페이지의 UI 빌드

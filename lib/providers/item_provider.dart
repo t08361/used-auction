@@ -18,10 +18,12 @@ class ItemProvider with ChangeNotifier {
     final url = Uri.parse('$baseUrl/items'); // 서버 URL
     try {
       final response = await http.get(url); // HTTP GET 요청 보내기
-      final extractedData = json.decode(response.body) as List<dynamic>; // JSON 응답을 디코드하여 리스트로 변환
+      final extractedData = json.decode(response.body) as List<
+          dynamic>; // JSON 응답을 디코드하여 리스트로 변환
       final List<Item> loadedItems = []; // 로드된 아이템을 저장할 리스트
       for (var itemData in extractedData) {
-        loadedItems.add(Item.fromJson(itemData)); // JSON 데이터를 Item 객체로 변환하여 리스트에 추가
+        loadedItems.add(
+            Item.fromJson(itemData)); // JSON 데이터를 Item 객체로 변환하여 리스트에 추가
       }
       _items = loadedItems; // _items 리스트를 로드된 아이템으로 업데이트
       notifyListeners(); // 상태 변경 알림
@@ -53,7 +55,8 @@ class ItemProvider with ChangeNotifier {
   // 아이템을 삭제하는 메서드
   Future<void> deleteItem(String id) async {
     final url = Uri.parse('$baseUrl/items/$id'); // 서버 URL
-    final existingItemIndex = _items.indexWhere((item) => item.id == id); // 삭제할 아이템의 인덱스를 찾기
+    final existingItemIndex = _items.indexWhere((item) =>
+    item.id == id); // 삭제할 아이템의 인덱스를 찾기
     var existingItem = _items[existingItemIndex]; // 삭제할 아이템 저장
     _items.removeAt(existingItemIndex); // 아이템 리스트에서 삭제
     notifyListeners(); // 상태 변경 알림
@@ -65,5 +68,32 @@ class ItemProvider with ChangeNotifier {
       throw Exception('Failed to delete item'); // 예외 던지기
     }
     //existingItem = null; // 기존 아이템 null 처리 (필요 시 사용)
+  }
+
+  Future<void> modifyItem(String id, String title, String description) async {
+    final url = Uri.parse('$baseUrl/items/$id');
+    final response = await http.put(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({'title': title, 'description': description}),
+    );
+    if (response.statusCode == 200) {
+      final index = _items.indexWhere((item) => item.id == id);
+      if (index != -1) {
+        _items[index] = Item(
+          id: id,
+          title: title,
+          description: description,
+          price: _items[index].price,
+          endDateTime: _items[index].endDateTime,
+          bidUnit: _items[index].bidUnit,
+          userId: _items[index].userId,
+          itemImage: _items[index].itemImage,
+        );
+        notifyListeners();
+      }
+    } else {
+      throw Exception('Failed to update item!!');
+    }
   }
 }

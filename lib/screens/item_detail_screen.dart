@@ -7,6 +7,8 @@ import '../providers/user_provider.dart';
 import '../providers/constants.dart';
 import 'package:http/http.dart' as http;
 
+import 'ItemEditScreen.dart';
+
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
 
@@ -94,11 +96,18 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   void _handleMenuSelection(String value) async {
     final itemProvider = Provider.of<ItemProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     switch (value) {
-      case 'edit':
-      // 수정하기 기능 추가
+      case 'edit'://수정
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (ctx) => ItemEditScreen(item: widget.item),
+          ),
+        );
+
         break;
-      case 'delete':
+      case 'delete'://삭제
         try {
           await itemProvider.deleteItem(widget.item.id);
           Navigator.of(context).pop();
@@ -119,8 +128,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final itemProvider = Provider.of<ItemProvider>(context);
+    final userProvider = Provider.of<UserProvider>(context,listen:false);
+    final itemProvider = Provider.of<ItemProvider>(context,listen:false);
     final bool isOwner = widget.item.userId == userProvider.id;
 
     // 임의의 입찰 기록 리스트
@@ -172,7 +181,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   PopupMenuButton<String>(
                     onSelected: _handleMenuSelection,
                     itemBuilder: (BuildContext context) {
-                      if (isOwner) {
+                      if (isOwner&&userProvider.isLoggedIn) {
                         return [
                           const PopupMenuItem<String>(
                             value: 'edit',
