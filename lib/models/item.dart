@@ -9,6 +9,7 @@ class Item {
   final int bidUnit;
   final String? itemImage;
   final String userId; // 상품등록한 사람 아이디(식별자)
+  final int lastPrice; // 현재 최고가
 
   Item({
     required this.id,
@@ -19,6 +20,7 @@ class Item {
     required this.bidUnit,
     this.itemImage,
     required this.userId,
+    required this.lastPrice
   });
 
   Map<String, dynamic> toJson() => {
@@ -30,6 +32,7 @@ class Item {
     'bidUnit': bidUnit,
     'itemImage' : itemImage,
     'userId': userId, // 추가
+    'lastPrice': lastPrice,
   };
 
   factory Item.fromJson(Map<String, dynamic> json) {
@@ -42,6 +45,7 @@ class Item {
       bidUnit: json['bidUnit'],
       itemImage: json['itemImage'],
       userId: json['userId'], // 추가
+      lastPrice: json['lastPrice']
     );
   }
 }
