@@ -18,7 +18,7 @@ class ItemDetailScreen extends StatefulWidget {
 }
 
 class _ItemDetailScreenState extends State<ItemDetailScreen> {
-  int currentPrice = 10000; // 임의로 설정한 현재가
+  int currentPrice = -1; // 현재 최고가를 담을 변수
   late Duration remainingTime; // 종료까지 남은 시간 계산
   List<Map<String, dynamic>> bids = []; // 현재 입찰 기록을 담을 리스트
   String sellerNickname = ''; // 판매자의 닉네임
@@ -29,6 +29,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     remainingTime = widget.item.endDateTime.difference(DateTime.now());
     fetchBids(); // 입찰 기록 가져오기 호출
     fetchSellerNickname(); // 판매자의 닉네임 가져오기
+    currentPrice = widget.item.lastPrice;
   }
 
   // 판매자의 닉네임 가져오기
@@ -84,6 +85,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
 
     if (response.statusCode == 201) {
+      setState(() {
+        currentPrice = bidAmount; // 입찰 성공 후 currentPrice 업데이트
+      });
       fetchBids(); // 입찰 성공 후 입찰 기록 다시 가져오기
       print('입찰 성공!');
       print('bidData: $bidData');
