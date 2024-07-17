@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:testhandproduct/models/chatRoom.dart';
 import '../models/item.dart';
 import '../providers/chat_provider.dart';
 import '../providers/item_provider.dart';
@@ -161,7 +162,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   void _handleMenuSelection(String value) async {
     final itemProvider = Provider.of<ItemProvider>(context, listen: false);
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    //final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     switch (value) {
       case 'edit'://수정
@@ -191,17 +192,23 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
   }
 
+  String getChatRoomId(String userId1, String userId2) {
+    final sortedIds = [userId1, userId2]..sort();
+    return sortedIds.join('_');
+  }
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context,listen:false);
+    final chatProvider = Provider.of<ChatProvider>(context,listen:false);
     final itemProvider = Provider.of<ItemProvider>(context,listen:false);
     final bool isOwner = widget.item.userId == userProvider.id;
-    final sellerNickname = userProvider.getNicknameById(widget.item.userId);
+    //final sellerNickname = userProvider.getNicknameById(widget.item.userId);
 
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.item.title,
+          '상품명 : '+widget.item.title,
           style: const TextStyle(color: Colors.black),
         ),
         iconTheme: const IconThemeData(
@@ -233,7 +240,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               Row(
                 children: [
                   Text(
-                    sellerNickname,
+                    '닉네임 : ' + sellerNickname,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 10),
@@ -266,7 +273,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                widget.item.description,
+                '자세한 설명 : '+widget.item.description,
                 style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 10),
@@ -320,18 +327,22 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       final userProvider = Provider.of<UserProvider>(context, listen: false);
                       //final itemProvider = Provider.of<ItemProvider>(context, listen: false);
                       final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+                      final chatRoomId = getChatRoomId(userProvider.id, widget.item.userId);
+                      final lastMessage = chatProvider.getLastMessageForChatRoom(chatRoomId);
                       chatProvider.createChatRoom(
                         userProvider.id,
                         userProvider.nickname,
                         widget.item.userId,
                         sellerNickname,
-                        widget.item.title,//채팅 마지막 내용이 들어가야함
+                        lastMessage ?? '',//채팅 마지막 내용이 들어가야함
                         userProvider.profileImage ?? '',
                       );
                       Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => ChatScreen(
                           senderId: userProvider.id,
                           recipientId: widget.item.userId,
+                          chatRoomId: chatRoomId,
                         ),
                       ));
                     },
