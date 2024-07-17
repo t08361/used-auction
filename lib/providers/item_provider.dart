@@ -18,19 +18,30 @@ class ItemProvider with ChangeNotifier {
     final url = Uri.parse('$baseUrl/items'); // 서버 URL
     try {
       final response = await http.get(url); // HTTP GET 요청 보내기
-      final extractedData = json.decode(response.body) as List<
-          dynamic>; // JSON 응답을 디코드하여 리스트로 변환
-      final List<Item> loadedItems = []; // 로드된 아이템을 저장할 리스트
-      for (var itemData in extractedData) {
-        loadedItems.add(
-            Item.fromJson(itemData)); // JSON 데이터를 Item 객체로 변환하여 리스트에 추가
+
+      if (response.statusCode == 200) {
+        final extractedData = json.decode(response.body) as List<dynamic>; // JSON 응답을 디코드하여 리스트로 변환
+
+        final List<Item> loadedItems = []; // 로드된 아이템을 저장할 리스트
+        for (var itemData in extractedData) {
+          loadedItems.add(Item.fromJson(itemData)); // JSON 데이터를 Item 객체로 변환하여 리스트에 추가
+        }
+        _items = loadedItems; // _items 리스트를 로드된 아이템으로 업데이트
+        notifyListeners(); // 상태 변경 알림
+      } else {
+        // 서버 응답 상태 코드와 응답 본문을 출력하여 문제 진단
+        print('Failed to load items. Status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        throw Exception('Failed to load items');
       }
-      _items = loadedItems; // _items 리스트를 로드된 아이템으로 업데이트
-      notifyListeners(); // 상태 변경 알림
     } catch (error) {
-      throw error; // 에러 발생 시 예외 던지기
+      // 에러 메시지와 함께 응답 상태 코드와 응답 본문을 출력
+      print('Error: $error');
+      rethrow;
     }
   }
+
+
 
   // 새로운 아이템을 추가하는 메서드
   Future<void> addItem(Item item) async {

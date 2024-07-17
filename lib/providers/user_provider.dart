@@ -2,7 +2,12 @@ import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이�
 import 'package:shared_preferences/shared_preferences.dart'; // SharedPreferences를 위한 패키지 import
 import 'dart:convert';
 
+import '../models/user.dart';
+
 class UserProvider with ChangeNotifier {
+
+  List<User> _users = [];
+
   String _id = ''; // 사용자 ID를 저장하는 변수
   String _username = ''; // 사용자 이름을 저장하는 변수
   String _email = ''; // 사용자 이메일을 저장하는 변수
@@ -22,6 +27,11 @@ class UserProvider with ChangeNotifier {
 
   bool _isLoggedIn = false; // 로그인 상태를 저장하는 변수
   bool get isLoggedIn => _isLoggedIn; // 로그인 상태에 대한 getter 정의
+
+  String getNicknameById(String id) {
+    final user = _users.firstWhere((user) => user.id == id, orElse: () => User(id: '', username: '', password: '', nickname: 'Unknown', email: '', location: '', age: 0));
+    return user.nickname;
+  }
 
   // 사용자 정보를 설정하는 메서드
   void setUser(Map<String, dynamic> userData) async {
