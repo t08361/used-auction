@@ -23,18 +23,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFE7F0DC),
       appBar: AppBar(
         title: const Text(
             '몽당마켓',
-            style: TextStyle(color: Colors.black)
+            style: TextStyle(color: Colors.white)
         ),
         automaticallyImplyLeading: false, // 뒤로가기 버튼을 없애기
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(255, 72, 97, 62), // 앱 바 색
         actions: [
           IconButton(
             icon: const Icon(Icons.search),
-            color: Colors.black,
+            color: Colors.white,
             onPressed: () {
               showSearch(
                 context: context,
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.notifications),
-            color: Colors.black,
+            color: Colors.white,
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -57,12 +58,13 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: ItemList(),
       floatingActionButton: FloatingActionButton(
+        foregroundColor: Colors.white,
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => AddItemScreen()),
           );
         },
-        backgroundColor: Colors.red,
+        backgroundColor: const Color.fromARGB(255, 72, 97, 62),
         child: const Icon(Icons.add), // 버튼 배경 색상 변경
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // 버튼 위치 설정
