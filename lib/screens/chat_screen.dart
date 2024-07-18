@@ -7,13 +7,13 @@ import '../models/chatMessage.dart';
 class ChatScreen extends StatefulWidget {
   final String senderId;
   final String recipientId;
-  final String chatRoomId;  // chatRoomId 추가
+  final String chatRoomId;
 
   const ChatScreen({
     super.key,
     required this.senderId,
     required this.recipientId,
-    required this.chatRoomId, // chatRoomId 추가
+    required this.chatRoomId,
   });
 
   @override
@@ -32,7 +32,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _loadMessages() async {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-    await chatProvider.loadMessages(widget.chatRoomId); // chatRoomId 사용
+    await chatProvider.loadMessages(widget.chatRoomId);
     _scrollToBottom();
   }
 
@@ -40,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
     final message = ChatMessage(
-      id: '', // id는 서버에서 생성
+      id: '',
       chatRoomId: widget.chatRoomId,
       senderId: widget.senderId,
       recipientId: widget.recipientId,
@@ -80,14 +80,28 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: Row(
           children: [
-            Text('상품이미지//'),
-            SizedBox(width: 10),
-            Text('낙찰가 : 20000원'),
+            CircleAvatar(
+              // 상품 이미지
+              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              radius: 22,
+            ),
+            SizedBox(width: 100),
+            Text(
+              '낙찰가 : 20000원',
+              style: TextStyle(
+                color: Color(0xFF36BA98), // 텍스트 색상 설정
+                fontWeight: FontWeight.bold,
+                fontSize: 18, // 텍스트 크기 설정),
+              ),
+            ),
           ],
         ),
+        iconTheme: IconThemeData(
+          color: Color(0xFF36BA98), // 뒤로가기 버튼 색상 변경
+        ),
+        backgroundColor: Colors.white,
       ),
       body: Container(
-        color: Colors.yellow[100], // 바디 부분의 배경색 변경
         child: Column(
           children: [
             Expanded(
@@ -103,59 +117,97 @@ class _ChatScreenState extends State<ChatScreen> {
 
                   return Container(
                     alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                    margin: EdgeInsets.only(left: 6.0, right: 6.0, top: 10.0),
+                    margin: EdgeInsets.only(left: 16.0, right: 16.0, top: 10.0),
                     padding: EdgeInsets.only(left: 0.0, top: 10.0),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: isMe ? Colors.lightGreenAccent : Colors.yellowAccent, // 배경색 설정
-                        borderRadius: isMe
-                            ? BorderRadius.only(
-                          topLeft: Radius.circular(30.0),
-                          topRight: Radius.circular(30.0),
-                          bottomLeft: Radius.circular(30.0),
-                        )
-                            : BorderRadius.only(
-                          topRight: Radius.circular(30.0),
-                          bottomLeft: Radius.circular(30.0),
-                          bottomRight: Radius.circular(30.0),
-                        ), // 모서리 다르게 설정
-                      ),
-                      padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 10), // 텍스트 주위에 여백
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            if (!isLastMessageFromSameUser) ...[
-                              TextSpan(
-                                text: isMe ? '${message.timestamp.hour}:${message.timestamp.minute}   ' : '',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                            TextSpan(
-                              text: message.content,
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                backgroundColor: isMe ? Colors.lightGreenAccent : Colors.yellowAccent,
-                                color: Colors.black, //텍스트 색깔 설정
-                              ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (!(!isMe && !isLastMessageFromSameUser)) ...[
+
+                          SizedBox(width:40),
+                        ],
+                        if (!isMe && !isLastMessageFromSameUser) ...[
+                          CircleAvatar(
+                            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+                            radius: 15,
+                          ),
+                          SizedBox(width: 10),
+                        ],
+                        Container(
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.white : Colors.white,
+                            borderRadius: isMe
+                                ? BorderRadius.only(
+                              topLeft: Radius.circular(30.0),
+                              topRight: Radius.circular(30.0),
+                              bottomLeft: Radius.circular(30.0),
+                              //bottomRight: Radius.circular(30.0),
+                            )
+                                : BorderRadius.only(
+                              topLeft: Radius.circular(30.0),
+                              topRight: Radius.circular(30.0),
+                              //bottomLeft: Radius.circular(30.0),
+                              bottomRight: Radius.circular(30.0),
                             ),
-                            if (isLastMessageFromSameUser) ...[
-                              TextSpan(
-                                text: isMe ? '' : '  ${message.timestamp.hour}:${message.timestamp.minute}',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 10,
-                                  color: Colors.black,
-                                ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                spreadRadius: isMe?1:0,
+                                blurRadius: isMe?3:0,
+                                offset: isMe?Offset(0, 3):Offset(0, 0),
                               ),
                             ],
-                          ],
+                          ),
+                          padding: EdgeInsets.only(left: 10.0, right: 10.0, top: 10.0, bottom: 10),
+                          constraints: BoxConstraints(maxWidth: 250), // 최대 너비 설정
+                          child: RichText(
+                            text: TextSpan(
+                              children: [
+                                if (!isLastMessageFromSameUser) ...[
+                                  TextSpan(
+                                    text: isMe ? '${message.timestamp.hour}:${message.timestamp.minute}   ' : '',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                                TextSpan(
+                                  text: message.content,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                    backgroundColor: isMe ? Colors.white : Colors.white,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                                if (!isLastMessageFromSameUser) ...[
+                                  TextSpan(
+                                    text: isMe ? '' : '  ${message.timestamp.hour}:${message.timestamp.minute}',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 10,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            softWrap: true,
+                          ),
                         ),
-                      ),
+                        if (!(isMe && !isLastMessageFromSameUser)) ...[
+                          SizedBox(width:40),
+                        ],
+                        if (isMe && !isLastMessageFromSameUser) ...[
+                          SizedBox(width: 10),
+                          CircleAvatar(
+                            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+                            radius: 15,
+                          ),
+                        ],
+                      ],
                     ),
                   );
                 },
@@ -165,12 +217,41 @@ class _ChatScreenState extends State<ChatScreen> {
               padding: const EdgeInsets.all(20.0),
               child: Row(
                 children: [
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // 버튼을 눌렀을 때의 동작을 정의
+                        print('Button Pressed');
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: Color(0xFF36BA98), // 버튼 배경색
+                        onPrimary: Colors.white, // 버튼 텍스트 색상
+                        padding: EdgeInsets.only(left: 0,right: 0,top: 5,bottom:5 ), // 버튼 패딩 설정
+                      ),
+                      child: Text(
+                        '거래\n완료',
+                        textAlign: TextAlign.center, // 텍스트 정렬 설정
+                        style: TextStyle(
+                          fontSize: 14, // 텍스트 크기 설정
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10,),
                   Expanded(
                     child: TextField(
                       controller: _messageController,
                       decoration: InputDecoration(
                         labelText: '메시지 입력',
-                        border: InputBorder.none, // 밑줄 제거
+                        labelStyle: TextStyle(
+                          color: Colors.black, // 레이블 텍스트 색상 설정
+                          fontSize: 18, // 레이블 텍스트 크기 설정
+                        ),
+                        border: InputBorder.none,
+                      ),
+                      style: TextStyle(
+                        //color: Colors.green, // 입력된 텍스트 색상 설정
+                        fontSize: 16, // 입력된 텍스트 크기 설정
                       ),
                     ),
                   ),

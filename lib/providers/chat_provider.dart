@@ -17,7 +17,7 @@ class ChatProvider with ChangeNotifier {
     try {
       final response = await http.get(url);
       print('Response status: ${response.statusCode}'); // 상태 코드 로그 추가
-      print('Response body: ${response.body}'); // 응답 본문 로그 추가
+      //print('Response body: ${response.body}'); // 응답 본문 로그 추가
 
       if (response.statusCode == 200) {
         final List<dynamic> extractedData = json.decode(response.body);
@@ -38,6 +38,32 @@ class ChatProvider with ChangeNotifier {
     } catch (error) {
       print('Error: $error'); // 오류 로그 추가
       throw Exception('Failed to load messages');
+    }
+  }
+
+  Future<void> loadChatRooms() async {
+    final url = Uri.parse('$baseUrl/chat/chatRooms');
+    try {
+      final response = await http.get(url);
+      print('Response status: ${response.statusCode}'); // 상태 코드 로그 추가
+      print('Response body: ${response.body}'); // 응답 본문 로그 추가
+
+      if (response.statusCode == 200) {
+        final List<dynamic> extractedData = json.decode(response.body);
+        final List<ChatRoom> loadedChatRooms = [];
+        for (var chatRoomData in extractedData) {
+          loadedChatRooms.add(ChatRoom.fromJson(chatRoomData));
+        }
+        _chatRooms = loadedChatRooms;
+        notifyListeners();
+        print('Chat rooms loaded successfully'); // 성공 로그 추가
+      } else {
+        print('Failed to load chat rooms. Status code: ${response.statusCode}');
+        throw Exception('Failed to load chat rooms');
+      }
+    } catch (error) {
+      print('Error: $error'); // 오류 로그 추가
+      throw Exception('Failed to load chat rooms');
     }
   }
 
