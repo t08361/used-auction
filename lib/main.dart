@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:testhandproduct/providers/chat_provider.dart';
+import 'package:testhandproduct/providers/constants.dart';
 import 'providers/item_provider.dart';
 import 'providers/user_provider.dart';
 import 'screens/home_screen.dart';
@@ -78,6 +79,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: primary_color, // Scaffold 배경색 설정
       body: _widgetOptions(context).elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
@@ -95,7 +97,9 @@ class _MainScreenState extends State<MainScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.red,
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.grey, // 선택되지 않은 항목의 색상
+        backgroundColor: primary_color, // BottomNavigationBar 배경색 설정
         onTap: _onItemTapped,
       ),
     );
