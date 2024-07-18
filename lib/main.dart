@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:testhandproduct/providers/chat_provider.dart';
+import 'package:testhandproduct/providers/constants.dart';
 import 'providers/item_provider.dart';
 import 'providers/user_provider.dart';
 import 'screens/home_screen.dart';
@@ -79,24 +80,37 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: _widgetOptions(context).elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
+      bottomNavigationBar: Container(
+        // height: 90, // 원하는 높이로 설정
+        decoration: const BoxDecoration(
+          color: Colors.white, // 하단바 배경색을 하얗게 설정
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey, // 경계선 색을 설정
+              width: 0.5, // 경계선 너비를 설정
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_rounded),
-            label: '채팅',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '마이페이지',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: const Color.fromARGB(255, 72, 97, 62),
-        onTap: _onItemTapped,
+        ),
+        child: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              label: '홈',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline_outlined),
+              label: '채팅',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: '마이페이지',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: primary_color,
+          onTap: _onItemTapped,
+          backgroundColor: Colors.white, // 네비게이션 바의 배경색 설정
+        ),
       ),
     );
   }
