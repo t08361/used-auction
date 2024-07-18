@@ -125,41 +125,73 @@ class _AddItemScreenState extends State<AddItemScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('상품 등록', style: TextStyle(color: Colors.black)), // 앱바 제목
+        foregroundColor: Colors.black, backgroundColor: primary_color,
         iconTheme: const IconThemeData(
           color: Colors.black, // 뒤로가기 버튼 색상 설정
         ),
         elevation: 0,
-        backgroundColor: Colors.white, // 앱바 배경색 설정
       ),
+      backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.all(8.0), // 패딩 설정
+        padding: const EdgeInsets.all(16.0), // 패딩 설정
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 10),
-              _selectedImage != null
-                  ? Image.file(
-                _selectedImage!,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-              )
-                  : const Text('사진를 올려주세요!'),
-              TextButton(
-                onPressed: _pickImage,
-                child: const Text('사진 선택'),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: _selectedImage != null
+                      ? Image.file(
+                    _selectedImage!,
+                    width: 90, // 이미지 너비를 줄입니다.
+                    height: 90, // 이미지 높이를 줄여 정사각형으로 만듭니다.
+                    fit: BoxFit.cover,
+                  )
+                      : Container(
+                    width: 90, // 컨테이너 너비를 줄입니다.
+                    height: 90, // 컨테이너 높이를 줄여 정사각형으로 만듭니다.
+                    decoration: BoxDecoration(
+                      color: background_color,
+                      border: Border.all(color: Colors.black45), // 검은색 테두리 추가
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: Colors.black54,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 20),
+              const Text('제목', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
               TextField(
                 controller: _titleController, // 제목 입력 컨트롤러
-                decoration: const InputDecoration(labelText: '제목'), // 제목 입력 필드의 힌트 텍스트
+                decoration: const InputDecoration(
+                  hintText: '제목을 입력하세요', // 힌트 텍스트 추가
+                  border: OutlineInputBorder(),
+                ),
               ),
+              const SizedBox(height: 20),
+              const Text('시초가', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
               TextField(
                 controller: _priceController, // 시초가 입력 컨트롤러
-                decoration: const InputDecoration(labelText: '시초가'), // 시초가 입력 필드의 힌트 텍스트
+                decoration: const InputDecoration(
+                  hintText: '시초가를 입력하세요', // 힌트 텍스트 추가
+                  border: OutlineInputBorder(),
+                ),
                 keyboardType: TextInputType.number, // 숫자 키보드 사용
               ),
-              const SizedBox(height: 10), // 간격 추가
+              const SizedBox(height: 20), // 간격 추가
+              const Text('경매 종료 시간', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
               ListTile(
                 title: Text(
                   _endDateTime == null
@@ -169,19 +201,45 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 trailing: const Icon(Icons.calendar_today), // 캘린더 아이콘
                 onTap: _pickEndDateTime, // 시간 선택 메서드 호출
               ),
+              const SizedBox(height: 20), // 간격 추가
+              const Text('자세한 설명', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
               TextField(
                 controller: _descriptionController, // 설명 입력 컨트롤러
-                decoration: const InputDecoration(labelText: '자세한 설명'), // 설명 입력 필드의 힌트 텍스트
+                decoration: const InputDecoration(
+                  hintText: '상품에 대한 자세한 설명을 입력하세요', // 힌트 텍스트 추가
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 5, // 설명 입력 필드의 최대 라인 수 설정
+                textInputAction: TextInputAction.done, // 완료 액션 설정
+                onSubmitted: (_) => _submitData(), // 완료 시 데이터 제출
               ),
+              const SizedBox(height: 20), // 간격 추가
+              const Text('입찰 단위', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
               TextField(
                 controller: _bidUnitController, // 입찰 단위 입력 컨트롤러
-                decoration: const InputDecoration(labelText: '입찰 단위'), // 입찰 단위 입력 필드의 힌트 텍스트
+                decoration: const InputDecoration(
+                  hintText: '입찰 단위를 입력하세요', // 힌트 텍스트 추가
+                  border: OutlineInputBorder(),
+                ),
                 keyboardType: TextInputType.number, // 숫자 키보드 사용
               ),
-              const SizedBox(height: 10), // 간격 추가
-              ElevatedButton(
-                onPressed: _submitData, // 데이터 제출 메서드 호출
-                child: const Text('상품 등록'), // 버튼 텍스트
+              const SizedBox(height: 20), // 간격 추가
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _submitData, // 데이터 제출 메서드 호출
+                  child: const Text('상품 등록'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black, backgroundColor: Colors.blueAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8), // 각진 사각형으로 설정
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                ),
               ),
             ],
           ),

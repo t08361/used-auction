@@ -79,6 +79,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: primary_color, // Scaffold 배경색 설정
       body: _widgetOptions(context).elementAt(_selectedIndex),
       bottomNavigationBar: Container(
         // height: 90, // 원하는 높이로 설정
