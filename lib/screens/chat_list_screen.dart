@@ -5,7 +5,22 @@ import '../providers/user_provider.dart';
 import '../models/chatRoom.dart';
 import 'chat_screen.dart';
 
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends StatefulWidget {
+  @override
+  _ChatListScreenState createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends State<ChatListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _loadChatRooms();
+  }
+
+  void _loadChatRooms() async {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    await chatProvider.loadChatRooms();
+  }
 
   String getChatRoomId(String userId1, String userId2) {
     final sortedIds = [userId1, userId2]..sort();
@@ -26,7 +41,8 @@ class ChatListScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('채팅 목록'),
+        title: Text('채팅'),
+        centerTitle: false, // 타이틀을 왼쪽으로 정렬
       ),
       body: ListView.builder(
         itemCount: userChatRooms.length,
@@ -37,11 +53,15 @@ class ChatListScreen extends StatelessWidget {
           final chatPartnerNickname = isMe ? chatRoom.buyerNickname : chatRoom.sellerNickname; // 실제로는 닉네임을 가져와야 함
 
           return Container(
-            color: Colors.green[200], // 배경색 설정
+            //color: Colors.green[200], // 배경색 설정
             child: ListTile(
-              //leading: Image.network(chatRoom.itemImage),
-              title: Text(chatPartnerNickname),
-              subtitle: Text(chatRoom.lastMessage),
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(chatRoom.itemImage), // 이미지 URL을 chatRoom.itemImage로 대체
+                radius: 24, // 원형 이미지의 반지름
+                //backgroundColor: Colors.grey[200], // 이미지가 로드되기 전에 보여질 배경색
+              ),
+              title: Text(chatPartnerNickname,style: TextStyle(color: Colors.black),),
+              subtitle: Text(chatRoom.lastMessage,style: TextStyle(color: Colors.black),),
               trailing: Text('${chatRoom.lastMessageTime.hour}:${chatRoom.lastMessageTime.minute}'), // 포맷팅 필요
               onTap: () {
                 Navigator.of(context).push(

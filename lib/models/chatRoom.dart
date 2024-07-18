@@ -1,5 +1,5 @@
 class ChatRoom {
-  final String id;  // chatRoomId와 일치
+  final String id;
   final String sellerId;
   final String sellerNickname;
   final String buyerId;
@@ -21,29 +21,33 @@ class ChatRoom {
     required this.itemImage,
   });
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'sellerId': sellerId,
-    'sellerNicname' : sellerNickname,
-    'buyerId': buyerId,
-    'buyerNicname' : buyerNickname,
-    'finalPrice': finalPrice,
-    'lastMessage': lastMessage,
-    'lastMessageTime': lastMessageTime.toIso8601String(),
-    'itemImage': itemImage,
-  };
-
   factory ChatRoom.fromJson(Map<String, dynamic> json) {
     return ChatRoom(
-      id: json['id'],
-      sellerId: json['sellerId'],
-      sellerNickname: json['sellerNicname'],
-      buyerId: json['buyerId'],
-      buyerNickname: json['buyerNicname'],
-      finalPrice: json['finalPrice'],
-      lastMessage: json['lastMessage'],
-      lastMessageTime: DateTime.parse(json['lastMessageTime']),
-      itemImage: json['itemImage'],
+      id: json['id'] ?? '',
+      sellerId: json['sellerId'] ?? '',
+      sellerNickname: json['sellerNickname'] ?? '',
+      buyerId: json['buyerId'] ?? '',
+      buyerNickname: json['buyerNickname'] ?? '',
+      finalPrice: json['finalPrice'] ?? 0,
+      lastMessage: json['lastMessage'] ?? '',
+      lastMessageTime: json['lastMessageTime'] != null
+          ? DateTime.parse(json['lastMessageTime'])
+          : DateTime.now(),
+      itemImage: json['itemImage'] ?? '',
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'sellerId': sellerId,
+      'sellerNickname': sellerNickname,
+      'buyerId': buyerId,
+      'buyerNickname': buyerNickname,
+      'finalPrice': finalPrice,
+      'lastMessage': lastMessage,
+      'lastMessageTime': lastMessageTime.toIso8601String(),
+      'itemImage': itemImage,
+    };
   }
 }
