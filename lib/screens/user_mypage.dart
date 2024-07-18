@@ -11,6 +11,7 @@ import 'purchase_history_screen.dart'; // 구매 내역 화면 import
 import 'FAQ_screen.dart'; // FAQ 화면 import
 import 'terms_and_policies_screen.dart'; // 약관 및 정책 화면 import
 import 'login_screen.dart'; // 로그인 화면 import
+import '../providers/constants.dart';
 
 // 사용자 페이지를 나타내는 클래스 정의
 class UserPage extends StatelessWidget {
@@ -27,11 +28,6 @@ class UserPage extends StatelessWidget {
       context,
       MaterialPageRoute(builder: (context) => EditProfilePage()), // EditProfilePage로 이동
     );
-  }
-
-  // 간편 회원가입 처리 로직 (미구현)
-  void _signup(BuildContext context) {
-    // 서버에 요청을 보내고 응답을 처리하는 로직 추가 예정
   }
 
   // 진행중인 경매 페이지로 이동하는 함수
@@ -86,78 +82,153 @@ class UserPage extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('마이페이지'), // 앱바 타이틀 설정
-      ),
+      /*appBar: AppBar(
+        title: const Text('', style: TextStyle(color: Colors.black)), // 앱바 제목
+        foregroundColor: Colors.black, backgroundColor: primary_color,
+        iconTheme: const IconThemeData(
+          color: Colors.black, // 뒤로가기 버튼 색상 설정
+        ),
+        elevation: 0,
+      ),*/
+      backgroundColor:background_color,
       body: Padding(
         padding: const EdgeInsets.all(16.0), // 패딩 설정
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 공간을 고르게 분배
-          children: [
-            // 프로필 사진과 닉네임을 표시하는 Row 위젯
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 40, // 원형 아바타의 반지름 설정
-                  backgroundImage: userProvider.profileImage != null
-                      ? MemoryImage(base64Decode(userProvider.profileImage!)) as ImageProvider
-                      : AssetImage('assets/images/default_profile.png'), // 프로필 이미지 경로 설정// 프로필 사진 경로 설정
-                ),
-                SizedBox(width: 16), // 간격 설정
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start, // 시작점 기준 정렬
-                  children: [
-                    Text(
-                      userProvider.nickname, // 닉네임 텍스트
-                      style: TextStyle(
-                        fontSize: 20, // 폰트 크기 설정
-                        fontWeight: FontWeight.bold, // 폰트 두께 설정
-                        color: Colors.black
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 60),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 45, // 원형 아바타의 반지름 설정
+                    backgroundImage: userProvider.profileImage != null
+                        ? MemoryImage(base64Decode(userProvider.profileImage!)) as ImageProvider
+                        : const AssetImage('assets/images/default_profile.png'), // 프로필 이미지 경로 설정
+                  ),
+                  const SizedBox(width: 20), // 간격 설정
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, // 시작점 기준 정렬
+                    children: [
+                      Text(
+                        userProvider.nickname, // 닉네임 텍스트
+                        style: const TextStyle(
+                          fontSize: 20, // 폰트 크기 설정
+                          fontWeight: FontWeight.bold, // 폰트 두께 설정
+                          color: Colors.black,
+                        ),
                       ),
-                    ),
-                    Text(
-                      userProvider.email, // 이메일 텍스트
-                      style: TextStyle(
-                        fontSize: 16, // 폰트 크기 설정
-                        color: Colors.grey, // 폰트 색상 설정
-
+                      Text(
+                        userProvider.email, // 이메일 텍스트
+                        style: const TextStyle(
+                          fontSize: 16, // 폰트 크기 설정
+                          color: Colors.grey, // 폰트 색상 설정
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 100), // 간격 설정
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
-            // 각 버튼에 onPressed 이벤트 연결
-            ElevatedButton(
-              onPressed: () => _showMyStatus(context), // 내 정보 버튼 클릭 시 이벤트
-              child: Text('내 정보'),
-            ),
-            ElevatedButton(
-              onPressed: () => _showSalesHistory(context), // 판매내역 버튼 클릭 시 이벤트
-              child: Text('판매내역'),
-            ),
-            ElevatedButton(
-              onPressed: () => _showPurchaseHistory(context), // 구매내역 버튼 클릭 시 이벤트
-              child: Text('구매내역'),
-            ),
-            ElevatedButton(
-              onPressed: () => _ongoingauction(context), // 진행중인 경매 버튼 클릭 시 이벤트
-              child: Text('진행중인 경매'),
-            ),
-            ElevatedButton(
-              onPressed: () => _showFAQ(context), // FAQ 버튼 클릭 시 이벤트
-              child: Text('FAQ'),
-            ),
-            ElevatedButton(
-              onPressed: () => _showTermsAndPolicies(context), // 약관 및 정책 버튼 클릭 시 이벤트
-              child: Text('약관 및 정책'),
-            ),
-            ElevatedButton(
-              onPressed: () => _logout(context), // 로그아웃 버튼 클릭 시 이벤트
-              child: Text('로그아웃'),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red), // 버튼 색상 설정
-            ),
-          ],
+                child: ListTile(
+                 // leading: const Icon(Icons.person, color: Colors.black),
+                  title: const Text('내 정보', style: TextStyle(color: Colors.black)),
+                  tileColor: button_color,
+                  onTap: () => _showMyStatus(context),
+                //  trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                ),
+              ),
+             // const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                 // leading: const Icon(Icons.history, color: Colors.black),
+                  title: const Text('판매내역', style: TextStyle(color: Colors.black)),
+                  tileColor: button_color,
+                  onTap: () => _showSalesHistory(context),
+                //  trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                ),
+              ),
+             // const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                 // leading: const Icon(Icons.shopping_cart, color: Colors.black),
+                  title: const Text('구매내역', style: TextStyle(color: Colors.black)),
+                  tileColor: button_color,
+                  onTap: () => _showPurchaseHistory(context),
+                //  trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                ),
+              ),
+             // const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                  //leading: const Icon(Icons.gavel, color: Colors.black),
+                  title: const Text('진행중인 경매', style: TextStyle(color: Colors.black)),
+                  tileColor: button_color,
+                  onTap: () => _ongoingauction(context),
+                  //trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                ),
+              ),
+             // const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                  //leading: const Icon(Icons.help_outline, color: Colors.black),
+                  title: const Text('FAQ', style: TextStyle(color: Colors.black)),
+                  tileColor: button_color,
+                  onTap: () => _showFAQ(context),
+                  //trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                ),
+              ),
+            //  const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                  //leading: const Icon(Icons.policy, color: Colors.black),
+                  title: const Text('약관 및 정책', style: TextStyle(color: Colors.black)),
+                  tileColor: button_color,
+                  onTap: () => _showTermsAndPolicies(context),
+                  //trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                ),
+              ),
+              const SizedBox(height: 0),
+              Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: ListTile(
+                 // leading: const Icon(Icons.logout, color: Colors.black),
+                  title: const Text('로그아웃', style: TextStyle(color: Colors.black)),
+                  tileColor: button_color,
+                  onTap: () => _logout(context),
+                  //trailing: const Icon(Icons.arrow_forward_ios, color: Colors.black),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
