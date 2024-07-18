@@ -81,26 +81,37 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       backgroundColor: primary_color, // Scaffold 배경색 설정
       body: _widgetOptions(context).elementAt(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '홈',
+      bottomNavigationBar: Container(
+        // height: 90, // 원하는 높이로 설정
+        decoration: const BoxDecoration(
+          color: Colors.white, // 하단바 배경색을 하얗게 설정
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey, // 경계선 색을 설정
+              width: 0.5, // 경계선 너비를 설정
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat_bubble_rounded),
-            label: '채팅',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: '마이페이지',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey, // 선택되지 않은 항목의 색상
-        backgroundColor: primary_color, // BottomNavigationBar 배경색 설정
-        onTap: _onItemTapped,
+        ),
+        child: BottomNavigationBar(
+          items: const <BottomNavigationBarItem>[
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              label: '홈',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.chat_bubble_outline_outlined),
+              label: '채팅',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_outline),
+              label: '마이페이지',
+            ),
+          ],
+          currentIndex: _selectedIndex,
+          selectedItemColor: primary_color,
+          onTap: _onItemTapped,
+          backgroundColor: Colors.white, // 네비게이션 바의 배경색 설정
+        ),
       ),
     );
   }

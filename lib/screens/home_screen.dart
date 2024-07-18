@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/constants.dart';
 import '../providers/item_provider.dart';
 import '../widgets/item_list.dart';
 import '../screens/search_screen.dart';
@@ -23,46 +24,47 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-            '몽당마켓',
-            style: TextStyle(color: Colors.black)
+      backgroundColor: Colors.white,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(40.0), // 원하는 높이로 설정
+        child: AppBar(
+          automaticallyImplyLeading: false, // 뒤로가기 버튼을 없애기
+          elevation: 0,
+          backgroundColor: Colors.white, // 앱 바 색
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search),
+              color: Colors.black,
+              onPressed: () {
+                showSearch(
+                  context: context,
+                  delegate: ItemSearch(),
+                );
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              color: Colors.black,
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => NotificationScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
-        automaticallyImplyLeading: false, // 뒤로가기 버튼을 없애기
-        elevation: 0,
-        backgroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search),
-            color: Colors.black,
-            onPressed: () {
-              showSearch(
-                context: context,
-                delegate: ItemSearch(),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            color: Colors.black,
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => NotificationScreen(),
-                ),
-              );
-            },
-          ),
-        ],
       ),
       body: ItemList(),
       floatingActionButton: FloatingActionButton(
+        foregroundColor: Colors.white,
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => AddItemScreen()),
           );
         },
-        backgroundColor: Colors.red,
+        backgroundColor: primary_color,
         child: const Icon(Icons.add), // 버튼 배경 색상 변경
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // 버튼 위치 설정
