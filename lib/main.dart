@@ -88,7 +88,7 @@ class _MainScreenState extends State<MainScreen> {
           border: Border(
             top: BorderSide(
               color: Colors.grey, // 경계선 색을 설정
-              width: 0.5, // 경계선 너비를 설정
+              width: 0.2, // 경계선 너비를 설정
             ),
           ),
         ),

@@ -100,6 +100,7 @@ class ItemProvider with ChangeNotifier {
           endDateTime: _items[index].endDateTime,
           bidUnit: _items[index].bidUnit,
           userId: _items[index].userId,
+          winnerId: _items[index].winnerId,
           itemImage: _items[index].itemImage,
           lastPrice: _items[index].lastPrice,
         );

@@ -125,7 +125,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('상품 등록', style: TextStyle(color: Colors.black)), // 앱바 제목
-        foregroundColor: Colors.black, backgroundColor: primary_color,
+        foregroundColor: Colors.black, backgroundColor: Colors.white,
         iconTheme: const IconThemeData(
           color: Colors.black, // 뒤로가기 버튼 색상 설정
         ),
@@ -232,7 +232,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   onPressed: _submitData, // 데이터 제출 메서드 호출
                   child: const Text('상품 등록'),
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.black, backgroundColor: Colors.blueAccent,
+                    foregroundColor: Colors.black, backgroundColor: primary_color,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8), // 각진 사각형으로 설정
                     ),

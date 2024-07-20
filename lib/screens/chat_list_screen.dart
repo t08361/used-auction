@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:testhandproduct/providers/constants.dart';
 import '../providers/chat_provider.dart';
 import '../providers/user_provider.dart';
 import '../models/chatRoom.dart';
@@ -43,6 +44,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       appBar: AppBar(
         title: Text('채팅'),
         centerTitle: false, // 타이틀을 왼쪽으로 정렬
+        backgroundColor: primary_color,
       ),
       body: ListView.builder(
         itemCount: userChatRooms.length,
