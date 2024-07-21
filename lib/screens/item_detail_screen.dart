@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:testhandproduct/models/chatRoom.dart';
 import '../models/item.dart';
 import '../providers/chat_provider.dart';
 import '../providers/item_provider.dart';
@@ -14,6 +13,7 @@ import 'package:http/http.dart' as http;
 
 import 'ItemEditScreen.dart';
 import 'chat_screen.dart';
+import 'purchase_history_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
@@ -227,6 +227,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
     if (response.statusCode == 200) {
       print('낙찰가 업데이트 성공');
+      // 낙찰가 업데이트 성공 시 PurchaseHistoryPage로 이동
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) => PurchaseHistoryPage(),
+        ),
+      );
     } else {
       print('낙찰가 업데이트 실패: ${response.body}');
     }
