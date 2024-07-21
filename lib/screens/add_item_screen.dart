@@ -23,6 +23,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _descriptionController = TextEditingController(); // 설명 입력 컨트롤러
   final _priceController = TextEditingController(); // 가격 입력 컨트롤러
   final _bidUnitController = TextEditingController(); // 입찰 단위 입력 컨트롤러
+  final _regionController = TextEditingController(); // 지역 입력 컨트롤러
   File? _selectedImage; // 선택된 이미지 파일
   DateTime? _endDateTime; // 경매 종료 시간
 
@@ -70,8 +71,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
     final description = _descriptionController.text; // 입력된 설명
     final price = int.tryParse(_priceController.text); // 입력된 가격을 정수로 변환
     final bidUnit = int.tryParse(_bidUnitController.text); // 입력된 입찰 단위를 정수로 변환
+    final region = _regionController.text; // 입력된 지역
 
-    if (title.isEmpty || description.isEmpty || price == null || price <= 0 || _endDateTime == null || bidUnit == null || bidUnit <= 0) {
+    if (title.isEmpty || description.isEmpty || price == null || price <= 0 || _endDateTime == null || bidUnit == null || bidUnit <= 0 || region.isEmpty) {
       print("Invalid input:");
       print("Title is empty: ${title.isEmpty}");
       print("Description is empty: ${description.isEmpty}");
@@ -79,6 +81,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       print("Selected image: $_selectedImage");
       print("End DateTime: $_endDateTime");
       print("Bid Unit: $bidUnit");
+      print("Region is empty: ${region.isEmpty}");
       return;
     }
 
@@ -95,6 +98,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       request.fields['bidUnit'] = bidUnit.toString();
       request.fields['userId'] = userProvider.id; // 추가
       request.fields['nickname'] = userProvider.nickname; // 추가
+      request.fields['region'] = region; // 추가
 
       // 이미지 파일이 선택된 경우 파일 추가
       if (_selectedImage != null) {
@@ -224,6 +228,16 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number, // 숫자 키보드 사용
+              ),
+              const SizedBox(height: 20), // 간격 추가
+              const Text('지역', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)), // 지역 텍스트 추가
+              const SizedBox(height: 5),
+              TextField(
+                controller: _regionController, // 지역 입력 컨트롤러
+                decoration: const InputDecoration(
+                  hintText: '지역을 입력하세요', // 힌트 텍스트 추가
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 20), // 간격 추가
               SizedBox(

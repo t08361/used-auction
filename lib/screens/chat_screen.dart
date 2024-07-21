@@ -224,8 +224,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         print('Button Pressed');
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Color(0xFF36BA98), // 버튼 배경색
-                        onPrimary: Colors.white, // 버튼 텍스트 색상
+                        foregroundColor: Colors.white, backgroundColor: Color(0xFF36BA98), // 버튼 텍스트 색상
                         padding: EdgeInsets.only(left: 0,right: 0,top: 5,bottom:5 ), // 버튼 패딩 설정
                       ),
                       child: Text(

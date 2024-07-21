@@ -11,6 +11,7 @@ class Item {
   final String userId; // 상품등록한 사람 아이디(식별자)
   final String winnerId;
   final int lastPrice; // 현재 최고가
+  final String region; // 지역 필드 추가
 
   Item({
     required this.id,
@@ -22,7 +23,8 @@ class Item {
     this.itemImage,
     required this.userId,
     required this.winnerId,
-    required this.lastPrice
+    required this.lastPrice,
+    required this.region // 생성자에 추가
   });
 
   Map<String, dynamic> toJson() => {
@@ -36,6 +38,7 @@ class Item {
     'winnerId' : winnerId,
     'userId': userId, // 추가
     'lastPrice': lastPrice,
+    'region': region, // toJson에 추가
   };
 
   factory Item.fromJson(Map<String, dynamic> json) {
@@ -49,7 +52,8 @@ class Item {
         itemImage: json['itemImage'],
         winnerId: json['winnerId'] ?? '',
         userId: json['userId'] ?? '',
-        lastPrice: json['lastPrice'] ?? 0
+        lastPrice: json['lastPrice'] ?? 0,
+        region: json['region'] ?? 'Unknown' // fromJson에 추가
     );
   }
 }

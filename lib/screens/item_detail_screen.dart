@@ -67,7 +67,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     super.dispose();
   }
 
-  // 판매자의 닉네임 가져오기
+  // 판매자의 닉네임과 지역 정보 가져오기
   Future<void> fetchSellerNickname() async {
     final url = Uri.parse('$baseUrl/users/${widget.item.userId}');
     final response = await http.get(url);
@@ -132,7 +132,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       print('입찰 실패: ${response.body}');
     }
   }
-
 
   // 입찰 버튼을 눌렀을 때 호출되는 함수
   void _showBidDialog() {
@@ -233,13 +232,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
   }
 
-  // 1.	타이머 시작 (_startTimer 메서드): 경매 종료 시간을 계산하고 타이머를 시작합니다.
-  // 2.	타이머 만료 처리: 타이머가 만료되면 (remainingTime이 0 또는 음수가 되면) _setWinningBid 메서드를 호출합니다.
-  // 3.	최고 입찰자 선정 (_setWinningBid 메서드): bids 리스트에서 가장 높은 입찰가를 찾고, 해당 입찰자를 낙찰자로 선정합니다. 이후 _updateWinner 메서드를 호출하여 서버에 낙찰 정보를 업데이트합니다.
-  // 4.	낙찰 정보 서버 업데이트 (_updateWinner 메서드): 최고 입찰가와 낙찰자의 ID를 서버에 업데이트합니다.
-
+  // 1. 타이머 시작 (_startTimer 메서드): 경매 종료 시간을 계산하고 타이머를 시작합니다.
+  // 2. 타이머 만료 처리: 타이머가 만료되면 (remainingTime이 0 또는 음수가 되면) _setWinningBid 메서드를 호출합니다.
+  // 3. 최고 입찰자 선정 (_setWinningBid 메서드): bids 리스트에서 가장 높은 입찰가를 찾고, 해당 입찰자를 낙찰자로 선정합니다. 이후 _updateWinner 메서드를 호출하여 서버에 낙찰 정보를 업데이트합니다.
+  // 4. 낙찰 정보 서버 업데이트 (_updateWinner 메서드): 최고 입찰가와 낙찰자의 ID를 서버에 업데이트합니다.
   void _startTimer() {
-
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     _timer = Timer.periodic(Duration(seconds: 1), (timer) {
@@ -266,7 +263,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     });
   }
 
-
   void _handleMenuSelection(String value) async {
     final itemProvider = Provider.of<ItemProvider>(context, listen: false);
     //final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -278,7 +274,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             builder: (ctx) => ItemEditScreen(item: widget.item),
           ),
         );
-
         break;
       case 'delete': //삭제
         try {
@@ -367,6 +362,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 children: [
                   Text(
                     '닉네임 : ' + sellerNickname,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    '지역 : ' + widget.item.region,
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(width: 10),

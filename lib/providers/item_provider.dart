@@ -41,8 +41,6 @@ class ItemProvider with ChangeNotifier {
     }
   }
 
-
-
   // 새로운 아이템을 추가하는 메서드
   Future<void> addItem(Item item) async {
     final url = Uri.parse('$baseUrl/items'); // 서버 URL
@@ -81,7 +79,7 @@ class ItemProvider with ChangeNotifier {
     //existingItem = null; // 기존 아이템 null 처리 (필요 시 사용)
   }
 
-
+  // 아이템을 수정하는 메서드
   Future<void> modifyItem(String id, String title, String description) async {
     final url = Uri.parse('$baseUrl/items/$id');
     final response = await http.put(
@@ -103,6 +101,7 @@ class ItemProvider with ChangeNotifier {
           winnerId: _items[index].winnerId,
           itemImage: _items[index].itemImage,
           lastPrice: _items[index].lastPrice,
+          region: _items[index].region, // region 필드 추가
         );
         notifyListeners();
       }
@@ -146,8 +145,4 @@ class ItemProvider with ChangeNotifier {
       throw error;
     }
   }
-
-
 }
-
-
