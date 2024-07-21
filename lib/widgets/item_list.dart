@@ -12,14 +12,30 @@ class ItemList extends StatefulWidget {
 }
 
 class _ItemListState extends State<ItemList> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void didUpdateWidget(covariant ItemList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollController.animateTo(
+        _scrollController.position.minScrollExtent,
+        duration: Duration(milliseconds: 100),
+        curve: Curves.easeOut,
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final itemProvider = Provider.of<ItemProvider>(context);
+    final reversedItems = itemProvider.items.reversed.toList(); // 1. 리스트를 역순으로 정렬
 
     return ListView.builder(
-      itemCount: itemProvider.items.length,
+      controller: _scrollController, // 스크롤 컨트롤러 추가
+      itemCount: reversedItems.length,
       itemBuilder: (context, index) {
-        final item = itemProvider.items[index];
+        final item = reversedItems[index];
 
         return FutureBuilder(
           future: Future.wait([
@@ -46,7 +62,8 @@ class _ItemListState extends State<ItemList> {
                       );
                     },
                     child: Container(
-                      margin: const EdgeInsets.symmetric(vertical: 2.0, horizontal: 5.0),
+                      margin: const EdgeInsets.symmetric(
+                          vertical: 2.0, horizontal: 5.0),
                       padding: const EdgeInsets.all(6.0),
                       decoration: const BoxDecoration(
                         color: Colors.white,
@@ -83,23 +100,28 @@ class _ItemListState extends State<ItemList> {
                               children: [
                                 Text(
                                   item.title,
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal),
+                                  style: TextStyle(fontSize: 18,
+                                      fontWeight: FontWeight.normal),
                                 ),
                                 const SizedBox(height: 13),
                                 Row(
                                   children: [
                                     Text(
                                       '최고가 : ${currentPrice}원 ~',
-                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black),
+                                      style: TextStyle(fontSize: 15,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
                                     ),
                                     const SizedBox(width: 4),
                                     Text(
                                       '${item.price}원',
-                                      style: TextStyle(fontSize: 12, color: Colors.black),
+                                      style: TextStyle(
+                                          fontSize: 12, color: Colors.black),
                                     ),
                                   ],
                                 ),
-                                RemainingTimeGrid(initialRemainingTime: initialRemainingTime),
+                                RemainingTimeGrid(
+                                    initialRemainingTime: initialRemainingTime),
                               ],
                             ),
                           ),
@@ -137,7 +159,10 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
     remainingTime = widget.initialRemainingTime;
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
       setState(() {
-        remainingTime -= Duration(seconds: 1);
+        remainingTime = remainingTime - Duration(seconds: 1);
+        if (remainingTime.isNegative) {
+          remainingTime = Duration.zero;
+        }
       });
     });
   }
@@ -150,10 +175,10 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final int days = remainingTime.inDays;
-    final int hours = remainingTime.inHours.remainder(24);
-    final int minutes = remainingTime.inMinutes.remainder(60);
-    final int seconds = remainingTime.inSeconds.remainder(60);
+    final int days = remainingTime.isNegative ? 0 : remainingTime.inDays;
+    final int hours = remainingTime.isNegative ? 0 : remainingTime.inHours.remainder(24);
+    final int minutes = remainingTime.isNegative ? 0 : remainingTime.inMinutes.remainder(60);
+    final int seconds = remainingTime.isNegative ? 0 : remainingTime.inSeconds.remainder(60);
 
     return GridView.builder(
       shrinkWrap: true,
@@ -183,7 +208,10 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
         }
         return Container(
           margin: const EdgeInsets.all(4.0),
-          color: Colors.blueAccent,
+          decoration: BoxDecoration(
+            color: Colors.red,
+            borderRadius: BorderRadius.circular(8.0), // 모서리를 둥글게 설정
+          ),
           child: Center(
             child: Text(
               text,

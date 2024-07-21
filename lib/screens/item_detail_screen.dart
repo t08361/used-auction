@@ -314,10 +314,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final bool isLoggedInUserSeller = userProvider.id == widget.item.userId;
 
     // 디버그 로그 추가
-    print("Build - isOwner: $isOwner");
-    print("Build - isLoggedInUserWinner: $isLoggedInUserWinner");
-    print("Build - isLoggedInUserSeller: $isLoggedInUserSeller");
-    print("Build - _showChatButton: $_showChatButton");
+    // print("Build - isOwner: $isOwner");
+    // print("Build - isLoggedInUserWinner: $isLoggedInUserWinner");
+    // print("Build - isLoggedInUserSeller: $isLoggedInUserSeller");
+    // print("Build - _showChatButton: $_showChatButton");
 
     return Scaffold(
       appBar: AppBar(
