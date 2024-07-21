@@ -85,28 +85,40 @@ class _AddItemScreenState extends State<AddItemScreen> {
       return;
     }
 
-    final newItem = Item(
-      id: DateTime.now().toString(), // 고유 ID 생성
-      title: title,
-      description: description,
-      price: price,
-      endDateTime: _endDateTime!,
-      bidUnit: bidUnit!,
-      userId: userProvider.id,
-      winnerId: '',
-      itemImage: _selectedImage != null ? base64Encode(await _selectedImage!.readAsBytes()) : null,
-      lastPrice: price,
-      region: region,
-    );
+    final url = Uri.parse('$baseUrl/items'); // 서버 URL
 
     try {
-      await itemProvider.addItem(newItem); // ItemProvider를 통해 아이템 추가
-      print('상품 등록 성공');
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => SaleHistoryPage(),
-        ),
-      );
+      var request = http.MultipartRequest('POST', url); // 멀티파트 요청 생성
+
+      // 필드 추가
+      request.fields['title'] = title;
+      request.fields['description'] = description;
+      request.fields['price'] = price.toString();
+      request.fields['endDateTime'] = _endDateTime!.toIso8601String();
+      request.fields['bidUnit'] = bidUnit.toString();
+      request.fields['userId'] = userProvider.id;
+      request.fields['nickname'] = userProvider.nickname;
+      request.fields['region'] = region;
+
+      // 이미지 파일이 선택된 경우 파일 추가
+      if (_selectedImage != null) {
+        request.files.add(await http.MultipartFile.fromPath(
+          'item_image',
+          _selectedImage!.path,
+        ));
+      }
+
+      var response = await request.send(); // 요청 전송
+
+      if (response.statusCode == 201) {
+        print('상품 등록 성공');
+        await itemProvider.fetchItems(); // 아이템 목록 갱신
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => SaleHistoryPage()), // SaleHistoryPage로 이동
+        );
+      } else {
+        print('Failed to add item');
+      }
     } catch (error) {
       print('Error: $error');
     }
