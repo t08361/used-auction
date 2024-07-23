@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:firebase_storage/firebase_storage.dart';
 import '../providers/constants.dart';
 
 class SignupScreen extends StatefulWidget {
@@ -68,11 +68,11 @@ class _SignupScreenState extends State<SignupScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('입력 오류'),
-            content: Text('아이디, 비밀번호, 닉네임은 필수 입력 항목입니다.'),
+            title: const Text('입력 오류'),
+            content: const Text('아이디, 비밀번호, 닉네임은 필수 입력 항목입니다.'),
             actions: <Widget>[
               TextButton(
-                child: Text('확인'),
+                child: const Text('확인'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -89,11 +89,11 @@ class _SignupScreenState extends State<SignupScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('입력 오류'),
-            content: Text('비밀번호가 일치하지 않습니다.'),
+            title: const Text('입력 오류'),
+            content: const Text('비밀번호가 일치하지 않습니다.'),
             actions: <Widget>[
               TextButton(
-                child: Text('확인'),
+                child: const Text('확인'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -103,6 +103,12 @@ class _SignupScreenState extends State<SignupScreen> {
         },
       );
       return;
+    }
+
+    // 이미지 업로드
+    String? imageUrl;
+    if (_selectedImage != null) {
+      imageUrl = await _uploadImageToFirebase(_selectedImage!);
     }
 
     final url = Uri.parse('$baseUrl/users');
@@ -115,16 +121,8 @@ class _SignupScreenState extends State<SignupScreen> {
         'email': email,
         'location': location,
         'age': age,
+        'profileImage': imageUrl,
       });
-
-    // 이미지 선택되었으면 이미지도 전송
-    if (_selectedImage != null) {
-      print('이미지가 선택됨');
-      request.files.add(await http.MultipartFile.fromPath(
-        'profile_image',
-        _selectedImage!.path,
-      ));
-    }
 
     final response = await request.send();
     Navigator.of(context).pop();
@@ -135,11 +133,11 @@ class _SignupScreenState extends State<SignupScreen> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('회원가입 완료'),
-            content: Text('회원가입이 완료되었습니다! 로그인해주세요.'),
+            title: const Text('회원가입 완료'),
+            content: const Text('회원가입이 완료되었습니다! 로그인해주세요.'),
             actions: <Widget>[
               TextButton(
-                child: Text('확인'),
+                child: const Text('확인'),
                 onPressed: () {
                   Navigator.of(context).pop();
                   Navigator.of(context).pushReplacementNamed('/login');
@@ -154,6 +152,19 @@ class _SignupScreenState extends State<SignupScreen> {
       print('회원가입 실패');
       print('Response status: ${response.statusCode}');
       print('Response body: $responseBody');
+    }
+  }
+
+  Future<String?> _uploadImageToFirebase(File image) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final imageRef = storageRef.child('profile_images/${image.path.split('/').last}');
+      await imageRef.putFile(image);
+      final imageUrl = await imageRef.getDownloadURL();
+      return imageUrl;
+    } catch (e) {
+      print('이미지 업로드 실패: $e');
+      return null;
     }
   }
 
@@ -187,20 +198,20 @@ class _SignupScreenState extends State<SignupScreen> {
                       ? FileImage(_selectedImage!)
                       : null,
                   child: _selectedImage == null
-                      ? Icon(
-                          Icons.add_a_photo,
-                          size: 40,
-                        )
+                      ? const Icon(
+                    Icons.add_a_photo,
+                    size: 40,
+                  )
                       : null,
                 ),
               ),
               TextField(
                 controller: _idController,
-                decoration: InputDecoration(labelText: '아이디 *'),
+                decoration: const InputDecoration(labelText: '아이디 *'),
               ),
               TextField(
                 controller: _passwordController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: '비밀번호 *',
                 ),
                 obscureText: true,
@@ -215,19 +226,19 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
               TextField(
                 controller: _nicknameController,
-                decoration: InputDecoration(labelText: '닉네임 *'),
+                decoration: const InputDecoration(labelText: '닉네임 *'),
               ),
               TextField(
                 controller: _emailController,
-                decoration: InputDecoration(labelText: '이메일'),
+                decoration: const InputDecoration(labelText: '이메일'),
               ),
               TextField(
                 controller: _locationController,
-                decoration: InputDecoration(labelText: '거주지역'),
+                decoration: const InputDecoration(labelText: '거주지역'),
               ),
               TextField(
                 controller: _ageController,
-                decoration: InputDecoration(labelText: '나이'),
+                decoration: const InputDecoration(labelText: '나이'),
                 keyboardType: TextInputType.number,
               ),
               SizedBox(height: 20),

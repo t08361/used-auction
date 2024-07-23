@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리 import
 import 'package:shared_preferences/shared_preferences.dart'; // SharedPreferences를 위한 패키지 import
-import 'dart:convert';
-
 import '../models/user.dart';
 
 class UserProvider with ChangeNotifier {
@@ -29,7 +27,7 @@ class UserProvider with ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn; // 로그인 상태에 대한 getter 정의
 
   String getNicknameById(String id) {
-    final user = _users.firstWhere((user) => user.id == id, orElse: () => User(id: '', username: '', password: '', nickname: 'Unknown', email: '', location: '', age: 0));
+    final user = _users.firstWhere((user) => user.id == id, orElse: () => User(id: '', username: '', password: '', nickname: 'Unknown', email: '', location: '', age: 0,profileImage: ''));
     return user.nickname;
   }
 
