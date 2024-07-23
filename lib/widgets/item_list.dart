@@ -88,18 +88,22 @@ class _ItemListState extends State<ItemList> {
                       height: 125.0,
                       child: Row(
                         children: [
-                          SizedBox(
+                          Container(
                             width: 120,
                             height: 120,
+                            decoration: BoxDecoration(
+                              border: Border.all(color: Colors.black, width: 1.2), // 테두리 추가
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
                               child: item.itemImage != null
                                   ? Image.memory(
-                                      base64Decode(item.itemImage!),
-                                      width: 120,
-                                      height: 120,
-                                      fit: BoxFit.cover,
-                                    )
+                                base64Decode(item.itemImage!),
+                                width: 120,
+                                height: 120,
+                                fit: BoxFit.cover,
+                              )
                                   : Placeholder(),
                             ),
                           ),
