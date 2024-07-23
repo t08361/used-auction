@@ -26,10 +26,21 @@ class _ItemListState extends State<ItemList> {
     });
   }
 
+  String formatPrice(int price) {
+    if (price >= 100000000 || price <= -100000000) {
+      return '${(price / 100000000).floor()}억${((price % 100000000) / 10000).floor()}만원';
+    } else if (price >= 10000 || price <= -10000) {
+      return '${(price / 10000).floor()}만${(price % 10000).toString().padLeft(4, '0')}원';
+    } else {
+      return '${price}원';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final itemProvider = Provider.of<ItemProvider>(context);
-    final reversedItems = itemProvider.items.reversed.toList(); // 1. 리스트를 역순으로 정렬
+    final reversedItems =
+        itemProvider.items.reversed.toList(); // 1. 리스트를 역순으로 정렬
 
     return ListView.builder(
       controller: _scrollController, // 스크롤 컨트롤러 추가
@@ -84,11 +95,11 @@ class _ItemListState extends State<ItemList> {
                               borderRadius: BorderRadius.circular(8.0),
                               child: item.itemImage != null
                                   ? Image.memory(
-                                base64Decode(item.itemImage!),
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                              )
+                                      base64Decode(item.itemImage!),
+                                      width: 120,
+                                      height: 120,
+                                      fit: BoxFit.cover,
+                                    )
                                   : Placeholder(),
                             ),
                           ),
@@ -96,32 +107,41 @@ class _ItemListState extends State<ItemList> {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
                                   item.title,
-                                  style: TextStyle(fontSize: 18,
-                                      fontWeight: FontWeight.normal),
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 13),
-                                Row(
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      '최고가 : ${currentPrice}원 ~',
-                                      style: TextStyle(fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black),
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '${item.price}원',
+                                      currentPrice == 0
+                                          ? '입찰자 없음 '
+                                          : '최고가 : ${formatPrice(currentPrice)} [${formatPrice(currentPrice - item.price)}]',
                                       style: TextStyle(
-                                          fontSize: 12, color: Colors.black),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.redAccent,
+                                      ),
                                     ),
+                                    const SizedBox(height: 0),
+                                    Text(
+                                      '시초가 : ${formatPrice(item.price)}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 10),
+                                    RemainingTimeGrid(
+                                        initialEndDateTime: item.endDateTime),
                                   ],
                                 ),
-                                RemainingTimeGrid(
-                                    initialRemainingTime: initialRemainingTime),
                               ],
                             ),
                           ),
@@ -141,29 +161,23 @@ class _ItemListState extends State<ItemList> {
 }
 
 class RemainingTimeGrid extends StatefulWidget {
-  final Duration initialRemainingTime;
+  final DateTime initialEndDateTime;
 
-  const RemainingTimeGrid({Key? key, required this.initialRemainingTime}) : super(key: key);
+  const RemainingTimeGrid({Key? key, required this.initialEndDateTime})
+      : super(key: key);
 
   @override
   _RemainingTimeGridState createState() => _RemainingTimeGridState();
 }
 
 class _RemainingTimeGridState extends State<RemainingTimeGrid> {
-  late Duration remainingTime;
   late Timer timer;
 
   @override
   void initState() {
     super.initState();
-    remainingTime = widget.initialRemainingTime;
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {
-        remainingTime = remainingTime - Duration(seconds: 1);
-        if (remainingTime.isNegative) {
-          remainingTime = Duration.zero;
-        }
-      });
+      setState(() {});
     });
   }
 
@@ -175,51 +189,46 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final int days = remainingTime.isNegative ? 0 : remainingTime.inDays;
-    final int hours = remainingTime.isNegative ? 0 : remainingTime.inHours.remainder(24);
-    final int minutes = remainingTime.isNegative ? 0 : remainingTime.inMinutes.remainder(60);
-    final int seconds = remainingTime.isNegative ? 0 : remainingTime.inSeconds.remainder(60);
+    final remainingTime = widget.initialEndDateTime.difference(DateTime.now());
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: 4, // 그리드 아이템 수
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4, // 한 줄에 두 개의 아이템
-        childAspectRatio: 2, // 아이템 비율
+    final int days = remainingTime.isNegative ? 0 : remainingTime.inDays;
+    final int hours =
+        remainingTime.isNegative ? 0 : remainingTime.inHours.remainder(24);
+    final int minutes =
+        remainingTime.isNegative ? 0 : remainingTime.inMinutes.remainder(60);
+    final int seconds =
+        remainingTime.isNegative ? 0 : remainingTime.inSeconds.remainder(60);
+
+    String displayText;
+    if (days > 0) {
+      displayText = "$days일";
+    } else if (hours > 0) {
+      displayText = "$hours시간";
+    } else if (minutes > 0) {
+      displayText = "$minutes분";
+    } else {
+      displayText = seconds == 0 ? "경매 종료" : "$seconds초";
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(top: 0.0), // 그리드와 텍스트 간의 간격 추가
+      decoration: BoxDecoration(
+        color: seconds == 0 ? Colors.black : Colors.redAccent,
+        borderRadius: BorderRadius.circular(8.0), // 모서리를 둥글게 설정
       ),
-      itemBuilder: (context, gridIndex) {
-        String text;
-        switch (gridIndex) {
-          case 0:
-            text = "${days}일";
-            break;
-          case 1:
-            text = "${hours}시간";
-            break;
-          case 2:
-            text = "${minutes}분";
-            break;
-          case 3:
-            text = "${seconds}초";
-            break;
-          default:
-            text = "";
-        }
-        return Container(
-          margin: const EdgeInsets.all(4.0),
-          decoration: BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.circular(8.0), // 모서리를 둥글게 설정
-          ),
-          child: Center(
-            child: Text(
-              text,
-              style: TextStyle(color: Colors.white),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(3.0), // 텍스트와 컨테이너 간의 간격 추가
+          child: Text(
+            displayText,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14, // 텍스트 크기 설정
+              fontWeight: FontWeight.bold, // 텍스트 굵기 설정
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
