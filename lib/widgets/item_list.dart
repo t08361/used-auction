@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/constants.dart';
 import '../providers/item_provider.dart';
 import '../screens/item_detail_screen.dart';
 
@@ -82,14 +80,9 @@ class _ItemListState extends State<ItemList> {
                             height: 120,
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
-                              child: item.itemImage != null
-                                  ? Image.memory(
-                                base64Decode(item.itemImage!),
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                              )
-                                  : Placeholder(),
+                              child: item.itemImage.isNotEmpty // itemImage가 비어있지 않으면
+                                  ? Image.network(item.itemImage, fit: BoxFit.cover)
+                                  : Placeholder(), // 비어있으면 Placeholder 사용
                             ),
                           ),
                           const SizedBox(width: 20),
@@ -129,7 +122,6 @@ class _ItemListState extends State<ItemList> {
                       ),
                     ),
                   ),
-                  // 그리드 추가
                 ],
               );
             }
@@ -185,7 +177,7 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
       physics: NeverScrollableScrollPhysics(),
       itemCount: 4, // 그리드 아이템 수
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 4, // 한 줄에 두 개의 아이템
+        crossAxisCount: 4, // 한 줄에 네 개의 아이템
         childAspectRatio: 2, // 아이템 비율
       ),
       itemBuilder: (context, gridIndex) {
