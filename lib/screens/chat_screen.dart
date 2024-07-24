@@ -8,12 +8,14 @@ class ChatScreen extends StatefulWidget {
   final String senderId;
   final String recipientId;
   final String chatRoomId;
+  final String itemImage;
 
   const ChatScreen({
     super.key,
     required this.senderId,
     required this.recipientId,
     required this.chatRoomId,
+    required this.itemImage,
   });
 
   @override
@@ -82,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             CircleAvatar(
               // 상품 이미지
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              backgroundImage: NetworkImage(widget.itemImage),
               radius: 22,
             ),
             SizedBox(width: 100),

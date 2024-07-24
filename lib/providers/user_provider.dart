@@ -1,9 +1,11 @@
-import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리 import
-import 'package:shared_preferences/shared_preferences.dart'; // SharedPreferences를 위한 패키지 import
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../models/user.dart';
+import 'constants.dart';
 
 class UserProvider with ChangeNotifier {
-
   List<User> _users = [];
 
   String _id = ''; // 사용자 ID를 저장하는 변수
@@ -27,7 +29,7 @@ class UserProvider with ChangeNotifier {
   bool get isLoggedIn => _isLoggedIn; // 로그인 상태에 대한 getter 정의
 
   String getNicknameById(String id) {
-    final user = _users.firstWhere((user) => user.id == id, orElse: () => User(id: '', username: '', password: '', nickname: 'Unknown', email: '', location: '', age: 0,profileImage: ''));
+    final user = _users.firstWhere((user) => user.id == id, orElse: () => User(id: '', username: '', password: '', nickname: 'Unknown', email: '', location: '', age: 0, profileImage: ''));
     return user.nickname;
   }
 
@@ -100,6 +102,8 @@ class UserProvider with ChangeNotifier {
   // 로그아웃 메서드
   void logout() async {
     _isLoggedIn = false; // 로그아웃 상태로 설정
+    _profileImage = null; // 프로필 이미지 초기화
+
     notifyListeners(); // 상태 변경 알림
     SharedPreferences prefs = await SharedPreferences.getInstance(); // SharedPreferences 인스턴스 가져오기
     await prefs.setBool('isLoggedIn', _isLoggedIn); // SharedPreferences에 로그아웃 상태 저장

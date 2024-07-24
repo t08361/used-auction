@@ -32,6 +32,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Timer? _timer; // 남은 시간을 지속적으로 업데이트하기 위한 타이머
   String winnerId = ''; // 가장 높은 입찰가를 제시한 사용자의 ID를 저장할 변수
   String winnerNickname = ''; // 낙찰자의 닉네임
+  String itemImage = '';
 
   @override
   void initState() {
@@ -247,7 +248,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             widget.item.userId,
             sellerNickname,
             lastMessage ?? '',
-            userProvider.profileImage ?? '',
+            widget.item.itemImage ?? '',
           );
         }
       });
@@ -465,7 +466,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             widget.item.userId,
                             sellerNickname,
                             lastMessage ?? '',
-                            userProvider.profileImage ?? '',
+                            widget.item.itemImage,
                           );
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
@@ -473,6 +474,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   senderId: userProvider.id,
                                   recipientId: widget.item.userId,
                                   chatRoomId: chatRoomId,
+                                  itemImage: widget.item.itemImage,
                                 ),
                           ));
                         },
