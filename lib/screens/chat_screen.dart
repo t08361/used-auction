@@ -1,4 +1,3 @@
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/chat_provider.dart';
@@ -26,23 +25,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   String? _buyerProfileImage;
-  String? _defaultProfileImage;
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
     _loadRecipientProfileImage();
-    _loadDefaultProfileImage();
-  }
-
-  Future<void> _loadDefaultProfileImage() async {
-    // Firebase Storage에서 기본 프로필 이미지의 URL 가져오기
-    final ref = FirebaseStorage.instance.ref().child('default_profile.png');
-    final url = await ref.getDownloadURL();
-    setState(() {
-      _defaultProfileImage = url;
-    });
   }
 
   Future<void> _loadMessages() async {
@@ -149,7 +137,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           CircleAvatar(
                             backgroundImage: _buyerProfileImage != null
                                 ? NetworkImage(_buyerProfileImage!)
-                                : NetworkImage(_defaultProfileImage!),
+                                : AssetImage('assets/images/default_profile.png') as ImageProvider,
                             radius: 15,
                           ),
                           SizedBox(width: 10),
@@ -221,7 +209,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           CircleAvatar(
                             backgroundImage: userProvider.profileImage != null
                                 ? NetworkImage(userProvider.profileImage!)
-                                : NetworkImage(_defaultProfileImage!),
+                                : AssetImage('assets/images/default_profile.png') as ImageProvider,
                             radius: 15,
                           ),
                         ],
