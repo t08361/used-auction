@@ -108,4 +108,22 @@ class UserProvider with ChangeNotifier {
     SharedPreferences prefs = await SharedPreferences.getInstance(); // SharedPreferences 인스턴스 가져오기
     await prefs.setBool('isLoggedIn', _isLoggedIn); // SharedPreferences에 로그아웃 상태 저장
   }
+
+  //특정 아이디로 사용자 정보를 가져와 프로필 이미지를 반환하는 메서드
+  Future<String?> getProfileImageById(String id) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/users/$id'));
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        print(data['profileImage']);
+        return data['profileImage'];
+      } else {
+        print('Failed to load user data');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching profile image: $e');
+      return null;
+    }
+  }
 }

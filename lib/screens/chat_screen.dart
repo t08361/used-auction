@@ -25,11 +25,23 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  String? _buyerProfileImage;
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
+    _loadBuyerProfileImage();
+  }
+
+  Future<void> _loadBuyerProfileImage() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    final chatRoom = chatProvider.chatRooms.firstWhere((chatRoom) => chatRoom.id == widget.chatRoomId);
+    final profileImage = await userProvider.getProfileImageById(chatRoom.buyerId);
+    setState(() {
+      _buyerProfileImage = profileImage;
+    });
   }
 
   Future<void> _loadMessages() async {
@@ -124,13 +136,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        if (!(!isMe && !isLastMessageFromSameUser)) ...[
-
-                          SizedBox(width:40),
-                        ],
                         if (!isMe && !isLastMessageFromSameUser) ...[
                           CircleAvatar(
-                            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+                            backgroundImage: NetworkImage(widget.itemImage),
                             radius: 15,
                           ),
                           SizedBox(width: 10),
@@ -143,20 +151,18 @@ class _ChatScreenState extends State<ChatScreen> {
                               topLeft: Radius.circular(30.0),
                               topRight: Radius.circular(30.0),
                               bottomLeft: Radius.circular(30.0),
-                              //bottomRight: Radius.circular(30.0),
                             )
                                 : BorderRadius.only(
                               topLeft: Radius.circular(30.0),
                               topRight: Radius.circular(30.0),
-                              //bottomLeft: Radius.circular(30.0),
                               bottomRight: Radius.circular(30.0),
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.3),
-                                spreadRadius: isMe?1:0,
-                                blurRadius: isMe?3:0,
-                                offset: isMe?Offset(0, 3):Offset(0, 0),
+                                spreadRadius: isMe ? 1 : 0,
+                                blurRadius: isMe ? 3 : 0,
+                                offset: isMe ? Offset(0, 3) : Offset(0, 0),
                               ),
                             ],
                           ),
@@ -199,13 +205,12 @@ class _ChatScreenState extends State<ChatScreen> {
                             softWrap: true,
                           ),
                         ),
-                        if (!(isMe && !isLastMessageFromSameUser)) ...[
-                          SizedBox(width:40),
-                        ],
                         if (isMe && !isLastMessageFromSameUser) ...[
                           SizedBox(width: 10),
                           CircleAvatar(
-                            backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+                            backgroundImage: userProvider.profileImage != null
+                                ? NetworkImage(userProvider.profileImage!)
+                                : AssetImage('assets/default_profile.png') as ImageProvider,
                             radius: 15,
                           ),
                         ],
@@ -227,7 +232,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white, backgroundColor: Color(0xFF36BA98), // 버튼 텍스트 색상
-                        padding: EdgeInsets.only(left: 0,right: 0,top: 5,bottom:5 ), // 버튼 패딩 설정
+                        padding: EdgeInsets.only(left: 0, right: 0, top: 5, bottom: 5), // 버튼 패딩 설정
                       ),
                       child: Text(
                         '거래\n완료',
