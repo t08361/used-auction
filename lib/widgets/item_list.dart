@@ -99,7 +99,7 @@ class _ItemListState extends State<ItemList> {
                           ),
                         ),
                       ),
-                      height: 125.0,
+                      height: 133.0,
                       child: Row(
                         children: [
                           Container(
@@ -107,16 +107,16 @@ class _ItemListState extends State<ItemList> {
                             height: 120,
                             decoration: BoxDecoration(
                               border: Border.all(color: Colors.black, width: 1.2), // 테두리 추가
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(7.0),
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8.0),
+                              borderRadius: BorderRadius.circular(5.0),
                               child: item.itemImage.isNotEmpty // itemImage가 비어있지 않으면
                                   ? Image.network(item.itemImage, fit: BoxFit.cover)
                                   : Placeholder(), // 비어있으면 Placeholder 사용
                             ),
                           ),
-                          const SizedBox(width: 20),
+                          const SizedBox(width: 18),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,7 +128,7 @@ class _ItemListState extends State<ItemList> {
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 7),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -150,7 +150,7 @@ class _ItemListState extends State<ItemList> {
                                         color: Colors.black,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 7),
                                     RemainingTimeGrid(
                                         initialEndDateTime: item.endDateTime),
                                   ],
@@ -227,7 +227,7 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
       margin: const EdgeInsets.only(top: 0.0), // 그리드와 텍스트 간의 간격 추가
       decoration: BoxDecoration(
         color: seconds == 0 ? Colors.black : Colors.redAccent,
-        borderRadius: BorderRadius.circular(8.0), // 모서리를 둥글게 설정
+        borderRadius: BorderRadius.circular(9.0), // 모서리를 둥글게 설정
       ),
       child: Center(
         child: Padding(

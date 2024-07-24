@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/chat_provider.dart';
@@ -25,17 +27,32 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
+    _startTimer();
+  }
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadMessages() async {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     await chatProvider.loadMessages(widget.chatRoomId);
     _scrollToBottom();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      setState(() {
+        _loadMessages();
+      });
+    });
   }
 
   void _sendMessage() async {
@@ -66,7 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 100),
           curve: Curves.easeOut,
         );
       }
