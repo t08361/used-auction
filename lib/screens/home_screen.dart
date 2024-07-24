@@ -7,7 +7,6 @@ import '../screens/search_screen.dart';
 import '../screens/add_item_screen.dart';
 import '../screens/notification_screen.dart';
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -21,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.didChangeDependencies();
     Provider.of<ItemProvider>(context, listen: false).fetchItems();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,9 +28,15 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(40.0), // 원하는 높이로 설정
         child: AppBar(
-          automaticallyImplyLeading: false, // 뒤로가기 버튼을 없애기
+          title: Text(
+              '에브리씽 🙌',
+            style: TextStyle(color: Colors.black),
+          ),
+          automaticallyImplyLeading: false,
+          // 뒤로가기 버튼을 없애기
           elevation: 0,
-          backgroundColor: Colors.white, // 앱 바 색
+          backgroundColor: Colors.white,
+          // 앱 바 색
           actions: [
             IconButton(
               icon: const Icon(Icons.search),
@@ -54,6 +60,13 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ],
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(0.5), // 원하는 높이로 설정
+            child: Container(
+              color: Colors.grey, // 밑줄 색상
+              height: 0.4, // 밑줄 두께
+            ),
+          ),
         ),
       ),
       body: ItemList(),
@@ -67,7 +80,8 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: primary_color,
         child: const Icon(Icons.add), // 버튼 배경 색상 변경
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // 버튼 위치 설정
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.endFloat, // 버튼 위치 설정
     );
   }
 }
