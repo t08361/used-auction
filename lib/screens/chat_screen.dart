@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/chat_provider.dart';
@@ -21,26 +22,26 @@ class ChatScreen extends StatefulWidget {
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
-
 class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   String? _buyerProfileImage;
+  String? _defaultProfileImage;
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
-    _loadBuyerProfileImage();
+    _loadRecipientProfileImage();
+    _loadDefaultProfileImage();
   }
 
-  Future<void> _loadBuyerProfileImage() async {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-    final chatRoom = chatProvider.chatRooms.firstWhere((chatRoom) => chatRoom.id == widget.chatRoomId);
-    final profileImage = await userProvider.getProfileImageById(chatRoom.buyerId);
+  Future<void> _loadDefaultProfileImage() async {
+    // Firebase Storage에서 기본 프로필 이미지의 URL 가져오기
+    final ref = FirebaseStorage.instance.ref().child('default_profile.png');
+    final url = await ref.getDownloadURL();
     setState(() {
-      _buyerProfileImage = profileImage;
+      _defaultProfileImage = url;
     });
   }
 
@@ -48,6 +49,14 @@ class _ChatScreenState extends State<ChatScreen> {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     await chatProvider.loadMessages(widget.chatRoomId);
     _scrollToBottom();
+  }
+
+  Future<void> _loadRecipientProfileImage() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final profileImage = await userProvider.getProfileImageById(widget.recipientId);
+    setState(() {
+      _buyerProfileImage = profileImage;
+    });
   }
 
   void _sendMessage() async {
@@ -138,7 +147,9 @@ class _ChatScreenState extends State<ChatScreen> {
                       children: [
                         if (!isMe && !isLastMessageFromSameUser) ...[
                           CircleAvatar(
-                            backgroundImage: NetworkImage(widget.itemImage),
+                            backgroundImage: _buyerProfileImage != null
+                                ? NetworkImage(_buyerProfileImage!)
+                                : NetworkImage(_defaultProfileImage!),
                             radius: 15,
                           ),
                           SizedBox(width: 10),
@@ -210,7 +221,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           CircleAvatar(
                             backgroundImage: userProvider.profileImage != null
                                 ? NetworkImage(userProvider.profileImage!)
-                                : AssetImage('assets/default_profile.png') as ImageProvider,
+                                : NetworkImage(_defaultProfileImage!),
                             radius: 15,
                           ),
                         ],
