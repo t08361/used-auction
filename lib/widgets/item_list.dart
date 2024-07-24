@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/constants.dart';
 import '../providers/item_provider.dart';
 import '../screens/item_detail_screen.dart';
 
@@ -113,14 +111,9 @@ class _ItemListState extends State<ItemList> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(8.0),
-                              child: item.itemImage != null
-                                  ? Image.memory(
-                                base64Decode(item.itemImage!),
-                                width: 120,
-                                height: 120,
-                                fit: BoxFit.cover,
-                              )
-                                  : Placeholder(),
+                              child: item.itemImage.isNotEmpty // itemImage가 비어있지 않으면
+                                  ? Image.network(item.itemImage, fit: BoxFit.cover)
+                                  : Placeholder(), // 비어있으면 Placeholder 사용
                             ),
                           ),
                           const SizedBox(width: 20),
@@ -169,7 +162,6 @@ class _ItemListState extends State<ItemList> {
                       ),
                     ),
                   ),
-                  // 그리드 추가
                 ],
               );
             }
@@ -212,6 +204,7 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
     final remainingTime = widget.initialEndDateTime.difference(DateTime.now());
 
     final int days = remainingTime.isNegative ? 0 : remainingTime.inDays;
+
     final int hours =
         remainingTime.isNegative ? 0 : remainingTime.inHours.remainder(24);
     final int minutes =

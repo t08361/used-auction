@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
 import 'package:testhandproduct/models/chatRoom.dart';
 import '../models/item.dart';
 import '../providers/chat_provider.dart';
@@ -31,9 +30,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   String sellerNickname = ''; // 판매자의 닉네임
   bool _showChatButton = false; // 대화하기 버튼을 표시할지 여부를 담는 변수
   Timer? _timer; // 남은 시간을 지속적으로 업데이트하기 위한 타이머
-  Future<Uint8List>? _imageFuture; // 이미지를 저장할 Future 변수
   String winnerId = ''; // 가장 높은 입찰가를 제시한 사용자의 ID를 저장할 변수
   String winnerNickname = ''; // 낙찰자의 닉네임
+  String itemImage = '';
 
   @override
   void initState() {
@@ -51,16 +50,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       _showChatButton = true;
     } else {
       _startTimer(); // 타이머 시작
-    }
-
-    fetchBids(); // 입찰 기록 가져오기 호출
-    fetchSellerNickname(); // 판매자의 닉네임 가져오기
-    _startTimer(); // 타이머 시작
-
-
-    // 이미지를 로드하는 Future 초기화
-    if (widget.item.itemImage != null && widget.item.itemImage!.isNotEmpty) {
-      _imageFuture = Future.value(base64Decode(widget.item.itemImage!));
     }
   }
 
@@ -260,7 +249,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             widget.item.userId,
             sellerNickname,
             lastMessage ?? '',
-            userProvider.profileImage ?? '',
+            widget.item.itemImage ?? '',
           );
         }
       });
@@ -313,12 +302,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final bool isLoggedInUserWinner = userProvider.id == winnerId;
     final bool isLoggedInUserSeller = userProvider.id == widget.item.userId;
 
-    // 디버그 로그 추가
-    // print("Build - isOwner: $isOwner");
-    // print("Build - isLoggedInUserWinner: $isLoggedInUserWinner");
-    // print("Build - isLoggedInUserSeller: $isLoggedInUserSeller");
-    // print("Build - _showChatButton: $_showChatButton");
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -338,30 +321,19 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 상품 이미지 추가 부분 ( starttimer의 영향을 안받게 하기 위해 future로 묶어 builder와 완전히 분리하였다. )
-              FutureBuilder<Uint8List>(
-                future: _imageFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error loading image');
-                  } else if (snapshot.hasData) {
-                    return SizedBox(
-                      width: double.infinity,
-                      height: 200,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image.memory(
-                          snapshot.data!,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                },
-              ),
+              widget.item.itemImage.isNotEmpty
+                  ? SizedBox(
+                width: double.infinity,
+                height: 200,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    widget.item.itemImage,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+                  : SizedBox.shrink(),
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -493,7 +465,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             widget.item.userId,
                             sellerNickname,
                             lastMessage ?? '',
-                            userProvider.profileImage ?? '',
+                            widget.item.itemImage,
                           );
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
@@ -501,6 +473,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   senderId: userProvider.id,
                                   recipientId: widget.item.userId,
                                   chatRoomId: chatRoomId,
+                                  itemImage: widget.item.itemImage,
                                 ),
                           ));
                         },

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "204279765070",
+    "project_id": "used-auction-image",
+    "storage_bucket": "used-auction-image.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:204279765070:android:843e21b8e2f28cea640b1f",
+        "android_client_info": {
+          "package_name": "com.example.testhandproduct"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGxxXHmZ6gHXVDN9UArDC50bpY8pCTW3g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

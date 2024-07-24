@@ -5,12 +5,12 @@ class Item {
   final String title;
   final String description;
   final int price;
-  final DateTime endDateTime; // DateTime 사용
+  final DateTime endDateTime;
   final int bidUnit;
-  final String? itemImage;
-  final String userId; // 상품등록한 사람 아이디(식별자)
+  final String itemImage;
+  final String userId;
   final String winnerId;
-  final int lastPrice; // 현재 최고가
+  final int lastPrice;
 
   Item({
     required this.id,
@@ -19,10 +19,10 @@ class Item {
     required this.price,
     required this.endDateTime,
     required this.bidUnit,
-    this.itemImage,
+    required this.itemImage,
     required this.userId,
     required this.winnerId,
-    required this.lastPrice
+    required this.lastPrice,
   });
 
   Map<String, dynamic> toJson() => {
@@ -30,26 +30,26 @@ class Item {
     'title': title,
     'description': description,
     'price': price,
-    'endDateTime': endDateTime.toIso8601String(), // DateTime을 String으로 변환
+    'endDateTime': endDateTime.toIso8601String(),
     'bidUnit': bidUnit,
-    'itemImage' : itemImage,
-    'winnerId' : winnerId,
-    'userId': userId, // 추가
+    'itemImage': itemImage,
+    'userId': userId,
+    'winnerId': winnerId,
     'lastPrice': lastPrice,
   };
 
   factory Item.fromJson(Map<String, dynamic> json) {
     return Item(
-        id: json['id'] ?? '',
-        title: json['title'] ?? 'Untitled',
-        description: json['description'] ?? '',
-        price: json['price'] ?? 0,
-        endDateTime: DateTime.parse(json['endDateTime'] ?? DateTime.now().toIso8601String()),
-        bidUnit: json['bidUnit'] ?? 1,
-        itemImage: json['itemImage'],
-        winnerId: json['winnerId'] ?? '',
-        userId: json['userId'] ?? '',
-        lastPrice: json['lastPrice'] ?? 0
+      id: json['id'] ?? '',
+      title: json['title'] ?? 'Untitled',
+      description: json['description'] ?? '',
+      price: json['price'] ?? 0,
+      endDateTime: DateTime.parse(json['endDateTime'] ?? DateTime.now().toIso8601String()),
+      bidUnit: json['bidUnit'] ?? 1,
+      itemImage: json['itemImage'] ?? '', // 기본 값을 빈 문자열로 설정
+      userId: json['userId'] ?? '',
+      winnerId: json['winnerId'] ?? '',
+      lastPrice: json['lastPrice'] ?? 0,
     );
   }
 }

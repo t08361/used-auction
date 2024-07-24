@@ -46,7 +46,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
         centerTitle: false, // 타이틀을 왼쪽으로 정렬
         backgroundColor: primary_color,
       ),
-      body: ListView.builder(
+      backgroundColor: Colors.white,
+      body:
+      ListView.builder(
         itemCount: userChatRooms.length,
         itemBuilder: (context, index) {
           final chatRoom = userChatRooms[index];
@@ -58,12 +60,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
             //color: Colors.green[200], // 배경색 설정
             child: ListTile(
               leading: CircleAvatar(
-                backgroundImage: NetworkImage(chatRoom.itemImage), // 이미지 URL을 chatRoom.itemImage로 대체
+                backgroundImage: NetworkImage(chatRoom.itemImage), // 상대방 프로필 이미지 사용
                 radius: 24, // 원형 이미지의 반지름
                 //backgroundColor: Colors.grey[200], // 이미지가 로드되기 전에 보여질 배경색
               ),
-              title: Text(chatPartnerNickname,style: TextStyle(color: Colors.black),),
-              subtitle: Text(chatRoom.lastMessage,style: TextStyle(color: Colors.black),),
+              title: Text(chatPartnerNickname, style: TextStyle(color: Colors.black)),
+              subtitle: Text(chatRoom.lastMessage, style: TextStyle(color: Colors.black)),
               trailing: Text('${chatRoom.lastMessageTime.hour}:${chatRoom.lastMessageTime.minute}'), // 포맷팅 필요
               onTap: () {
                 Navigator.of(context).push(
@@ -72,6 +74,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       senderId: userProvider.id,
                       recipientId: chatPartnerId,
                       chatRoomId: chatRoom.id,
+                      itemImage: chatRoom.itemImage,
                     ),
                   ),
                 );

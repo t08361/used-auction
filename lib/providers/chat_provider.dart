@@ -46,7 +46,7 @@ class ChatProvider with ChangeNotifier {
     try {
       final response = await http.get(url);
       print('Response status: ${response.statusCode}'); // 상태 코드 로그 추가
-      print('Response body: ${response.body}'); // 응답 본문 로그 추가
+      //print('Response body: ${response.body}'); // 응답 본문 로그 추가
 
       if (response.statusCode == 200) {
         final List<dynamic> extractedData = json.decode(response.body);

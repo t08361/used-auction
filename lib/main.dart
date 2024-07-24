@@ -9,10 +9,11 @@ import 'screens/add_item_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/chat_list_screen.dart';
 import 'screens/user_mypage.dart';
-import 'screens/edit_profile_screen.dart';
-import 'screens/user_mypage.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // 바인딩 초기화
+  await Firebase.initializeApp(); // Firebase 초기화
   runApp(
     MultiProvider(
       providers: [

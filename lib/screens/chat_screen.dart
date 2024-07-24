@@ -8,12 +8,14 @@ class ChatScreen extends StatefulWidget {
   final String senderId;
   final String recipientId;
   final String chatRoomId;
+  final String itemImage;
 
   const ChatScreen({
     super.key,
     required this.senderId,
     required this.recipientId,
     required this.chatRoomId,
+    required this.itemImage,
   });
 
   @override
@@ -82,7 +84,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             CircleAvatar(
               // 상품 이미지
-              backgroundImage: NetworkImage('https://via.placeholder.com/150'),
+              backgroundImage: NetworkImage(widget.itemImage),
               radius: 22,
             ),
             SizedBox(width: 100),
@@ -224,8 +226,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         print('Button Pressed');
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: Color(0xFF36BA98), // 버튼 배경색
-                        onPrimary: Colors.white, // 버튼 텍스트 색상
+                        foregroundColor: Colors.white, backgroundColor: Color(0xFF36BA98), // 버튼 텍스트 색상
                         padding: EdgeInsets.only(left: 0,right: 0,top: 5,bottom:5 ), // 버튼 패딩 설정
                       ),
                       child: Text(
