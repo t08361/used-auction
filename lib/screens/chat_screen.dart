@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/chat_provider.dart';
@@ -25,12 +27,19 @@ class _ChatScreenState extends State<ChatScreen> {
   final _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   String? _buyerProfileImage;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _loadMessages();
     _loadRecipientProfileImage();
+    _startTimer();
+  }
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
   }
 
   Future<void> _loadMessages() async {
@@ -39,6 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollToBottom();
   }
 
+
   Future<void> _loadRecipientProfileImage() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final profileImage = await userProvider.getProfileImageById(widget.recipientId);
@@ -46,6 +56,13 @@ class _ChatScreenState extends State<ChatScreen> {
       _buyerProfileImage = profileImage;
     });
   }
+  
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
+      setState(() {
+        _loadMessages();
+      });
+   }
 
   void _sendMessage() async {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
@@ -75,7 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 100),
           curve: Curves.easeOut,
         );
       }
