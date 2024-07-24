@@ -513,7 +513,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   _showChatButton)
                 Center(
                   child: Text(
-                    '경매가 완료! 낙찰자는 $winnerNickname님입니다.',
+                    '경매 완료! 낙찰자는 $winnerNickname님입니다.👏',
                     style: const TextStyle(fontSize: 18, color: Colors.black),
                   ),
                 ),

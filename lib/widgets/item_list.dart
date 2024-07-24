@@ -25,14 +25,30 @@ class _ItemListState extends State<ItemList> {
       );
     });
   }
-
+//금액을 가시적으로 보여지게 하기위한 함수
   String formatPrice(int price) {
-    if (price >= 100000000 || price <= -100000000) {
-      return '${(price / 100000000).floor()}억${((price % 100000000) / 10000).floor()}만원';
-    } else if (price >= 10000 || price <= -10000) {
-      return '${(price / 10000).floor()}만${(price % 10000).toString().padLeft(4, '0')}원';
+    if (price >= 100000000) {
+      int billionPart = (price / 100000000).floor();
+      int millionPart = ((price % 100000000) / 10000).floor();
+      return '${billionPart}억${millionPart == 0 ? '' : '$millionPart만원'}';
+    } else if (price >= 10000) {
+      int tenThousandPart = (price / 10000).floor();
+      int remainder = price % 10000;
+      return remainder == 0 ? '${tenThousandPart}만원' : '${tenThousandPart}만${remainder.toString().padLeft(4, '0')}원';
     } else {
       return '${price}원';
+    }
+  }
+//입찰가에 따른 직관적 이해를 돕기위한 이모티콘 활용한 함수
+  String _getEmoji(int difference, bool isAuctionEnded) {
+    if (isAuctionEnded) {
+      return '';
+    } else if (difference > 0) {
+      return '🤩';
+    } else if (difference == 0) {
+      return '☺️';
+    } else {
+      return '🧐';
     }
   }
 
@@ -114,34 +130,34 @@ class _ItemListState extends State<ItemList> {
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
                                 Text(
-                                  item.title,
+                                  item.title ,
                                   style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold),
                                 ),
-                                const SizedBox(height: 13),
+                                const SizedBox(height: 8),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
                                       currentPrice == 0
-                                          ? '입찰자 없음 '
-                                          : '최고가 : ${formatPrice(currentPrice)} [${formatPrice(currentPrice - item.price)}]',
+                                          ? _getEmoji(currentPrice - item.price, initialRemainingTime.isNegative || initialRemainingTime.inSeconds == 0)+"입찰자 없음 "
+                                          : _getEmoji(currentPrice - item.price, initialRemainingTime.isNegative || initialRemainingTime.inSeconds == 0)+'${formatPrice(currentPrice)}',
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
-                                        color: Colors.redAccent,
+                                        //color: Colors.redAccent,
                                       ),
                                     ),
-                                    const SizedBox(height: 0),
+                                    const SizedBox(height: 3),
                                     Text(
-                                      '시초가 : ${formatPrice(item.price)}',
+                                      '${formatPrice(item.price)}',
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: Colors.black,
                                       ),
                                     ),
-                                    const SizedBox(height: 10),
+                                    const SizedBox(height: 8),
                                     RemainingTimeGrid(
                                         initialEndDateTime: item.endDateTime),
                                   ],
