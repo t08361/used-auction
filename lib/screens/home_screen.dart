@@ -28,6 +28,10 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(40.0), // 원하는 높이로 설정
         child: AppBar(
+          title: Text(
+              '에브리씽 🙌',
+            style: TextStyle(color: Colors.black),
+          ),
           automaticallyImplyLeading: false,
           // 뒤로가기 버튼을 없애기
           elevation: 0,
