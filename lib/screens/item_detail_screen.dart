@@ -241,16 +241,20 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           _setWinningBid(); // 남은 시간이 0이 되면 낙찰가 설정
           remainingTime = Duration.zero; // 남은 시간을 0으로 설정
           timer.cancel(); // 타이머 취소
-          final chatRoomId = getChatRoomId(userProvider.id, widget.item.userId);
-          final lastMessage = chatProvider.getLastMessageForChatRoom(chatRoomId);
-          chatProvider.createChatRoom(
-            userProvider.id,
-            userProvider.nickname,
-            widget.item.userId,
-            sellerNickname,
-            lastMessage ?? '',
-            widget.item.itemImage ?? '',
-          );
+          if (winnerId.isNotEmpty && widget.item.userId != winnerId) { // 낙찰자가 있는 경우에만 채팅방 생성
+            final chatRoomId = getChatRoomId(
+                userProvider.id, widget.item.userId);
+            final lastMessage = chatProvider.getLastMessageForChatRoom(
+                chatRoomId);
+            chatProvider.createChatRoom(
+              userProvider.id,
+              userProvider.nickname,
+              widget.item.userId,
+              sellerNickname,
+              lastMessage ?? '',
+              widget.item.itemImage ?? '',
+            );
+          }
         }
       });
     });
