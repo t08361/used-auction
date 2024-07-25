@@ -12,7 +12,6 @@ class ItemProvider with ChangeNotifier {
   List<Item> get items {
     return [..._items]; // 아이템 리스트의 복사본을 반환
   }
-
   // 서버에서 아이템 목록을 가져오는 메서드
   Future<void> fetchItems() async {
     final url = Uri.parse('$baseUrl/items'); // 서버 URL

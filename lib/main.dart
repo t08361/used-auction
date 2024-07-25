@@ -9,10 +9,11 @@ import 'screens/add_item_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/chat_list_screen.dart';
 import 'screens/user_mypage.dart';
-import 'screens/edit_profile_screen.dart';
-import 'screens/user_mypage.dart';
+import 'package:firebase_core/firebase_core.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // 바인딩 초기화
+  await Firebase.initializeApp(); // Firebase 초기화
   runApp(
     MultiProvider(
       providers: [
@@ -28,7 +29,6 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     Provider.of<UserProvider>(context, listen: false).loadUser();
 
     return MaterialApp(
@@ -58,7 +58,6 @@ class _MainScreenState extends State<MainScreen> {
 
   List<Widget> _widgetOptions(BuildContext context) {
     return <Widget>[
-
       HomeScreen(),
       ChatListScreen(),
       Consumer<UserProvider>(
@@ -68,7 +67,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
     ];
   }
-
 
   void _onItemTapped(int index) {
     setState(() {
@@ -82,7 +80,7 @@ class _MainScreenState extends State<MainScreen> {
       backgroundColor: primary_color, // Scaffold 배경색 설정
       body: _widgetOptions(context).elementAt(_selectedIndex),
       bottomNavigationBar: Container(
-        // height: 90, // 원하는 높이로 설정
+        height: 87, // 높이를 줄이기 위해 설정
         decoration: const BoxDecoration(
           color: Colors.white, // 하단바 배경색을 하얗게 설정
           border: Border(
@@ -95,22 +93,25 @@ class _MainScreenState extends State<MainScreen> {
         child: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
+              icon: Icon(Icons.home_outlined, size: 22), // 아이콘 크기 조절
               label: '홈',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline_outlined),
+              icon: Icon(Icons.chat_bubble_outline_outlined, size: 22), // 아이콘 크기 조절
               label: '채팅',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline),
+              icon: Icon(Icons.person_outline, size: 22), // 아이콘 크기 조절
               label: '마이페이지',
             ),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: primary_color,
+          unselectedItemColor: Colors.grey,
           onTap: _onItemTapped,
           backgroundColor: Colors.white, // 네비게이션 바의 배경색 설정
+          selectedLabelStyle: TextStyle(fontSize: 12), // 선택된 아이템의 텍스트 크기 조절
+          unselectedLabelStyle: TextStyle(fontSize: 10), // 선택되지 않은 아이템의 텍스트 크기 조절
         ),
       ),
     );

@@ -5,10 +5,10 @@ class Item {
   final String title;
   final String description;
   final int price;
-  final DateTime endDateTime; // DateTime 사용
+  final DateTime endDateTime;
   final int bidUnit;
-  final String? itemImage;
-  final String userId; // 상품등록한 사람 아이디(식별자)
+  final String itemImage;
+  final String userId;
   final String winnerId;
   final int lastPrice; // 현재 최고가
   final String region; // 지역 필드 추가
@@ -20,7 +20,7 @@ class Item {
     required this.price,
     required this.endDateTime,
     required this.bidUnit,
-    this.itemImage,
+    required this.itemImage,
     required this.userId,
     required this.winnerId,
     required this.lastPrice,
@@ -32,11 +32,11 @@ class Item {
     'title': title,
     'description': description,
     'price': price,
-    'endDateTime': endDateTime.toIso8601String(), // DateTime을 String으로 변환
+    'endDateTime': endDateTime.toIso8601String(),
     'bidUnit': bidUnit,
-    'itemImage' : itemImage,
-    'winnerId' : winnerId,
-    'userId': userId, // 추가
+    'itemImage': itemImage,
+    'userId': userId,
+    'winnerId': winnerId,
     'lastPrice': lastPrice,
     'region': region, // toJson에 추가
   };

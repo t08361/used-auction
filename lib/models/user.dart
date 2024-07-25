@@ -6,7 +6,7 @@ class User {
   final String email;
   final String location;
   final int age;
-  final String? profileImage;
+  final String profileImage;
 
   User({
     required this.id,
@@ -16,7 +16,7 @@ class User {
     required this.email,
     required this.location,
     required this.age,
-    this.profileImage,
+    required this.profileImage,
   });
 
   Map<String, dynamic> toJson() => {

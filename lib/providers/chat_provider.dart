@@ -46,7 +46,7 @@ class ChatProvider with ChangeNotifier {
     try {
       final response = await http.get(url);
       print('Response status: ${response.statusCode}'); // 상태 코드 로그 추가
-      print('Response body: ${response.body}'); // 응답 본문 로그 추가
+      //print('Response body: ${response.body}'); // 응답 본문 로그 추가
 
       if (response.statusCode == 200) {
         final List<dynamic> extractedData = json.decode(response.body);
@@ -98,8 +98,13 @@ class ChatProvider with ChangeNotifier {
       print('Response body: ${response.body}');
 
       if (response.statusCode == 201) {
-        _messages.add(ChatMessage.fromJson(json.decode(response.body)));
+        // _messages.add(ChatMessage.fromJson(json.decode(response.body)));
+        final newMessage = ChatMessage.fromJson(json.decode(response.body));
+        _messages.add(newMessage);
         notifyListeners();
+
+        // 현재 채팅방의 마지막 메시지 업데이트
+        await updateLastMessage(chatRoomId, content, timestamp);
         print('Message sent successfully');
       } else {
         print('Failed to send message. Status code: ${response.statusCode}');
@@ -109,6 +114,57 @@ class ChatProvider with ChangeNotifier {
     } catch (error) {
       print('Error: $error');
       throw Exception('Fail to send message');
+    }
+  }
+
+  // 현재 채팅방의 마지막 메시지, 시간 업데이트
+  Future<void> updateLastMessage(String chatRoomId, String lastMessage, DateTime lastMessageTime) async {
+    // chatRoomId 에 해당하는 채팅방의 인덱스를 찾음
+    final chatRoomIndex = _chatRooms.indexWhere((chatRoom) => chatRoom.id == chatRoomId);
+
+    // 해당 채팅방이 존재할 경우
+    if (chatRoomIndex != -1) {
+      // 채팅방 정보 업데이트
+      _chatRooms[chatRoomIndex] = ChatRoom(
+        id: _chatRooms[chatRoomIndex].id,
+        sellerId: _chatRooms[chatRoomIndex].sellerId,
+        sellerNickname: _chatRooms[chatRoomIndex].sellerNickname,
+        buyerId: _chatRooms[chatRoomIndex].buyerId,
+        buyerNickname: _chatRooms[chatRoomIndex].buyerNickname,
+        finalPrice: _chatRooms[chatRoomIndex].finalPrice,
+        lastMessage: lastMessage,
+        lastMessageTime: lastMessageTime,
+        itemImage: _chatRooms[chatRoomIndex].itemImage,
+      );
+      notifyListeners();
+
+      // 서버의 updateLastMessage 엔드포인트 URL 설정
+      final url = Uri.parse('$baseUrl/chat/updateLastMessage');
+
+      // 서버로 보낼 업데이트 데이터
+      final updateData = {
+        'chatRoomId': chatRoomId,
+        'lastMessage': lastMessage,
+        'lastMessageTime': lastMessageTime.toIso8601String(),
+      };
+
+      try {
+        // 서버에 POST 요청
+        final response = await http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(updateData),
+        );
+
+        // 성공이 아닌 경우 에러 처리
+        if (response.statusCode != 200) {
+          print('Failed to update last message. Status code: ${response.statusCode}');
+          throw Exception('Failed to update last message');
+        }
+      } catch (error) {
+        print('Error: $error');
+        throw Exception('Failed to update last message');
+      }
     }
   }
 

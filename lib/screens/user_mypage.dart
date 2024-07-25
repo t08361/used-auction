@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리 import
 import 'package:provider/provider.dart'; // Provider 패키지 import
-import '../main.dart';
 import '../providers/user_provider.dart'; // UserProvider import
 import 'ongoing_auction_screen.dart'; // 진행중인 경매 화면 import
 import 'edit_profile_screen.dart'; // 프로필 수정 화면 import
@@ -10,7 +9,6 @@ import 'sales_history_screen.dart'; // 판매 내역 화면 import
 import 'purchase_history_screen.dart'; // 구매 내역 화면 import
 import 'FAQ_screen.dart'; // FAQ 화면 import
 import 'terms_and_policies_screen.dart'; // 약관 및 정책 화면 import
-import 'login_screen.dart'; // 로그인 화면 import
 import '../providers/constants.dart';
 
 class UserPage extends StatelessWidget {
@@ -109,8 +107,9 @@ class UserPage extends StatelessWidget {
                   CircleAvatar(
                     radius: 45,
                     backgroundImage: userProvider.profileImage != null
-                        ? MemoryImage(base64Decode(userProvider.profileImage!)) as ImageProvider
-                        : const AssetImage('assets/images/default_profile.png'),
+
+                        ? NetworkImage(userProvider.profileImage!) as ImageProvider
+                        : const AssetImage('assets/images/default_profile.png'), // 프로필 이미지 경로 설정
                   ),
                   const SizedBox(width: 25),
                   Column(

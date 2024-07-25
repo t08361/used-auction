@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:convert';
+import 'package:testhandproduct/models/chatRoom.dart';
 import '../models/item.dart';
 import '../providers/chat_provider.dart';
 import '../providers/item_provider.dart';
@@ -31,9 +31,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   String sellerNickname = ''; // 판매자의 닉네임
   bool _showChatButton = false; // 대화하기 버튼을 표시할지 여부를 담는 변수
   Timer? _timer; // 남은 시간을 지속적으로 업데이트하기 위한 타이머
-  Future<Uint8List>? _imageFuture; // 이미지를 저장할 Future 변수
   String winnerId = ''; // 가장 높은 입찰가를 제시한 사용자의 ID를 저장할 변수
   String winnerNickname = ''; // 낙찰자의 닉네임
+  String itemImage = '';
 
   @override
   void initState() {
@@ -44,20 +44,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     currentPrice = widget.item.lastPrice;
     _startTimer(); // 타이머 시작
 
-    // 경매가 이미 종료된 경우 초기 상태 설정 (자꾸 입찰버튼 있다가 다음 ui나오는 문제 해결)
+    // 남은 시간이 0 이하일 경우 초기 상태 설정
     if (remainingTime.isNegative || remainingTime.inSeconds == 0) {
-      _setWinningBid(); // 남은 시간이 0이 되면 낙찰가 설정
+      remainingTime = Duration.zero;
+      _setWinningBid();
       _showChatButton = true;
-    }
-
-    fetchBids(); // 입찰 기록 가져오기 호출
-    fetchSellerNickname(); // 판매자의 닉네임 가져오기
-    _startTimer(); // 타이머 시작
-
-
-    // 이미지를 로드하는 Future 초기화
-    if (widget.item.itemImage != null && widget.item.itemImage!.isNotEmpty) {
-      _imageFuture = Future.value(base64Decode(widget.item.itemImage!));
+    } else {
+      _startTimer(); // 타이머 시작
     }
   }
 
@@ -251,18 +244,17 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         if (remainingTime.isNegative || remainingTime.inSeconds == 0) {
           _showChatButton = true;
           _setWinningBid(); // 남은 시간이 0이 되면 낙찰가 설정
-          timer.cancel(); // 남은 시간이 0이 되면 타이머 취소
-          final chatRoomId = getChatRoomId(
-              userProvider.id, widget.item.userId);
-          final lastMessage = chatProvider
-              .getLastMessageForChatRoom(chatRoomId);
+          remainingTime = Duration.zero; // 남은 시간을 0으로 설정
+          timer.cancel(); // 타이머 취소
+          final chatRoomId = getChatRoomId(userProvider.id, widget.item.userId);
+          final lastMessage = chatProvider.getLastMessageForChatRoom(chatRoomId);
           chatProvider.createChatRoom(
             userProvider.id,
             userProvider.nickname,
             widget.item.userId,
             sellerNickname,
             lastMessage ?? '',
-            userProvider.profileImage ?? '',
+            widget.item.itemImage ?? '',
           );
         }
       });
@@ -272,7 +264,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   void _handleMenuSelection(String value) async {
     final itemProvider = Provider.of<ItemProvider>(context, listen: false);
     //final userProvider = Provider.of<UserProvider>(context, listen: false);
-
     switch (value) {
       case 'edit': //수정
         Navigator.of(context).push(
@@ -314,12 +305,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     final bool isLoggedInUserWinner = userProvider.id == winnerId;
     final bool isLoggedInUserSeller = userProvider.id == widget.item.userId;
 
-    // 디버그 로그 추가
-    print("Build - isOwner: $isOwner");
-    print("Build - isLoggedInUserWinner: $isLoggedInUserWinner");
-    print("Build - isLoggedInUserSeller: $isLoggedInUserSeller");
-    print("Build - _showChatButton: $_showChatButton");
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -339,30 +324,19 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // 상품 이미지 추가 부분 ( starttimer의 영향을 안받게 하기 위해 future로 묶어 builder와 완전히 분리하였다. )
-              FutureBuilder<Uint8List>(
-                future: _imageFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return CircularProgressIndicator();
-                  } else if (snapshot.hasError) {
-                    return Text('Error loading image');
-                  } else if (snapshot.hasData) {
-                    return SizedBox(
-                      width: double.infinity,
-                      height: 200,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(8.0),
-                        child: Image.memory(
-                          snapshot.data!,
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    );
-                  } else {
-                    return SizedBox.shrink();
-                  }
-                },
-              ),
+              widget.item.itemImage.isNotEmpty
+                  ? SizedBox(
+                width: double.infinity,
+                height: 200,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    widget.item.itemImage,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
+                  : SizedBox.shrink(),
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -420,8 +394,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               ),
               const SizedBox(height: 10),
               Text(
-                '종료까지 남은 시간: ${remainingTime.inDays}일 ${remainingTime.inHours %
-                    24}시간 ${remainingTime.inMinutes % 60}분',
+                '종료까지 남은 시간: ${remainingTime.inDays}일 ${remainingTime.inHours % 24}시간 ${remainingTime.inMinutes % 60}분 ${remainingTime.inSeconds % 60}초',
                 style: const TextStyle(fontSize: 16),
               ),
               const SizedBox(height: 20),
@@ -500,7 +473,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             widget.item.userId,
                             sellerNickname,
                             lastMessage ?? '',
-                            userProvider.profileImage ?? '',
+                            widget.item.itemImage,
                           );
                           Navigator.of(context).push(MaterialPageRoute(
                             builder: (context) =>
@@ -508,6 +481,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   senderId: userProvider.id,
                                   recipientId: widget.item.userId,
                                   chatRoomId: chatRoomId,
+                                  itemImage: widget.item.itemImage,
                                 ),
                           ));
                         },
@@ -520,7 +494,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   _showChatButton)
                 Center(
                   child: Text(
-                    '경매가 완료! 낙찰자는 $winnerNickname님입니다.',
+                    '경매 완료! 낙찰자는 $winnerNickname님입니다.👏',
                     style: const TextStyle(fontSize: 18, color: Colors.black),
                   ),
                 ),

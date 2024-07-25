@@ -3,14 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
 import 'package:testhandproduct/screens/sales_history_screen.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
 import '../main.dart';
 import '../providers/constants.dart';
 import '../providers/item_provider.dart';
 import '../providers/user_provider.dart';
 import '../models/item.dart'; // 추가
 import 'sales_history_screen.dart';
+
 
 class AddItemScreen extends StatefulWidget {
   static const routeName = '/add-item';
@@ -27,6 +29,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _priceController = TextEditingController();
   final _bidUnitController = TextEditingController();
   final _regionController = TextEditingController();
+
   File? _selectedImage;
   DateTime? _endDateTime;
 
@@ -40,6 +43,20 @@ class _AddItemScreenState extends State<AddItemScreen> {
       });
     }
   }
+
+  Future<String?> _uploadImageToFirebase(File image) async {
+    try {
+      final storageRef = FirebaseStorage.instance.ref();
+      final imageRef = storageRef.child('item_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
+      await imageRef.putFile(image);
+      final imageUrl = await imageRef.getDownloadURL();
+      return imageUrl;
+    } catch (e) {
+      print('이미지 업로드 실패: $e');
+      return null;
+    }
+  }
+
 
   Future<void> _pickEndDateTime() async {
     final date = await showDatePicker(
@@ -85,12 +102,20 @@ class _AddItemScreenState extends State<AddItemScreen> {
       return;
     }
 
-    final url = Uri.parse('$baseUrl/items'); // 서버 URL
+    String? imageUrl;
+    if (_selectedImage != null) {
+      imageUrl = await _uploadImageToFirebase(_selectedImage!);
+      if (imageUrl == null) {
+        print('Failed to upload image');
+        return;
+      }
+    }
+
+    final url = Uri.parse('$baseUrl/items');
 
     try {
-      var request = http.MultipartRequest('POST', url); // 멀티파트 요청 생성
+      var request = http.MultipartRequest('POST', url);
 
-      // 필드 추가
       request.fields['title'] = title;
       request.fields['description'] = description;
       request.fields['price'] = price.toString();
@@ -100,24 +125,24 @@ class _AddItemScreenState extends State<AddItemScreen> {
       request.fields['nickname'] = userProvider.nickname;
       request.fields['region'] = region;
 
-      // 이미지 파일이 선택된 경우 파일 추가
-      if (_selectedImage != null) {
-        request.files.add(await http.MultipartFile.fromPath(
-          'item_image',
-          _selectedImage!.path,
-        ));
+
+      if (imageUrl != null) {
+        request.fields['itemImage'] = imageUrl; // 서버 필드명 확인
       }
 
-      var response = await request.send(); // 요청 전송
+      var response = await request.send();
 
       if (response.statusCode == 201) {
         print('상품 등록 성공');
-        await itemProvider.fetchItems(); // 아이템 목록 갱신
+
+        itemProvider.fetchItems(); // 아이템 목록 갱신
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => SaleHistoryPage()), // SaleHistoryPage로 이동
+          MaterialPageRoute(builder: (context) => MainScreen()),
         );
       } else {
         print('Failed to add item');
+        print(await response.stream.bytesToString()); // 에러 메시지 확인
+
       }
     } catch (error) {
       print('Error: $error');
@@ -241,6 +266,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 ),
               ),
               const SizedBox(height: 20),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
