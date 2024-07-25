@@ -14,7 +14,6 @@ class SaleHistoryPage extends StatelessWidget {
 
     // 현재 로그인한 사용자가 등록한 아이템만 필터링
     final userItems = itemProvider.items.where((item) => item.userId == userId).toList();
-
     return Scaffold(
       appBar: AppBar(
         title: Text('판매내역'),
@@ -24,9 +23,12 @@ class SaleHistoryPage extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = userItems[index];
           return ListTile(
-            leading: item.itemImage != null
-                ? Image.memory(base64Decode(item.itemImage!), width: 50, height: 50)
-                : Placeholder(fallbackWidth: 50, fallbackHeight: 50),
+            leading: CircleAvatar(
+              backgroundImage: item.itemImage != null
+                  ? NetworkImage(item.itemImage!)
+                  : AssetImage('assets/images/default_profile.png') as ImageProvider,
+              radius: 15,
+            ),
             title: Text(item.title),
             subtitle: Text('판매 날짜: ${item.endDateTime.toLocal()}'.split(' ')[0]),
             trailing: Text('₩${item.price}'),

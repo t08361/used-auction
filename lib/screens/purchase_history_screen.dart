@@ -24,9 +24,12 @@ class PurchaseHistoryPage extends StatelessWidget {
         itemBuilder: (context, index) {
           final item = purchasedItems[index];
           return ListTile(
-            leading: item.itemImage != null
-                ? Image.memory(base64Decode(item.itemImage!), width: 50, height: 50)
-                : Placeholder(fallbackWidth: 50, fallbackHeight: 50),
+            leading: CircleAvatar(
+              backgroundImage: item.itemImage != null
+                  ? NetworkImage(item.itemImage!)
+                  : AssetImage('assets/images/default_profile.png') as ImageProvider,
+              radius: 15,
+            ),
             title: Text(item.title),
             subtitle: Text('구매 날짜: ${item.endDateTime.toLocal()}'.split(' ')[0]),
             trailing: Text('₩${item.price}'),

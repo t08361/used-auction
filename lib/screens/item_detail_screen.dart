@@ -221,11 +221,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     if (response.statusCode == 200) {
       print('낙찰가 업데이트 성공');
       // 낙찰가 업데이트 성공 시 PurchaseHistoryPage로 이동
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => PurchaseHistoryPage(),
-        ),
-      );
+      // Navigator.of(context).push(
+      //   MaterialPageRoute(
+      //     builder: (context) => PurchaseHistoryPage(),
+      //   ),
+      // );
     } else {
       print('낙찰가 업데이트 실패: ${response.body}');
     }
