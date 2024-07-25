@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:testhandproduct/screens/login_screen.dart';
 import '../main.dart';
 import '../providers/constants.dart';
 import '../providers/item_provider.dart';
@@ -72,6 +73,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
     });
   }
 
+  bool _isLoading = false; // 로딩 상태를 관리하는 변수
+
   Future<void> _submitData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final itemProvider = Provider.of<ItemProvider>(context, listen: false);
@@ -92,6 +95,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
       return;
     }
 
+    setState(() {
+      _isLoading = true; // 로딩 상태로 변경
+    });
+
     String? imageUrl;
     if (_selectedImage != null) {
       imageUrl = await _uploadImageToFirebase(_selectedImage!);
@@ -104,6 +111,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     final url = Uri.parse('$baseUrl/items');
 
     try {
+
       var request = http.MultipartRequest('POST', url);
 
       request.fields['title'] = title;
@@ -117,20 +125,30 @@ class _AddItemScreenState extends State<AddItemScreen> {
         request.fields['itemImage'] = imageUrl; // 서버 필드명 확인
       }
 
-      var response = await request.send();
+      if(userProvider.isLoggedIn) {
+        var response = await request.send();
 
-      if (response.statusCode == 201) {
-        print('상품 등록 성공');
-        itemProvider.fetchItems(); // 아이템 목록 갱신
+        if (response.statusCode == 201) {
+          print('상품 등록 성공');
+          itemProvider.fetchItems(); // 아이템 목록 갱신
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => MainScreen()),
+          );
+        } else {
+          print('Failed to add item');
+          print(await response.stream.bytesToString()); // 에러 메시지 확인
+        }
+      }else{
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => MainScreen()),
+          MaterialPageRoute(builder: (context) => LoginScreen()),
         );
-      } else {
-        print('Failed to add item');
-        print(await response.stream.bytesToString()); // 에러 메시지 확인
       }
     } catch (error) {
       print('Error: $error');
+    }finally {
+      setState(() {
+        _isLoading = false; // 로딩 상태 해제
+      });
     }
   }
 
@@ -147,7 +165,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
         elevation: 0,
       ),
       backgroundColor: Colors.white,
-      body: Padding(
+      body: _isLoading // 로딩 중이면 로딩 인디케이터를 표시
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
