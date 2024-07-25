@@ -13,6 +13,7 @@ const String baseUrl = 'http://ec2-54-252-189-16.ap-southeast-2.compute.amazonaw
 //const String baseUrl = 'https://port-0-used-auction-server-ly8s26ye59c6f619.sel5.cloudtype.app/api';
 //const String baseUrl = 'http://10.0.2.2:8080/api';
 
+
 Color primary_color=Color(0xFF36BA98);
 
 Color background_color=Colors.white;

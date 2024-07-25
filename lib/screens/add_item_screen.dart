@@ -1,13 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:testhandproduct/screens/sales_history_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import '../main.dart';
 import '../providers/constants.dart';
 import '../providers/item_provider.dart';
 import '../providers/user_provider.dart';
+import '../models/item.dart'; // 추가
+import 'sales_history_screen.dart';
+
 
 class AddItemScreen extends StatefulWidget {
   static const routeName = '/add-item';
@@ -23,6 +28,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _bidUnitController = TextEditingController();
+  final _regionController = TextEditingController();
+
   File? _selectedImage;
   DateTime? _endDateTime;
 
@@ -49,6 +56,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       return null;
     }
   }
+
 
   Future<void> _pickEndDateTime() async {
     final date = await showDatePicker(
@@ -80,8 +88,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
     final description = _descriptionController.text;
     final price = int.tryParse(_priceController.text);
     final bidUnit = int.tryParse(_bidUnitController.text);
+    final region = _regionController.text;
 
-    if (title.isEmpty || description.isEmpty || price == null || price <= 0 || _endDateTime == null || bidUnit == null || bidUnit <= 0) {
+    if (title.isEmpty || description.isEmpty || price == null || price <= 0 || _endDateTime == null || bidUnit == null || bidUnit <= 0 || region.isEmpty) {
       print("Invalid input:");
       print("Title is empty: ${title.isEmpty}");
       print("Description is empty: ${description.isEmpty}");
@@ -89,6 +98,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       print("Selected image: $_selectedImage");
       print("End DateTime: $_endDateTime");
       print("Bid Unit: $bidUnit");
+      print("Region is empty: ${region.isEmpty}");
       return;
     }
 
@@ -113,6 +123,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
       request.fields['bidUnit'] = bidUnit.toString();
       request.fields['userId'] = userProvider.id;
       request.fields['nickname'] = userProvider.nickname;
+      request.fields['region'] = region;
+
+
       if (imageUrl != null) {
         request.fields['itemImage'] = imageUrl; // 서버 필드명 확인
       }
@@ -121,6 +134,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
       if (response.statusCode == 201) {
         print('상품 등록 성공');
+
         itemProvider.fetchItems(); // 아이템 목록 갱신
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(builder: (context) => MainScreen()),
@@ -128,6 +142,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       } else {
         print('Failed to add item');
         print(await response.stream.bytesToString()); // 에러 메시지 확인
+
       }
     } catch (error) {
       print('Error: $error');
@@ -241,6 +256,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 20),
+              const Text('지역', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              TextField(
+                controller: _regionController,
+                decoration: const InputDecoration(
+                  hintText: '지역을 입력하세요',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
