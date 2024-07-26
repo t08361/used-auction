@@ -10,6 +10,19 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>We need access to the microphone to record audio</string>
 
+    <!-- 권한 설명 추가 -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>We need your location to show nearby items.</string>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>We need your permission to track usage data.</string>
+    <key>UNNotificationAlert</key>
+    <string>App requires notification permission</string>
+    <key>UNNotificationSound</key>
+    <string>App requires notification permission</string>
+    <key>UNNotificationBadge</key>
+    <string>App requires notification permission</string>
+    <!-- 권한 설명 추가 끝 -->
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

@@ -28,6 +28,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   String? _buyerProfileImage;
   Timer? _timer;
+  bool _initialScrollDone = false; // 스크롤이 초기화되었는지 여부를 추적
 
   @override
   void initState() {
@@ -46,7 +47,10 @@ class _ChatScreenState extends State<ChatScreen> {
   Future<void> _loadMessages() async {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
     await chatProvider.loadMessages(widget.chatRoomId);
-    _scrollToBottom();
+    if (!_initialScrollDone) {
+      _scrollToBottom();
+      _initialScrollDone = true; // 스크롤 초기화를 한 번만 수행
+    }
   }
 
   Future<void> _loadRecipientProfileImage() async {
@@ -142,8 +146,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
                 return Container(
                   alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 5.0),  // 상하단 간격 조정
-                  padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),  // 상하단 간격 조정
+                  margin: EdgeInsets.symmetric(horizontal: 1.0, vertical: 0.0),  // 상하단 간격 조정
+                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),  // 상하단 간격 조정
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -155,7 +159,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           radius: 15,
                         ),
                         SizedBox(width: 10),
-                      ],
+                      ]else if(!(isMe && !isLastMessageFromSameUser))...[
+                SizedBox(width: 40),
+                ],
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -225,6 +231,8 @@ class _ChatScreenState extends State<ChatScreen> {
                               : AssetImage('assets/images/default_profile.png') as ImageProvider,
                           radius: 15,
                         ),
+                      ]else if(!(isMe && !isLastMessageFromSameUser))...[
+                        SizedBox(width: 40),
                       ],
                     ],
                   ),
@@ -236,26 +244,26 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                Center(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      // 버튼을 눌렀을 때의 동작을 정의
-                      print('Button Pressed');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFF36BA98),
-                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),  // 패딩 수정
-                    ),
-                    child: Text(
-                      '거래\n완료',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                      ),
-                    ),
-                  ),
-                ),
+                // Center(
+                //   child: ElevatedButton(
+                //     onPressed: () {
+                //       // 버튼을 눌렀을 때의 동작을 정의
+                //       print('Button Pressed');
+                //     },
+                //     style: ElevatedButton.styleFrom(
+                //       foregroundColor: Colors.white,
+                //       backgroundColor: Color(0xFF36BA98),
+                //       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),  // 패딩 수정
+                //     ),
+                //     child: Text(
+                //       '거래\n완료',
+                //       textAlign: TextAlign.center,
+                //       style: TextStyle(
+                //         fontSize: 14,
+                //       ),
+                //     ),
+                //   ),
+                // ),
                 SizedBox(width: 10),
                 Expanded(
                   child: TextField(
