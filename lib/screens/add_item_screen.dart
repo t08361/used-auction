@@ -7,6 +7,8 @@ import 'package:testhandproduct/screens/sales_history_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:testhandproduct/screens/login_screen.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import '../main.dart';
 import '../providers/constants.dart';
 import '../providers/item_provider.dart';
@@ -33,6 +35,42 @@ class _AddItemScreenState extends State<AddItemScreen> {
   File? _selectedImage;
   DateTime? _endDateTime;
 
+  @override
+  void initState() {
+    super.initState();
+    _priceController.addListener(_updateBidUnitDefault);
+    _setDefaultLocation(); // 사용자의 위치 설정 함수 호출
+  }
+
+// 시초가에 입력에 따라 입찰 단위 자동 설정에 대한 계산 함수
+  void _updateBidUnitDefault() {
+    final price = int.tryParse(_priceController.text) ?? 0;
+    final defaultBidUnit = ((price * 0.01).round() / 10).ceil() * 10; // 십의 자리 반올림
+    _bidUnitController.text = defaultBidUnit > 0 ? defaultBidUnit.toString() : '';
+  }
+
+  // 사용자의 현재 위치를 가져와서 지역 필드에 설정하는 함수
+  Future<void> _setDefaultLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      Placemark place = placemarks[0];
+      setState(() {
+        _regionController.text = '${place.locality}, ${place.administrativeArea}, ${place.country}';
+      });
+    } catch (e) {
+      print('Failed to get location: $e');
+    }
+  }
+
+
+  @override
+  void dispose() {
+    _priceController.removeListener(_updateBidUnitDefault);
+    _priceController.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -42,6 +80,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
         _selectedImage = File(pickedFile.path);
       });
     }
+  }
+  //경매 종료일을 등록 시간 기준 1일 후로 설정하는 버튼 기능
+  void _setEndDateTimeOneDayLater() {
+    setState(() {
+      _endDateTime = DateTime.now().add(Duration(days: 1));
+    });
   }
 
   Future<String?> _uploadImageToFirebase(File image) async {
@@ -249,14 +293,24 @@ class _AddItemScreenState extends State<AddItemScreen> {
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 5),
-                    ListTile(
-                      title: Text(
-                        _endDateTime == null
-                            ? '경매 종료 시간을 선택해주세요'
-                            : '종료 시간: ${_endDateTime!.toLocal()}'.split('.')[0],
-                      ),
-                      trailing: const Icon(Icons.calendar_today),
-                      onTap: _pickEndDateTime,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ListTile(
+                            title: Text(
+                              _endDateTime == null
+                                  ? '경매 종료 시간을 선택해주세요'
+                                  : '종료 시간: ${_endDateTime!.toLocal()}'.split('.')[0],
+                            ),
+                            trailing: const Icon(Icons.calendar_today),
+                            onTap: _pickEndDateTime,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: _setEndDateTimeOneDayLater,
+                          child: Text('1일'),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 20),
                     const Text('자세한 설명',
@@ -280,9 +334,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     const SizedBox(height: 5),
                     TextField(
                       controller: _bidUnitController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: '입찰 단위를 입력하세요',
                         border: OutlineInputBorder(),
+                        labelText: '입찰 단위 (기본값: ${_priceController.text.isNotEmpty ? (int.parse(_priceController.text) * 0.01).round().toString() : '시초가를 입력하세요'})',
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -293,9 +348,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     const SizedBox(height: 5),
                     TextField(
                       controller: _regionController,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         hintText: '지역을 입력하세요',
                         border: OutlineInputBorder(),
+                        labelText: _regionController.text.isNotEmpty ? _regionController.text : '현재 위치를 가져오는 중...',
                       ),
                     ),
                     const SizedBox(height: 20),

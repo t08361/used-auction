@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 
 import 'ItemEditScreen.dart';
 import 'chat_screen.dart';
+import 'login_screen.dart';
 import 'purchase_history_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
@@ -432,7 +433,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           _setWinningBid(); // 남은 시간이 0이 되면 낙찰가 설정
           remainingTime = Duration.zero; // 남은 시간을 0으로 설정
           timer.cancel(); // 타이머 취소
-          if (winnerId.isNotEmpty && widget.item.userId != winnerId) {
+          if (winnerId.isNotEmpty && widget.item.userId != winnerId && userProvider.id == winnerId) {
             // 낙찰자가 있는 경우에만 채팅방 생성
             final chatRoomId =
                 getChatRoomId(userProvider.id, widget.item.userId);
@@ -657,6 +658,39 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         notchMargin: 5,
         child: Row(
           children: [
+            if (!userProvider.isLoggedIn)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
+                    children: [
+                      TextButton.icon(
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.transparent, // 배경색을 투명으로 설정
+                          foregroundColor: primary_color, // 글자색을 primary_color로 설정
+                          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 40), // 패딩 조절
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6), // 모서리 둥글기
+                            side: BorderSide(color: primary_color), // 테두리 색상 설정
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ));
+                        },
+                        icon: Icon(Icons.login, color: primary_color), // 아이콘 추가
+                        label: Text(
+                          '로그인 해주세요',
+                          style: TextStyle(color: primary_color), // 글자색을 primary_color로 설정
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if(userProvider.isLoggedIn)
             Column(
               children: [
                 if (!(isLoggedInUserWinner ||
@@ -704,7 +738,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
               ],
             ),
-            if (!(isLoggedInUserWinner ||
+            if (userProvider.isLoggedIn&&!(isLoggedInUserWinner ||
                 (!isLoggedInUserWinner &&
                     !isLoggedInUserSeller &&
                     _showChatButton)))
@@ -713,14 +747,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                if (isLoggedInUserSeller)
+                if (userProvider.isLoggedIn&&isLoggedInUserSeller)
                   Center(
                     child: Text(
                       '내가 등록한 상품',
                       style: const TextStyle(fontSize: 18, color: Colors.black),
                     ),
                   ),
-                if (!isOwner &&
+                if (userProvider.isLoggedIn&&!isOwner &&
                     !isLoggedInUserWinner &&
                     !userProvider.isLoggedIn &&
                     !_showChatButton)
@@ -734,7 +768,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       ),
                     ],
                   ),
-                if (!isOwner &&
+                if (userProvider.isLoggedIn&&!isOwner &&
                     !isLoggedInUserWinner &&
                     userProvider.isLoggedIn &&
                     !_showChatButton)
@@ -757,7 +791,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       ),
                     ],
                   ),
-                if (isLoggedInUserWinner)
+                if (userProvider.isLoggedIn&&isLoggedInUserWinner)
                   Row(
                     children: [
                       SizedBox(
@@ -790,7 +824,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   userProvider.id, widget.item.userId);
                               final lastMessage = chatProvider
                                   .getLastMessageForChatRoom(chatRoomId);
-                              chatProvider.createChatRoom(
+                              if (winnerId.isNotEmpty && widget.item.userId != winnerId && userProvider.id == winnerId)
+                                chatProvider.createChatRoom(
                                 userProvider.id,
                                 userProvider.nickname,
                                 widget.item.userId,
@@ -813,7 +848,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       ),
                     ],
                   ),
-                if (!isLoggedInUserWinner &&
+                if (userProvider.isLoggedIn&&!isLoggedInUserWinner &&
                     !isLoggedInUserSeller &&
                     _showChatButton)
                   Center(

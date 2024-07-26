@@ -16,7 +16,7 @@ class ChatProvider with ChangeNotifier {
     final url = Uri.parse('$baseUrl/chat/messages/$chatRoomId');
     try {
       final response = await http.get(url);
-      print('Response status: ${response.statusCode}'); // 상태 코드 로그 추가
+      //print('Response status: ${response.statusCode}'); // 상태 코드 로그 추가
       //print('Response body: ${response.body}'); // 응답 본문 로그 추가
 
       if (response.statusCode == 200) {
@@ -30,7 +30,7 @@ class ChatProvider with ChangeNotifier {
         }
         _messages = loadedMessages;
         notifyListeners();
-        print('Messages loaded successfully'); // 성공 로그 추가
+        //print('Messages loaded successfully'); // 성공 로그 추가
       } else {
         print('Failed to load messages. Status code: ${response.statusCode}');
         throw Exception('Failed to load messages');
