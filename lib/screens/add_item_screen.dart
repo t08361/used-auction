@@ -55,9 +55,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
       Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
       Placemark place = placemarks[0];
-      setState(() {
-        _regionController.text = '${place.locality}, ${place.administrativeArea}, ${place.country}';
-      });
+      if (mounted) { // Ensure the widget is still mounted
+        setState(() {
+          _regionController.text = '${place.name}, ${place.street}, ${place.subLocality}, ${place.locality}, '
+              '${place.subAdministrativeArea}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}';
+        });
+      }
     } catch (e) {
       print('Failed to get location: $e');
     }
@@ -181,6 +184,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       request.fields['bidUnit'] = bidUnit.toString();
       request.fields['userId'] = userProvider.id;
       request.fields['nickname'] = userProvider.nickname;
+      request.fields['region'] = region; // 지역 필드 추가
       if (imageUrl != null) {
         request.fields['itemImage'] = imageUrl; // 서버 필드명 확인
       }

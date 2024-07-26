@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
             preferredSize: Size.fromHeight(0.5), // 원하는 높이로 설정
             child: Container(
               color: Colors.grey, // 밑줄 색상
-              height: 0.4, // 밑줄 두께
+              height: 0.2, // 밑줄 두께
             ),
           ),
         ),
