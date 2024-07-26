@@ -106,8 +106,8 @@ class _ItemListState extends State<ItemList> {
                             width: 120,
                             height: 120,
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black, width: 1.2), // 테두리 추가
-                              borderRadius: BorderRadius.circular(7.0),
+                              border: Border.all(color: Colors.black, width: 0.09), // 테두리 추가
+                              borderRadius: BorderRadius.circular(5.0),
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(5.0),
