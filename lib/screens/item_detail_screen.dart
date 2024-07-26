@@ -13,6 +13,7 @@ import 'package:http/http.dart' as http;
 
 import 'ItemEditScreen.dart';
 import 'chat_screen.dart';
+import 'purchase_history_screen.dart';
 
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
@@ -80,7 +81,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     super.dispose();
   }
 
-  // 판매자의 닉네임 가져오기
+  // 판매자의 닉네임과 지역 정보 가져오기
   Future<void> fetchSellerNickname() async {
     final url = Uri.parse('$baseUrl/users/${widget.item.userId}');
     final response = await http.get(url);
@@ -230,19 +231,19 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       children: [
         bidsToShow.isEmpty
             ? const Text('아직 입찰 기록이 없습니다!',
-            style: TextStyle(fontSize: 16, color: Colors.grey))
+                style: TextStyle(fontSize: 16, color: Colors.grey))
             : ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: bidsToShow.length,
-          itemBuilder: (ctx, index) {
-            final bid = bidsToShow[index];
-            return ListTile(
-              title: Text(bid['nickname'] as String),
-              subtitle: Text('입찰가: \$${bid['bidPrice']}'),
-            );
-          },
-        ),
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: bidsToShow.length,
+                itemBuilder: (ctx, index) {
+                  final bid = bidsToShow[index];
+                  return ListTile(
+                    title: Text(bid['nickname'] as String),
+                    subtitle: Text('입찰가: \$${bid['bidPrice']}'),
+                  );
+                },
+              ),
       ],
     );
   }
@@ -314,8 +315,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                      '제안할 금액: \₩${currentPrice + widget.item.bidUnit * _currentBidStep}',
-                    style: TextStyle(fontSize: 18,color: Colors.red),
+                    '제안할 금액: \₩${currentPrice + widget.item.bidUnit * _currentBidStep}',
+                    style: TextStyle(fontSize: 18, color: Colors.red),
                   ),
                   const SizedBox(height: 10),
                   Text('현재가: \₩${currentPrice}'),
@@ -405,16 +406,21 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
     if (response.statusCode == 200) {
       print('낙찰가 업데이트 성공');
+      // 낙찰가 업데이트 성공 시 PurchaseHistoryPage로 이동
+      // Navigator.of(context).push(
+      //   MaterialPageRoute(
+      //     builder: (context) => PurchaseHistoryPage(),
+      //   ),
+      // );
     } else {
       print('낙찰가 업데이트 실패: ${response.body}');
     }
   }
 
-  // 1.	타이머 시작 (_startTimer 메서드): 경매 종료 시간을 계산하고 타이머를 시작합니다.
-  // 2.	타이머 만료 처리: 타이머가 만료되면 (remainingTime이 0 또는 음수가 되면) _setWinningBid 메서드를 호출합니다.
-  // 3.	최고 입찰자 선정 (_setWinningBid 메서드): bids 리스트에서 가장 높은 입찰가를 찾고, 해당 입찰자를 낙찰자로 선정합니다. 이후 _updateWinner 메서드를 호출하여 서버에 낙찰 정보를 업데이트합니다.
-  // 4.	낙찰 정보 서버 업데이트 (_updateWinner 메서드): 최고 입찰가와 낙찰자의 ID를 서버에 업데이트합니다.
-
+  // 1. 타이머 시작 (_startTimer 메서드): 경매 종료 시간을 계산하고 타이머를 시작합니다.
+  // 2. 타이머 만료 처리: 타이머가 만료되면 (remainingTime이 0 또는 음수가 되면) _setWinningBid 메서드를 호출합니다.
+  // 3. 최고 입찰자 선정 (_setWinningBid 메서드): bids 리스트에서 가장 높은 입찰가를 찾고, 해당 입찰자를 낙찰자로 선정합니다. 이후 _updateWinner 메서드를 호출하여 서버에 낙찰 정보를 업데이트합니다.
+  // 4. 낙찰 정보 서버 업데이트 (_updateWinner 메서드): 최고 입찰가와 낙찰자의 ID를 서버에 업데이트합니다.
   void _startTimer() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
@@ -484,7 +490,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             builder: (ctx) => ItemEditScreen(item: widget.item),
           ),
         );
-
         break;
       case 'delete': //삭제
         try {
@@ -560,38 +565,41 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 10),
-                    if (isLoggedInUserWinner||(!isLoggedInUserWinner &&
-                        !isLoggedInUserSeller &&
-                        _showChatButton))
-                    // AnimatedOpacity 추가
-                    AnimatedOpacity(
-                      opacity: _showCurrentPrice ? 1.0 : 0.0,
-                      duration: Duration(seconds: 1),
-                      child: Text(
-                        '현재 가격 : ${currentPrice}원',
-                        style: const TextStyle(
-                            fontSize: 20,
-                            color: Colors.red,
-                            fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    //if (showPrice)
-                    if (isLoggedInUserWinner||(!isLoggedInUserWinner &&
-                        !isLoggedInUserSeller &&
-                        _showChatButton))
-                      const SizedBox(height: 10),
-                    if (isLoggedInUserWinner||(!isLoggedInUserWinner &&
-                        !isLoggedInUserSeller &&
-                        _showChatButton))
+                    if (isLoggedInUserWinner ||
+                        (!isLoggedInUserWinner &&
+                            !isLoggedInUserSeller &&
+                            _showChatButton))
+                      // AnimatedOpacity 추가
                       AnimatedOpacity(
-                      opacity: _showCurrentPrice ? 1.0 : 0.0,
-                      duration: Duration(seconds: 4),
-                      child: Text(
-                        '시작 가격 : ${widget.item.price}원',
-                        style:
-                            const TextStyle(fontSize: 20, color: Colors.black),
+                        opacity: _showCurrentPrice ? 1.0 : 0.0,
+                        duration: Duration(seconds: 1),
+                        child: Text(
+                          '현재 가격 : ${currentPrice}원',
+                          style: const TextStyle(
+                              fontSize: 20,
+                              color: Colors.red,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
-                    ),
+                    //if (showPrice)
+                    if (isLoggedInUserWinner ||
+                        (!isLoggedInUserWinner &&
+                            !isLoggedInUserSeller &&
+                            _showChatButton))
+                      const SizedBox(height: 10),
+                    if (isLoggedInUserWinner ||
+                        (!isLoggedInUserWinner &&
+                            !isLoggedInUserSeller &&
+                            _showChatButton))
+                      AnimatedOpacity(
+                        opacity: _showCurrentPrice ? 1.0 : 0.0,
+                        duration: Duration(seconds: 4),
+                        child: Text(
+                          '시작 가격 : ${widget.item.price}원',
+                          style: const TextStyle(
+                              fontSize: 20, color: Colors.black),
+                        ),
+                      ),
                     const SizedBox(height: 10),
                     Text(
                       '설명 : ' + widget.item.description,
@@ -651,46 +659,55 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           children: [
             Column(
               children: [
-                if (!(isLoggedInUserWinner||(!isLoggedInUserWinner &&
-                    !isLoggedInUserSeller &&
-                    _showChatButton)))
-                  SizedBox(width: 200,),
-                if ((isLoggedInUserWinner||(!isLoggedInUserWinner &&
-                    !isLoggedInUserSeller &&
-                    _showChatButton)))
-                  SizedBox(width: 30,),
-                if (!(isLoggedInUserWinner||(!isLoggedInUserWinner &&
-                    !isLoggedInUserSeller &&
-                    _showChatButton)))
-                // AnimatedOpacity 추가
-                AnimatedOpacity(
-                  opacity: _showCurrentPrice? 1.0 : 0.0,
-                  duration: Duration(seconds: 1),
-                  child: Text(
-                    '현재 가격 : ${currentPrice}원',
-                    style: const TextStyle(
-                        fontSize: 17,
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold),
+                if (!(isLoggedInUserWinner ||
+                    (!isLoggedInUserWinner &&
+                        !isLoggedInUserSeller &&
+                        _showChatButton)))
+                  SizedBox(
+                    width: 200,
                   ),
-                ),
-                //if (showPrice)
-                if (!(isLoggedInUserWinner||(!isLoggedInUserWinner &&
-                    !isLoggedInUserSeller &&
-                    _showChatButton)))
+                if ((isLoggedInUserWinner ||
+                    (!isLoggedInUserWinner &&
+                        !isLoggedInUserSeller &&
+                        _showChatButton)))
+                  SizedBox(
+                    width: 30,
+                  ),
+                if (!(isLoggedInUserWinner ||
+                    (!isLoggedInUserWinner &&
+                        !isLoggedInUserSeller &&
+                        _showChatButton)))
+                  // AnimatedOpacity 추가
                   AnimatedOpacity(
-                  opacity: _showCurrentPrice ? 1.0 : 0.0,
-                  duration: Duration(seconds: 4),
-                  child: Text(
-                    '시작 가격 : ${widget.item.price}원',
-                    style: const TextStyle(fontSize: 17, color: Colors.black),
+                    opacity: _showCurrentPrice ? 1.0 : 0.0,
+                    duration: Duration(seconds: 1),
+                    child: Text(
+                      '현재 가격 : ${currentPrice}원',
+                      style: const TextStyle(
+                          fontSize: 17,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold),
+                    ),
                   ),
-                ),
+                //if (showPrice)
+                if (!(isLoggedInUserWinner ||
+                    (!isLoggedInUserWinner &&
+                        !isLoggedInUserSeller &&
+                        _showChatButton)))
+                  AnimatedOpacity(
+                    opacity: _showCurrentPrice ? 1.0 : 0.0,
+                    duration: Duration(seconds: 4),
+                    child: Text(
+                      '시작 가격 : ${widget.item.price}원',
+                      style: const TextStyle(fontSize: 17, color: Colors.black),
+                    ),
+                  ),
               ],
             ),
-            if (!(isLoggedInUserWinner||(!isLoggedInUserWinner &&
-                !isLoggedInUserSeller &&
-                _showChatButton)))
+            if (!(isLoggedInUserWinner ||
+                (!isLoggedInUserWinner &&
+                    !isLoggedInUserSeller &&
+                    _showChatButton)))
               Spacer(),
             Row(
               mainAxisSize: MainAxisSize.max,
@@ -807,7 +824,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
               ],
             ),
-            SizedBox(width: 30,),
+            SizedBox(
+              width: 30,
+            ),
           ],
         ),
       ),
