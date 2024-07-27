@@ -148,24 +148,29 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
   }
 
-  // 이미지를 확대해서 볼 수 있도록 하는 함수
+// 이미지를 확대해서 볼 수 있도록 하는 함수
   void _showFullImage(List<String> imageUrls, int initialIndex) {
-    showDialog(
+    showGeneralDialog(
       context: context,
-      builder: (context) {
-        return Dialog(
-          child: InteractiveViewer(
-            child: PageView.builder(
-              itemCount: imageUrls.length,
-              controller: PageController(initialPage: initialIndex),
-              itemBuilder: (context, index) {
-                return Image.network(
-                  imageUrls[index],
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                );
-              },
+      barrierDismissible: true,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+      pageBuilder: (context, _, __) {
+        return Scaffold(
+          backgroundColor: Colors.black,
+          body: Center(
+            child: InteractiveViewer(
+              child: PageView.builder(
+                itemCount: imageUrls.length,
+                controller: PageController(initialPage: initialIndex),
+                itemBuilder: (context, index) {
+                  return Image.network(
+                    imageUrls[index],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  );
+                },
+              ),
             ),
           ),
         );
