@@ -34,7 +34,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   Timer? _timer; // 남은 시간을 지속적으로 업데이트하기 위한 타이머
   String winnerId = ''; // 가장 높은 입찰가를 제시한 사용자의 ID를 저장할 변수
   String winnerNickname = ''; // 낙찰자의 닉네임
-  String itemImage = '';
   bool _showAllBids = false; // 모든 입찰 기록을 보여줄지 여부를 담는 변수
   bool _isLoading = true; // 로딩 상태를 나타내는 변수
   bool _showPrice = false; // 판매 가격을 보여줄지 여부를 담는 변수
@@ -150,17 +149,23 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   // 이미지를 확대해서 볼 수 있도록 하는 함수
-  void _showFullImage(String imageUrl) {
+  void _showFullImage(List<String> imageUrls, int initialIndex) {
     showDialog(
       context: context,
       builder: (context) {
         return Dialog(
           child: InteractiveViewer(
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover, // 이미지를 화면에 꽉 차게 설정
-              width: double.infinity,
-              //height: double.infinity,
+            child: PageView.builder(
+              itemCount: imageUrls.length,
+              controller: PageController(initialPage: initialIndex),
+              itemBuilder: (context, index) {
+                return Image.network(
+                  imageUrls[index],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                );
+              },
             ),
           ),
         );
@@ -168,7 +173,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
   }
 
-// 전체 입찰 기록을 팝업으로 보여주는 함수
+  // 전체 입찰 기록을 팝업으로 보여주는 함수
   void _showAllBidsDialog() {
     showDialog(
       context: context,
@@ -218,7 +223,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     });
   }
 
-// 입찰 기록을 보여주는 부분
+  // 입찰 기록을 보여주는 부분
   Widget _buildBidList() {
     if (_isLoading) {
       return const Center(
@@ -252,41 +257,34 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   // 이미지 슬라이더를 추가하는 부분
   Widget _buildImageSlider() {
     return GestureDetector(
-      onTap: () => _showFullImage(widget.item.itemImage),
+      onTap: () => _showFullImage(widget.item.itemImages, 0),
       child: SizedBox(
         width: double.infinity,
-        height: MediaQuery.of(context).size.height * 0.35, // 화면 높이의 절반으로 설정
+        height: MediaQuery.of(context).size.height * 0.35,
         child: Stack(
           children: [
-            // PageView.builder(
-            //   itemCount: itemImage.length,
-            //   itemBuilder: (context, index) {
-            //return
-            ClipRRect(
-              borderRadius: BorderRadius.circular(0.0),
-              child: Image.network(
-                widget.item.itemImage, //[index],
-                fit: BoxFit.cover, // 이미지를 화면에 꽉 차게 설정
-                width: double.infinity,
-                height: double.infinity,
-              ),
+            PageView.builder(
+              itemCount: widget.item.itemImages.length,
+              itemBuilder: (context, index) {
+                return ClipRRect(
+                  borderRadius: BorderRadius.circular(0.0),
+                  child: Image.network(
+                    widget.item.itemImages[index],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                );
+              },
             ),
-            //},
-            //),
-            // Text(
-            //   '현재 가격 : ${currentPrice}원',
-            //   style: const TextStyle(fontSize: 20, color: Colors.red),
-            // ),
             Positioned(
                 bottom: 0,
-                //left: 10,
                 child: Container(
                   padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: Colors.black26,
                     borderRadius: BorderRadius.only(
-                        topLeft: Radius.zero,
-                        topRight: Radius.circular(13)), // 원하는 모서리 둥글기 값으로 설정
+                        topLeft: Radius.zero, topRight: Radius.circular(13)),
                   ),
                   child: Text(
                     '남은 시간: ${remainingTime.inDays}일 ${remainingTime.inHours % 24}시간 ${remainingTime.inMinutes % 60}분 ${remainingTime.inSeconds % 60}초',
@@ -407,21 +405,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
     if (response.statusCode == 200) {
       print('낙찰가 업데이트 성공');
-      // 낙찰가 업데이트 성공 시 PurchaseHistoryPage로 이동
-      // Navigator.of(context).push(
-      //   MaterialPageRoute(
-      //     builder: (context) => PurchaseHistoryPage(),
-      //   ),
-      // );
     } else {
       print('낙찰가 업데이트 실패: ${response.body}');
     }
   }
 
-  // 1. 타이머 시작 (_startTimer 메서드): 경매 종료 시간을 계산하고 타이머를 시작합니다.
-  // 2. 타이머 만료 처리: 타이머가 만료되면 (remainingTime이 0 또는 음수가 되면) _setWinningBid 메서드를 호출합니다.
-  // 3. 최고 입찰자 선정 (_setWinningBid 메서드): bids 리스트에서 가장 높은 입찰가를 찾고, 해당 입찰자를 낙찰자로 선정합니다. 이후 _updateWinner 메서드를 호출하여 서버에 낙찰 정보를 업데이트합니다.
-  // 4. 낙찰 정보 서버 업데이트 (_updateWinner 메서드): 최고 입찰가와 낙찰자의 ID를 서버에 업데이트합니다.
   void _startTimer() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
@@ -433,7 +421,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           _setWinningBid(); // 남은 시간이 0이 되면 낙찰가 설정
           remainingTime = Duration.zero; // 남은 시간을 0으로 설정
           timer.cancel(); // 타이머 취소
-          if (winnerId.isNotEmpty && widget.item.userId != winnerId && userProvider.id == winnerId) {
+          if (winnerId.isNotEmpty &&
+              widget.item.userId != winnerId &&
+              userProvider.id == winnerId) {
             // 낙찰자가 있는 경우에만 채팅방 생성
             final chatRoomId =
                 getChatRoomId(userProvider.id, widget.item.userId);
@@ -445,7 +435,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               widget.item.userId,
               sellerNickname,
               lastMessage ?? '',
-              widget.item.itemImage ?? '',
+              widget.item.itemImages.isNotEmpty
+                  ? widget.item.itemImages[0]
+                  : '',
             );
           }
         }
@@ -552,21 +544,21 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildImageSlider(), // 이미지 슬라이더 추가
-            //const SizedBox(height: 5),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(children: [
-                      Text(
-                        widget.item.title,
-                        style:
-                        TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                      ),
-                      Spacer(),
-                      buildPopupMenuButton(isOwner, userProvider.isLoggedIn),
-                    ],
+                    Row(
+                      children: [
+                        Text(
+                          widget.item.title,
+                          style: TextStyle(
+                              fontSize: 22, fontWeight: FontWeight.bold),
+                        ),
+                        Spacer(),
+                        buildPopupMenuButton(isOwner, userProvider.isLoggedIn),
+                      ],
                     ),
                     const SizedBox(height: 10),
                     if (isLoggedInUserWinner ||
@@ -585,7 +577,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                               fontWeight: FontWeight.bold),
                         ),
                       ),
-                    //if (showPrice)
                     if (isLoggedInUserWinner ||
                         (!isLoggedInUserWinner &&
                             !isLoggedInUserSeller &&
@@ -629,28 +620,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           ),
                       ],
                     ),
-                    //const SizedBox(height: 10),
                     _buildBidList(), // 입찰 기록 리스트 추가
-                    //const SizedBox(height: 20),
                   ]),
             ),
-            // const SizedBox(height: 10),
-            // bids.isEmpty
-            //     ? const Text('아직 입찰 기록이 없습니다!',
-            //     style: TextStyle(fontSize: 16, color: Colors.grey))
-            //     : ListView.builder(
-            //     reverse: true,
-            //     shrinkWrap: true,
-            //     physics: const NeverScrollableScrollPhysics(),
-            //     itemCount: bids.length,
-            //     itemBuilder: (ctx, index) {
-            //     final bid = bids[index];
-            //     return ListTile(
-            //       title: Text(bid['nickname'] as String),
-            //       subtitle: Text('입찰가: \$${bid['bidPrice']}'),
-            //     );
-            //   },
-            // ),
           ],
         ),
       ),
@@ -664,15 +636,18 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             if (!userProvider.isLoggedIn)
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0),
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 0.0, horizontal: 0.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center, // 중앙 정렬
                     children: [
                       TextButton.icon(
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.transparent, // 배경색을 투명으로 설정
-                          foregroundColor: primary_color, // 글자색을 primary_color로 설정
-                          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 40), // 패딩 조절
+                          foregroundColor:
+                              primary_color, // 글자색을 primary_color로 설정
+                          padding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 40), // 패딩 조절
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6), // 모서리 둥글기
                             side: BorderSide(color: primary_color), // 테두리 색상 설정
@@ -686,78 +661,81 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         icon: Icon(Icons.login, color: primary_color), // 아이콘 추가
                         label: Text(
                           '로그인 해주세요',
-                          style: TextStyle(color: primary_color), // 글자색을 primary_color로 설정
+                          style: TextStyle(
+                              color: primary_color), // 글자색을 primary_color로 설정
                         ),
                       ),
                     ],
                   ),
                 ),
               ),
-            if(userProvider.isLoggedIn)
-            Column(
-              children: [
-                if (!(isLoggedInUserWinner ||
-                    (!isLoggedInUserWinner &&
-                        !isLoggedInUserSeller &&
-                        _showChatButton)))
-                  SizedBox(
-                    width: 200,
-                  ),
-                if ((isLoggedInUserWinner ||
-                    (!isLoggedInUserWinner &&
-                        !isLoggedInUserSeller &&
-                        _showChatButton)))
-                  SizedBox(
-                    width: 30,
-                  ),
-                if (!(isLoggedInUserWinner ||
-                    (!isLoggedInUserWinner &&
-                        !isLoggedInUserSeller &&
-                        _showChatButton)))
-                  // AnimatedOpacity 추가
-                  AnimatedOpacity(
-                    opacity: _showCurrentPrice ? 1.0 : 0.0,
-                    duration: Duration(seconds: 1),
-                    child: Text(
-                      '현재 가격 : ${currentPrice}원',
-                      style: const TextStyle(
-                          fontSize: 17,
-                          color: Colors.red,
-                          fontWeight: FontWeight.bold),
+            if (userProvider.isLoggedIn)
+              Column(
+                children: [
+                  if (!(isLoggedInUserWinner ||
+                      (!isLoggedInUserWinner &&
+                          !isLoggedInUserSeller &&
+                          _showChatButton)))
+                    SizedBox(
+                      width: 200,
                     ),
-                  ),
-                //if (showPrice)
-                if (!(isLoggedInUserWinner ||
+                  if ((isLoggedInUserWinner ||
+                      (!isLoggedInUserWinner &&
+                          !isLoggedInUserSeller &&
+                          _showChatButton)))
+                    SizedBox(
+                      width: 30,
+                    ),
+                  if (!(isLoggedInUserWinner ||
+                      (!isLoggedInUserWinner &&
+                          !isLoggedInUserSeller &&
+                          _showChatButton)))
+                    // AnimatedOpacity 추가
+                    AnimatedOpacity(
+                      opacity: _showCurrentPrice ? 1.0 : 0.0,
+                      duration: Duration(seconds: 1),
+                      child: Text(
+                        '현재 가격 : ${currentPrice}원',
+                        style: const TextStyle(
+                            fontSize: 17,
+                            color: Colors.red,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  if (!(isLoggedInUserWinner ||
+                      (!isLoggedInUserWinner &&
+                          !isLoggedInUserSeller &&
+                          _showChatButton)))
+                    AnimatedOpacity(
+                      opacity: _showCurrentPrice ? 1.0 : 0.0,
+                      duration: Duration(seconds: 4),
+                      child: Text(
+                        '시작 가격 : ${widget.item.price}원',
+                        style:
+                            const TextStyle(fontSize: 17, color: Colors.black),
+                      ),
+                    ),
+                ],
+              ),
+            if (userProvider.isLoggedIn &&
+                !(isLoggedInUserWinner ||
                     (!isLoggedInUserWinner &&
                         !isLoggedInUserSeller &&
                         _showChatButton)))
-                  AnimatedOpacity(
-                    opacity: _showCurrentPrice ? 1.0 : 0.0,
-                    duration: Duration(seconds: 4),
-                    child: Text(
-                      '시작 가격 : ${widget.item.price}원',
-                      style: const TextStyle(fontSize: 17, color: Colors.black),
-                    ),
-                  ),
-              ],
-            ),
-            if (userProvider.isLoggedIn&&!(isLoggedInUserWinner ||
-                (!isLoggedInUserWinner &&
-                    !isLoggedInUserSeller &&
-                    _showChatButton)))
               Spacer(),
             Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                if (userProvider.isLoggedIn&&isLoggedInUserSeller)
+                if (userProvider.isLoggedIn && isLoggedInUserSeller)
                   Center(
                     child: Text(
                       '내가 등록한 상품',
                       style: const TextStyle(fontSize: 18, color: Colors.black),
                     ),
                   ),
-                if (userProvider.isLoggedIn&&!isOwner &&
+                if (userProvider.isLoggedIn &&
+                    !isOwner &&
                     !isLoggedInUserWinner &&
                     !userProvider.isLoggedIn &&
                     !_showChatButton)
@@ -771,7 +749,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       ),
                     ],
                   ),
-                if (userProvider.isLoggedIn&&!isOwner &&
+                if (userProvider.isLoggedIn &&
+                    !isOwner &&
                     !isLoggedInUserWinner &&
                     userProvider.isLoggedIn &&
                     !_showChatButton)
@@ -794,7 +773,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       ),
                     ],
                   ),
-                if (userProvider.isLoggedIn&&isLoggedInUserWinner)
+                if (userProvider.isLoggedIn && isLoggedInUserWinner)
                   Row(
                     children: [
                       SizedBox(
@@ -827,21 +806,27 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   userProvider.id, widget.item.userId);
                               final lastMessage = chatProvider
                                   .getLastMessageForChatRoom(chatRoomId);
-                              if (winnerId.isNotEmpty && widget.item.userId != winnerId && userProvider.id == winnerId)
+                              if (winnerId.isNotEmpty &&
+                                  widget.item.userId != winnerId &&
+                                  userProvider.id == winnerId)
                                 chatProvider.createChatRoom(
-                                userProvider.id,
-                                userProvider.nickname,
-                                widget.item.userId,
-                                sellerNickname,
-                                lastMessage ?? '',
-                                widget.item.itemImage,
-                              );
+                                  userProvider.id,
+                                  userProvider.nickname,
+                                  widget.item.userId,
+                                  sellerNickname,
+                                  lastMessage ?? '',
+                                  widget.item.itemImages.isNotEmpty
+                                      ? widget.item.itemImages[0]
+                                      : '',
+                                );
                               Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => ChatScreen(
                                   senderId: userProvider.id,
                                   recipientId: widget.item.userId,
                                   chatRoomId: chatRoomId,
-                                  itemImage: widget.item.itemImage,
+                                  itemImage: widget.item.itemImages.isNotEmpty
+                                      ? widget.item.itemImages[0]
+                                      : '',
                                 ),
                               ));
                             },
@@ -851,7 +836,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       ),
                     ],
                   ),
-                if (userProvider.isLoggedIn&&!isLoggedInUserWinner &&
+                if (userProvider.isLoggedIn &&
+                    !isLoggedInUserWinner &&
                     !isLoggedInUserSeller &&
                     _showChatButton)
                   Center(

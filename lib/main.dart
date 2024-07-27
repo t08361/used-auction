@@ -106,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
     // 화면 높이를 가져옴 ( 핸드폰 규격에 맞게 %로 설정 가능하여 반응형 Ui 적용이 가능해졌다. )
     double screenHeight = MediaQuery.of(context).size.height;
     // 화면 높이에 따라 BottomNavigationBar의 높이 설정
-    double bottomBarHeight = screenHeight * 0.08; // 예시: 화면 높이의 8%로 설정
+    double bottomBarHeight = screenHeight * 0.1; // 예시: 화면 높이의 8%로 설정
 
     return Scaffold(
       backgroundColor: primary_color, // Scaffold 배경색 설정

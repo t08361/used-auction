@@ -54,7 +54,7 @@ class _ItemListState extends State<ItemList> {
   Widget build(BuildContext context) {
     final itemProvider = Provider.of<ItemProvider>(context);
     final reversedItems =
-        itemProvider.items.reversed.toList(); // 1. 리스트를 역순으로 정렬
+    itemProvider.items.reversed.toList(); // 1. 리스트를 역순으로 정렬
 
     return ListView.builder(
       controller: _scrollController, // 스크롤 컨트롤러 추가
@@ -111,8 +111,8 @@ class _ItemListState extends State<ItemList> {
                             ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(5.0),
-                              child: item.itemImage.isNotEmpty // itemImage가 비어있지 않으면
-                                  ? Image.network(item.itemImage, fit: BoxFit.cover)
+                              child: item.itemImages.isNotEmpty // itemImages가 비어있지 않으면
+                                  ? Image.network(item.itemImages[0], fit: BoxFit.cover)
                                   : Placeholder(), // 비어있으면 Placeholder 사용
                             ),
                           ),
@@ -206,11 +206,11 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
     final int days = remainingTime.isNegative ? 0 : remainingTime.inDays;
 
     final int hours =
-        remainingTime.isNegative ? 0 : remainingTime.inHours.remainder(24);
+    remainingTime.isNegative ? 0 : remainingTime.inHours.remainder(24);
     final int minutes =
-        remainingTime.isNegative ? 0 : remainingTime.inMinutes.remainder(60);
+    remainingTime.isNegative ? 0 : remainingTime.inMinutes.remainder(60);
     final int seconds =
-        remainingTime.isNegative ? 0 : remainingTime.inSeconds.remainder(60);
+    remainingTime.isNegative ? 0 : remainingTime.inSeconds.remainder(60);
 
     String displayText;
     if (days > 0) {
