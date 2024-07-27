@@ -25,8 +25,8 @@ class PurchaseHistoryPage extends StatelessWidget {
           final item = purchasedItems[index];
           return ListTile(
             leading: CircleAvatar(
-              backgroundImage: item.itemImage != null
-                  ? NetworkImage(item.itemImage!)
+              backgroundImage: item.itemImages.isNotEmpty
+                  ? NetworkImage(item.itemImages[0])
                   : AssetImage('assets/images/default_profile.png') as ImageProvider,
               radius: 15,
             ),

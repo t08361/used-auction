@@ -98,7 +98,7 @@ class ItemProvider with ChangeNotifier {
           bidUnit: _items[index].bidUnit,
           userId: _items[index].userId,
           winnerId: _items[index].winnerId,
-          itemImage: _items[index].itemImage,
+          itemImages: _items[index].itemImages,
           lastPrice: _items[index].lastPrice,
           region: _items[index].region, // region 필드 추가
         );

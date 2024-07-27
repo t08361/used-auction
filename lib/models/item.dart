@@ -7,7 +7,7 @@ class Item {
   final int price;
   final DateTime endDateTime;
   final int bidUnit;
-  final String itemImage;
+  final List<String> itemImages;
   final String userId;
   final String winnerId;
   final int lastPrice; // 현재 최고가
@@ -20,7 +20,7 @@ class Item {
     required this.price,
     required this.endDateTime,
     required this.bidUnit,
-    required this.itemImage,
+    required this.itemImages,
     required this.userId,
     required this.winnerId,
     required this.lastPrice,
@@ -34,7 +34,7 @@ class Item {
     'price': price,
     'endDateTime': endDateTime.toIso8601String(),
     'bidUnit': bidUnit,
-    'itemImage': itemImage,
+    'itemImages': itemImages,
     'userId': userId,
     'winnerId': winnerId,
     'lastPrice': lastPrice,
@@ -49,7 +49,7 @@ class Item {
         price: json['price'] ?? 0,
         endDateTime: DateTime.parse(json['endDateTime'] ?? DateTime.now().toIso8601String()),
         bidUnit: json['bidUnit'] ?? 1,
-        itemImage: json['itemImage'],
+        itemImages: List<String>.from(json['itemImages'] ?? []),
         winnerId: json['winnerId'] ?? '',
         userId: json['userId'] ?? '',
         lastPrice: json['lastPrice'] ?? 0,
