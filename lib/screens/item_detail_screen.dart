@@ -539,8 +539,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   '\'',
               style: const TextStyle(fontSize: 18, color: Colors.black),
             ),
-            Spacer(),
-            buildPopupMenuButton(isOwner, userProvider.isLoggedIn),
           ],
         ),
         iconTheme: const IconThemeData(
@@ -560,10 +558,15 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      widget.item.title,
-                      style:
-                          TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    Row(children: [
+                      Text(
+                        widget.item.title,
+                        style:
+                        TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      Spacer(),
+                      buildPopupMenuButton(isOwner, userProvider.isLoggedIn),
+                    ],
                     ),
                     const SizedBox(height: 10),
                     if (isLoggedInUserWinner ||
