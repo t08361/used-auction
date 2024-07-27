@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:testhandproduct/screens/sales_history_screen.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:testhandproduct/screens/login_screen.dart';
@@ -13,8 +12,6 @@ import '../main.dart';
 import '../providers/constants.dart';
 import '../providers/item_provider.dart';
 import '../providers/user_provider.dart';
-import '../models/item.dart'; // 추가
-import 'sales_history_screen.dart';
 
 class AddItemScreen extends StatefulWidget {
   static const routeName = '/add-item';
@@ -32,7 +29,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _bidUnitController = TextEditingController();
   final _regionController = TextEditingController();
 
-  File? _selectedImage;
+  List<File> _selectedImages = [];
   DateTime? _endDateTime;
 
   @override
@@ -42,7 +39,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     _setDefaultLocation(); // 사용자의 위치 설정 함수 호출
   }
 
-// 시초가에 입력에 따라 입찰 단위 자동 설정에 대한 계산 함수
+  // 시초가에 입력에 따라 입찰 단위 자동 설정에 대한 계산 함수
   void _updateBidUnitDefault() {
     final price = int.tryParse(_priceController.text) ?? 0;
     final defaultBidUnit = ((price * 0.01).round() / 10).ceil() * 10; // 십의 자리 반올림
@@ -74,13 +71,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
     super.dispose();
   }
 
-  Future<void> _pickImage() async {
+  Future<void> _pickImages() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFiles = await picker.pickMultiImage();
 
-    if (pickedFile != null) {
+    if (pickedFiles != null) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImages = pickedFiles.map((file) => File(file.path)).toList();
       });
     }
   }
@@ -91,18 +88,24 @@ class _AddItemScreenState extends State<AddItemScreen> {
     });
   }
 
-  Future<String?> _uploadImageToFirebase(File image) async {
-    try {
-      final storageRef = FirebaseStorage.instance.ref();
-      final imageRef = storageRef.child(
-          'item_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
-      await imageRef.putFile(image);
-      final imageUrl = await imageRef.getDownloadURL();
-      return imageUrl;
-    } catch (e) {
-      print('이미지 업로드 실패: $e');
-      return null;
+  Future<List<String?>> _uploadImagesToFirebase(List<File> images) async {
+    List<String?> imageUrls = [];
+
+    for (var image in images) {
+      try {
+        final storageRef = FirebaseStorage.instance.ref();
+        final imageRef = storageRef.child(
+            'item_images/${DateTime.now().millisecondsSinceEpoch}_${image.path.split('/').last}');
+        await imageRef.putFile(image);
+        final imageUrl = await imageRef.getDownloadURL();
+        imageUrls.add(imageUrl);
+      } catch (e) {
+        print('이미지 업로드 실패: $e');
+        imageUrls.add(null);
+      }
     }
+
+    return imageUrls;
   }
 
   Future<void> _pickEndDateTime() async {
@@ -152,7 +155,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       print("Title is empty: ${title.isEmpty}");
       print("Description is empty: ${description.isEmpty}");
       print("Price: $price");
-      print("Selected image: $_selectedImage");
+      print("Selected images: $_selectedImages");
       print("End DateTime: $_endDateTime");
       print("Bid Unit: $bidUnit");
       print("Region is empty: ${region.isEmpty}");
@@ -163,13 +166,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
       _isLoading = true; // 로딩 상태로 변경
     });
 
-    String? imageUrl;
-    if (_selectedImage != null) {
-      imageUrl = await _uploadImageToFirebase(_selectedImage!);
-      if (imageUrl == null) {
-        print('Failed to upload image');
-        return;
-      }
+    List<String?> imageUrls = await _uploadImagesToFirebase(_selectedImages);
+
+    // 업로드에 실패한 이미지가 있을 경우 처리
+    if (imageUrls.contains(null)) {
+      print('Some images failed to upload');
+      return;
     }
 
     final url = Uri.parse('$baseUrl/items');
@@ -185,8 +187,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
       request.fields['userId'] = userProvider.id;
       request.fields['nickname'] = userProvider.nickname;
       request.fields['region'] = region; // 지역 필드 추가
-      if (imageUrl != null) {
-        request.fields['itemImage'] = imageUrl; // 서버 필드명 확인
+
+      for (var imageUrl in imageUrls) {
+        if (imageUrl != null) {
+          request.fields['itemImages[]'] = imageUrl; // 서버 필드명 확인
+        }
       }
 
       if (userProvider.isLoggedIn) {
@@ -232,153 +237,159 @@ class _AddItemScreenState extends State<AddItemScreen> {
       body: _isLoading // 로딩 중이면 로딩 인디케이터를 표시
           ? Center(child: CircularProgressIndicator())
           : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: _pickImage,
-                        child: _selectedImage != null
-                            ? Image.file(
-                                _selectedImage!,
-                                width: 90,
-                                height: 90,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                width: 90,
-                                height: 90,
-                                decoration: BoxDecoration(
-                                  color: background_color,
-                                  border: Border.all(color: Colors.black45),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.camera_alt,
-                                    color: Colors.black54,
-                                    size: 30,
-                                  ),
-                                ),
-                              ),
+        padding: const EdgeInsets.all(16.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: _pickImages,
+                  child: _selectedImages.isNotEmpty
+                      ? Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: _selectedImages.map((image) {
+                      return Image.file(
+                        image,
+                        width: 90,
+                        height: 90,
+                        fit: BoxFit.cover,
+                      );
+                    }).toList(),
+                  )
+                      : Container(
+                    width: 90,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: background_color,
+                      border: Border.all(color: Colors.black45),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.camera_alt,
+                        color: Colors.black54,
+                        size: 30,
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    const Text('제목',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    TextField(
-                      controller: _titleController,
-                      decoration: const InputDecoration(
-                        hintText: '제목을 입력하세요',
-                        border: OutlineInputBorder(),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text('시초가',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    TextField(
-                      controller: _priceController,
-                      decoration: const InputDecoration(
-                        hintText: '시초가를 입력하세요',
-                        border: OutlineInputBorder(),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 20),
-                    const Text('경매 종료 시간',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ListTile(
-                            title: Text(
-                              _endDateTime == null
-                                  ? '경매 종료 시간을 선택해주세요'
-                                  : '종료 시간: ${_endDateTime!.toLocal()}'.split('.')[0],
-                            ),
-                            trailing: const Icon(Icons.calendar_today),
-                            onTap: _pickEndDateTime,
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: _setEndDateTimeOneDayLater,
-                          child: Text('1일'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    const Text('자세한 설명',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    TextField(
-                      controller: _descriptionController,
-                      decoration: const InputDecoration(
-                        hintText: '상품에 대한 자세한 설명을 입력하세요',
-                        border: OutlineInputBorder(),
-                      ),
-                      maxLines: 5,
-                      textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => _submitData(),
-                    ),
-                    const SizedBox(height: 20),
-                    const Text('입찰 단위',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    TextField(
-                      controller: _bidUnitController,
-                      decoration: InputDecoration(
-                        hintText: '입찰 단위를 입력하세요',
-                        border: OutlineInputBorder(),
-                        labelText: '입찰 단위 (기본값: ${_priceController.text.isNotEmpty ? (int.parse(_priceController.text) * 0.01).round().toString() : '시초가를 입력하세요'})',
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 20),
-                    const Text('지역',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 5),
-                    TextField(
-                      controller: _regionController,
-                      decoration: InputDecoration(
-                        hintText: '지역을 입력하세요',
-                        border: OutlineInputBorder(),
-                        labelText: _regionController.text.isNotEmpty ? _regionController.text : '현재 위치를 가져오는 중...',
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _submitData,
-                        child: const Text('상품 등록'),
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          backgroundColor: primary_color,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 15),
-                          textStyle: const TextStyle(fontSize: 18),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(height: 20),
+              const Text('제목',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  hintText: '제목을 입력하세요',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text('시초가',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              TextField(
+                controller: _priceController,
+                decoration: const InputDecoration(
+                  hintText: '시초가를 입력하세요',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+              const Text('경매 종료 시간',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              Row(
+                children: [
+                  Expanded(
+                    child: ListTile(
+                      title: Text(
+                        _endDateTime == null
+                            ? '경매 종료 시간을 선택해주세요'
+                            : '종료 시간: ${_endDateTime!.toLocal()}'.split('.')[0],
+                      ),
+                      trailing: const Icon(Icons.calendar_today),
+                      onTap: _pickEndDateTime,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _setEndDateTimeOneDayLater,
+                    child: Text('1일'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text('자세한 설명',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  hintText: '상품에 대한 자세한 설명을 입력하세요',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 5,
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => _submitData(),
+              ),
+              const SizedBox(height: 20),
+              const Text('입찰 단위',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              TextField(
+                controller: _bidUnitController,
+                decoration: InputDecoration(
+                  hintText: '입찰 단위를 입력하세요',
+                  border: OutlineInputBorder(),
+                  labelText: '입찰 단위 (기본값: ${_priceController.text.isNotEmpty ? (int.parse(_priceController.text) * 0.01).round().toString() : '시초가를 입력하세요'})',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 20),
+              const Text('지역',
+                  style: TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 5),
+              TextField(
+                controller: _regionController,
+                decoration: InputDecoration(
+                  hintText: '지역을 입력하세요',
+                  border: OutlineInputBorder(),
+                  labelText: _regionController.text.isNotEmpty ? _regionController.text : '현재 위치를 가져오는 중...',
+                ),
+              ),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _submitData,
+                  child: const Text('상품 등록'),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.black,
+                    backgroundColor: primary_color,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 15),
+                    textStyle: const TextStyle(fontSize: 18),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
