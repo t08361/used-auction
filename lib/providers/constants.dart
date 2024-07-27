@@ -1,16 +1,9 @@
-// constants.dart
-//const String baseUrl = 'http://10.0.2.2:8080/api';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
 
-const String baseUrl = 'http://localhost:8080/api';
-// const String baseUrl = 'http://ec2-54-252-189-16.ap-southeast-2.compute.amazonaws.com:8080/api';
-
-
-
-
-//const String baseUrl = 'https://port-0-used-auction-server-ly8s26ye59c6f619.sel5.cloudtype.app/api';
+// const String baseUrl = 'http://localhost:8080/api';
+const String baseUrl = 'http://ec2-54-252-189-16.ap-southeast-2.compute.amazonaws.com:8080/api';
 //const String baseUrl = 'http://10.0.2.2:8080/api';
 
 
