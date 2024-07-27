@@ -171,6 +171,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
     // 업로드에 실패한 이미지가 있을 경우 처리
     if (imageUrls.contains(null)) {
       print('Some images failed to upload');
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
@@ -190,7 +193,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
       for (var imageUrl in imageUrls) {
         if (imageUrl != null) {
-          request.fields['itemImages[]'] = imageUrl; // 서버 필드명 확인
+          request.files.add(http.MultipartFile.fromString('itemImages', imageUrl));
         }
       }
 
@@ -220,6 +223,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
