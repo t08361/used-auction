@@ -148,7 +148,6 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
   }
 
-// 이미지를 확대해서 볼 수 있도록 하는 함수
   void _showFullImage(List<String> imageUrls, int initialIndex) {
     showGeneralDialog(
       context: context,
@@ -157,21 +156,35 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       pageBuilder: (context, _, __) {
         return Scaffold(
           backgroundColor: Colors.black,
-          body: Center(
-            child: InteractiveViewer(
-              child: PageView.builder(
-                itemCount: imageUrls.length,
-                controller: PageController(initialPage: initialIndex),
-                itemBuilder: (context, index) {
-                  return Image.network(
-                    imageUrls[index],
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    height: double.infinity,
-                  );
-                },
+          body: Stack(
+            children: [
+              Center(
+                child: InteractiveViewer(
+                  child: PageView.builder(
+                    itemCount: imageUrls.length,
+                    controller: PageController(initialPage: initialIndex),
+                    itemBuilder: (context, index) {
+                      return Image.network(
+                        imageUrls[index],
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        height: double.infinity,
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
+              Positioned(
+                top: 40,
+                left: 20,
+                child: IconButton(
+                  icon: Icon(Icons.close, color: Colors.white, size: 30),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ],
           ),
         );
       },
@@ -564,6 +577,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         Spacer(),
                         buildPopupMenuButton(isOwner, userProvider.isLoggedIn),
                       ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      widget.item.region, // 주소를 표시하는 Text 위젯 추가
+                      style: const TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                     const SizedBox(height: 10),
                     if (isLoggedInUserWinner ||
