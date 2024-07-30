@@ -30,6 +30,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   late Duration remainingTime; // 종료까지 남은 시간 계산
   List<Map<String, dynamic>> bids = []; // 현재 입찰 기록을 담을 리스트
   String sellerNickname = ''; // 판매자의 닉네임
+  //String sellerImageUrl = ''; // 판매자의 이미지 URL
   bool _showChatButton = false; // 대화하기 버튼을 표시할지 여부를 담는 변수
   Timer? _timer; // 남은 시간을 지속적으로 업데이트하기 위한 타이머
   String winnerId = ''; // 가장 높은 입찰가를 제시한 사용자의 ID를 저장할 변수
@@ -62,13 +63,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
 
     // 2초 후에 showPrice를 true로 설정
-    Timer(Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 2), () {
       setState(() {
         _showPrice = true;
       });
     });
 
-    Timer(Duration(milliseconds: 20), () {
+    Timer(const Duration(milliseconds: 20), () {
       setState(() {
         _showCurrentPrice = true;
       });
@@ -96,6 +97,22 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       print('판매자 닉네임 가져오기 실패');
     }
   }
+
+  // // 판매자의 닉네임과 이미지 정보 가져오기
+  // Future<void> fetchSellerDetails() async {
+  //   final url = Uri.parse('$baseUrl/users/${widget.item.userId}');
+  //   final response = await http.get(url);
+  //
+  //   if (response.statusCode == 200) {
+  //     final Map<String, dynamic> user = json.decode(response.body);
+  //     setState(() {
+  //       sellerImageUrl = user['imageUrl']; // 이미지 URL 가져오기
+  //     });
+  //     print('판매자 닉네임 : $sellerNickname');
+  //   } else {
+  //     print('판매자 정보 가져오기 실패');
+  //   }
+  // }
 
   // 현재 상품의 입찰 기록을 가져오기
   Future<void> fetchBids() async {
@@ -148,6 +165,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
   }
 
+
+//사진 전체화면에 보여지는 경우 설정
   void _showFullImage(List<String> imageUrls, int initialIndex) {
     showGeneralDialog(
       context: context,
@@ -159,19 +178,20 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           body: Stack(
             children: [
               Center(
-                child: InteractiveViewer(
-                  child: PageView.builder(
-                    itemCount: imageUrls.length,
-                    controller: PageController(initialPage: initialIndex),
-                    itemBuilder: (context, index) {
-                      return Image.network(
+                child: PageView.builder(
+                  itemCount: imageUrls.length,
+                  controller: PageController(initialPage: initialIndex),
+                  itemBuilder: (context, index) {
+                    return InteractiveViewer(
+                      clipBehavior: Clip.none,
+                      child: Image.network(
                         imageUrls[index],
                         fit: BoxFit.contain,
                         width: double.infinity,
                         height: double.infinity,
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
               Positioned(
@@ -541,12 +561,10 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         title: Row(
           children: [
             Text(
-              '\'' +
+
                   sellerNickname +
-                  '\'' +
-                  '님이 판매하는 \'' +
-                  widget.item.title +
-                  '\'',
+
+                  ' 님의 상품',
               style: const TextStyle(fontSize: 18, color: Colors.black),
             ),
           ],

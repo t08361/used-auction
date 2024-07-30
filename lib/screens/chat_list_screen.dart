@@ -1,10 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:testhandproduct/providers/constants.dart';
-import '../providers/chat_provider.dart';
-import '../providers/user_provider.dart';
-import '../models/chatRoom.dart';
-import 'chat_screen.dart';
+import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리 import
+import 'package:provider/provider.dart'; // 상태 관리를 위한 Provider 패키지 import
+import 'package:testhandproduct/providers/constants.dart'; // 앱의 상수값을 포함한 파일 import
+import '../providers/chat_provider.dart'; // 채팅 관련 상태 관리 Provider import
+import '../providers/user_provider.dart'; // 사용자 관련 상태 관리 Provider import
+import '../models/chatRoom.dart'; // 채팅방 모델 import
+import 'chat_screen.dart'; // 채팅 화면 import
+
+//함수 구성
+// 채팅방 목록 로드 함수
+// 채팅방 ID 생성 함수
+
+// 🟡채팅방 리스트 Ui
+
 
 class ChatListScreen extends StatefulWidget {
   @override
@@ -12,20 +19,23 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
+
   @override
   void initState() {
     super.initState();
-    _loadChatRooms();
+    _loadChatRooms(); // 채팅방 목록 로드
   }
 
+  // 채팅방 목록 로드 함수
   void _loadChatRooms() async {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-    await chatProvider.loadChatRooms();
+    await chatProvider.loadChatRooms(); // 채팅방 목록을 로드
   }
 
+  // 채팅방 ID 생성 함수
   String getChatRoomId(String userId1, String userId2) {
-    final sortedIds = [userId1, userId2]..sort();
-    return sortedIds.join('_');
+    final sortedIds = [userId1, userId2]..sort(); // 유저 ID 정렬
+    return sortedIds.join('_'); // 정렬된 ID를 조합하여 채팅방 ID 생성
   }
 
   @override
@@ -42,14 +52,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('채팅'),
+        title: Text('채팅'), // 앱바 타이틀 설정
         centerTitle: false, // 타이틀을 왼쪽으로 정렬
-        backgroundColor: primary_color,
+        backgroundColor: primary_color, // 앱바 배경색 설정
       ),
-      backgroundColor: Colors.white,
-      body:
-      ListView.builder(
-        itemCount: userChatRooms.length,
+      backgroundColor: Colors.white, // 배경색 설정
+      // 🟡채팅방 리스트 Ui
+      body: ListView.builder(
+        itemCount: userChatRooms.length, // 채팅방 개수 설정
         itemBuilder: (context, index) {
           final chatRoom = userChatRooms[index];
           final isMe = chatRoom.sellerId == userProvider.id;
@@ -57,16 +67,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
           final chatPartnerNickname = isMe ? chatRoom.buyerNickname : chatRoom.sellerNickname; // 실제로는 닉네임을 가져와야 함
 
           return Container(
-            //color: Colors.green[200], // 배경색 설정
             child: ListTile(
               leading: CircleAvatar(
                 backgroundImage: NetworkImage(chatRoom.itemImage), // 상대방 프로필 이미지 사용
                 radius: 24, // 원형 이미지의 반지름
-                //backgroundColor: Colors.grey[200], // 이미지가 로드되기 전에 보여질 배경색
               ),
-              title: Text(chatPartnerNickname, style: TextStyle(color: Colors.black)),
-              subtitle: Text(chatRoom.lastMessage, style: TextStyle(color: Colors.black)),
-              trailing: Text('${chatRoom.lastMessageTime.hour}:${chatRoom.lastMessageTime.minute}'), // 포맷팅 필요
+              title: Text(chatPartnerNickname, style: TextStyle(color: Colors.black)), // 채팅 상대방 닉네임
+              subtitle: Text(chatRoom.lastMessage, style: TextStyle(color: Colors.black)), // 마지막 메시지
+              trailing: Text('${chatRoom.lastMessageTime.hour}:${chatRoom.lastMessageTime.minute}'), // 마지막 메시지 시간
               onTap: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(

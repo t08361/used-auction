@@ -54,8 +54,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       Placemark place = placemarks[0];
       if (mounted) { // Ensure the widget is still mounted
         setState(() {
-          _regionController.text = '${place.name}, ${place.street}, ${place.subLocality}, ${place.locality}, '
-              '${place.subAdministrativeArea}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}';
+          _regionController.text = '${place.locality}. ${place.subLocality}. ${place.name} ';
         });
       }
     } catch (e) {
@@ -81,6 +80,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       });
     }
   }
+
   //경매 종료일을 등록 시간 기준 1일 후로 설정하는 버튼 기능
   void _setEndDateTimeOneDayLater() {
     setState(() {
@@ -104,7 +104,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
         imageUrls.add(null);
       }
     }
-
     return imageUrls;
   }
 
@@ -133,6 +132,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   bool _isLoading = false; // 로딩 상태를 관리하는 변수
 
+  //상품 등록 버튼을 누를 경우 실행되는 함수
   Future<void> _submitData() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final itemProvider = Provider.of<ItemProvider>(context, listen: false);
@@ -224,7 +224,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
   }
 
-
+//🟡메인 화면
   @override
   Widget build(BuildContext context) {
     return Scaffold(
