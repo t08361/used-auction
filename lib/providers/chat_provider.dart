@@ -38,7 +38,6 @@ class ChatProvider with ChangeNotifier {
         for (var messageData in extractedData) {
           loadedMessages.add(ChatMessage.fromJson(messageData));
         }
-
         _messages = loadedMessages;
         notifyListeners(); // 상태 변경 알림
       } else {
