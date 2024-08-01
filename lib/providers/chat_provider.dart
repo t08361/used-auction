@@ -39,7 +39,6 @@ class ChatProvider with ChangeNotifier {
         for (var messageData in extractedData) {
           loadedMessages.add(ChatMessage.fromJson(messageData));
         }
-
         _messages = loadedMessages;
         notifyListeners(); // 상태 변경 알림
       } else {
@@ -197,6 +196,7 @@ class ChatProvider with ChangeNotifier {
         itemImage: imageUrl,
       );
 
+      //채팅방 리스트에 새로운 채팅방 추가
       _chatRooms.add(newChatRoom);
       notifyListeners(); // 상태 변경 알림
 

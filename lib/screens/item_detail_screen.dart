@@ -845,21 +845,21 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             onPressed: () async {
                               final chatRoomId = getChatRoomId(
                                   userProvider.id, widget.item.userId);
-                              final lastMessage = chatProvider
-                                  .getLastMessageForChatRoom(chatRoomId);
-                              if (winnerId.isNotEmpty &&
-                                  widget.item.userId != winnerId &&
-                                  userProvider.id == winnerId)
-                                chatProvider.createChatRoom(
-                                  userProvider.id,
-                                  userProvider.nickname,
-                                  widget.item.userId,
-                                  sellerNickname,
-                                  lastMessage ?? '',
-                                  widget.item.itemImages.isNotEmpty
-                                      ? widget.item.itemImages[0]
-                                      : '',
-                                );
+                              // final lastMessage = chatProvider
+                              //     .getLastMessageForChatRoom(chatRoomId);
+                              // if (winnerId.isNotEmpty &&
+                              //     widget.item.userId != winnerId &&
+                              //     userProvider.id == winnerId)
+                              //   chatProvider.createChatRoom(
+                              //     userProvider.id,
+                              //     userProvider.nickname,
+                              //     widget.item.userId,
+                              //     sellerNickname,
+                              //     lastMessage ?? '',
+                              //     widget.item.itemImages.isNotEmpty
+                              //         ? widget.item.itemImages[0]
+                              //         : '',
+                              //   );
                               Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => ChatScreen(
                                   senderId: userProvider.id,
@@ -873,7 +873,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             },
                             child: Text('대화하기'),
                           ),
-                        ],
+                        ]
                       ),
                     ],
                   ),
