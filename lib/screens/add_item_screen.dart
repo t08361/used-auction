@@ -4,6 +4,7 @@ import 'package:provider/provider.dart'; // 상태 관리를 위한 Provider 패
 import 'package:image_picker/image_picker.dart'; // 이미지 선택을 위한 image_picker 패키지
 import 'package:firebase_storage/firebase_storage.dart'; // Firebase 스토리지와 상호작용하기 위한 패키지
 import 'package:http/http.dart' as http; // HTTP 요청을 위한 패키지
+import 'package:image/image.dart' as img; // image 패키지의 네임스페이스 지정
 import 'package:testhandproduct/screens/login_screen.dart'; // 로그인 화면
 import 'package:geolocator/geolocator.dart'; // 현재 위치 정보를 얻기 위한 geolocator 패키지
 import 'package:geocoding/geocoding.dart'; // 좌표를 주소로 변환하기 위한 geocoding 패키지
@@ -74,15 +75,43 @@ class _AddItemScreenState extends State<AddItemScreen> {
     super.dispose();
   }
 
+  // 이미지 압축 및 변환 함수
+  Future<File> _optimizeImage(File imageFile) async {
+    // 이미지를 읽어들임
+    final img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
+
+    if (image == null) {
+      throw Exception("이미지 디코딩에 실패했습니다.");
+    }
+
+    // 이미지 크기를 조정할 수 있습니다 (예: 가로 800px, 세로는 비율에 맞춰 자동 조정)
+    final resizedImage = img.copyResize(image, width: 800);
+
+    // 이미지를 jpg 포맷으로 변환하고 압축 (품질을 85%로 설정)
+    final compressedImageBytes = img.encodeJpg(resizedImage, quality: 85);
+
+    // 임시 파일로 저장
+    final tempDir = Directory.systemTemp;
+    final tempFile = File('${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await tempFile.writeAsBytes(compressedImageBytes);
+
+    return tempFile;
+  }
+
+
   // 이미지 선택을 처리하는 함수
   Future<void> _pickImages() async {
     final picker = ImagePicker(); // ImagePicker 인스턴스 생성
     final pickedFiles = await picker.pickMultiImage(); // 여러 이미지를 선택
 
+    // 선택된 이미지를 최적화
+    final optimizedImages = await Future.wait(
+      pickedFiles.map((file) async => await _optimizeImage(File(file.path))),
+    );
+
     setState(() {
-      // 선택한 이미지들을 File 객체로 변환하여 리스트에 저장
-      _selectedImages = pickedFiles.map((file) => File(file.path)).toList();
-    });
+      _selectedImages = optimizedImages; // 최적화된 이미지 파일을 리스트에 추가
+      });
     }
 
   // 경매 종료일을 등록 시간 기준 1일 후로 설정하는 버튼 기능
