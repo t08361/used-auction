@@ -10,11 +10,13 @@ import '../providers/user_provider.dart';
 import '../providers/constants.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:http/http.dart' as http;
-
 import 'ItemEditScreen.dart';
 import 'chat_screen.dart';
 import 'login_screen.dart';
 import 'purchase_history_screen.dart';
+//ItemDetailScreen페이지 상태를 가질 수 있는 Stateful위젯
+
+
 
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
@@ -76,6 +78,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   }
 
   @override
+  //메모리 해제하는 dispose함수
   void dispose() {
     _timer?.cancel(); // 타이머 취소
     super.dispose();
