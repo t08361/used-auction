@@ -2,6 +2,7 @@ import 'dart:convert'; // JSON 데이터를 인코딩/디코딩하기 위한 패
 import 'dart:io'; // 파일 작업을 위한 패키지
 import 'package:flutter/material.dart'; // Flutter에서 UI를 구성하기 위한 패키지
 import 'package:image_picker/image_picker.dart'; // 이미지를 선택할 수 있게 해주는 패키지
+import 'package:image/image.dart' as img; // image 패키지의 네임스페이스 지정
 import 'package:http/http.dart' as http; // HTTP 요청을 보내기 위한 패키지
 import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage에 이미지를 업로드하기 위한 패키지
 import '../providers/constants.dart'; // 프로젝트에서 사용하는 상수를 관리하는 파일
@@ -155,12 +156,39 @@ class _SignupScreenState extends State<SignupScreen> {
     }
   }
 
+
+  // 이미지 최적화 함수
+  Future<File> _optimizeImage(File imageFile) async {
+    // 이미지를 읽어들임
+    final img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
+
+    if (image == null) {
+      throw Exception("이미지 디코딩에 실패했습니다.");
+    }
+
+    // 이미지 크기를 조정할 수 있습니다 (예: 가로 800px, 세로는 비율에 맞춰 자동 조정)
+    final resizedImage = img.copyResize(image, width: 300);
+
+    // 이미지를 jpg 포맷으로 변환하고 압축 (품질을 85%로 설정)
+    final compressedImageBytes = img.encodeJpg(resizedImage, quality: 70);
+
+    // 임시 파일로 저장
+    final tempDir = Directory.systemTemp;
+    final tempFile = File('${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await tempFile.writeAsBytes(compressedImageBytes);
+
+    return tempFile;
+  }
+
   // 이미지를 Firebase Storage에 업로드하는 메서드입니다.
   Future<String?> _uploadImageToFirebase(File image) async {
     try {
+      // 이미지를 최적화합니다.
+      final optimizedImage = await _optimizeImage(image);
+
       final storageRef = FirebaseStorage.instance.ref(); // Firebase Storage의 참조를 가져옵니다.
-      final imageRef = storageRef.child('profile_images/${image.path.split('/').last}'); // 업로드할 이미지의 경로를 설정합니다.
-      await imageRef.putFile(image); // 이미지를 업로드합니다.
+      final imageRef = storageRef.child('profile_images/${optimizedImage.path.split('/').last}'); // 업로드할 이미지의 경로를 설정합니다.
+      await imageRef.putFile(optimizedImage); // 최적화된 이미지를 업로드합니다.
       final imageUrl = await imageRef.getDownloadURL(); // 업로드된 이미지의 URL을 가져옵니다.
       return imageUrl; // 이미지 URL을 반환합니다.
     } catch (e) {
