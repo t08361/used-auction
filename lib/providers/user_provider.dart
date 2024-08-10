@@ -142,7 +142,7 @@ class UserProvider with ChangeNotifier {
         print(data['profileImage']); // 프로필 이미지 출력
         return data['profileImage']; // 프로필 이미지 반환
       } else {
-        print('Failed to load user data'); // 오류 메시지 출력
+        print('유저 탈퇴함'); // 오류 메시지 출력
         return null;
       }
     } catch (e) {
@@ -150,4 +150,23 @@ class UserProvider with ChangeNotifier {
       return null;
     }
   }
+
+  // 특정 아이디로 사용자가 존재하는지 확인하는 메서드
+  Future<bool> doesUserExist(String id) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/users/$id')); // HTTP GET 요청
+      if (response.statusCode == 200) {
+        return true; // 사용자가 존재함
+      } else if (response.statusCode == 404) {
+        return false; // 사용자가 존재하지 않음
+      } else {
+        print('상대 유저 탈퇴 체크 중 오류'); // 오류 메시지 출력
+        return false;
+      }
+    } catch (e) {
+      print('상대 유저 탈퇴 체크 중 예외: $e'); // 예외 메시지 출력
+      return false;
+    }
+  }
+
 }
