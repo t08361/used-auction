@@ -28,14 +28,13 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   String? _buyerProfileImage;
   Timer? _timer;
-  bool _initialScrollDone = false; // 스크롤이 초기화되었는지 여부를 추적
+  bool _initialScrollDone = false;
+  bool _isRecipientValid = true;
 
   @override
   void initState() {
     super.initState();
-    _loadMessages();
-    _loadRecipientProfileImage();
-    _startTimer();
+    _initializeChat();
   }
 
   @override
@@ -44,30 +43,91 @@ class _ChatScreenState extends State<ChatScreen> {
     super.dispose();
   }
 
+  Future<void> _initializeChat() async {
+    try {
+      await _loadMessages(); // 메시지 로드
+      await _loadRecipientProfileImage(); // 프로필 이미지 로드
+      _isRecipientValid = await _isRecipientValidCheck(); // 상대방 상태 확인
+
+      if (_isRecipientValid) {
+        _startTimer(); // 상대방이 유효한 경우에만 타이머 시작
+      } else {
+        _addRecipientInvalidMessage(); // 상대방이 탈퇴한 경우 메시지 추가
+      }
+    } catch (e) {
+      print('Chat initialization error: $e');
+    }
+  }
+
   Future<void> _loadMessages() async {
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-    await chatProvider.loadMessages(widget.chatRoomId);
-    if (!_initialScrollDone) {
-      _scrollToBottom();
-      _initialScrollDone = true; // 스크롤 초기화를 한 번만 수행
+    try {
+      await chatProvider.loadMessages(widget.chatRoomId);
+      if (!_initialScrollDone) {
+        _scrollToBottom();
+        _initialScrollDone = true;
+      }
+    } catch (e) {
+      print('Error loading messages: $e');
+      throw Exception('Failed to load messages');
     }
   }
 
   Future<void> _loadRecipientProfileImage() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final profileImage = await userProvider.getProfileImageById(widget.recipientId);
+    try {
+      final profileImage = await userProvider.getProfileImageById(widget.recipientId);
+      setState(() {
+        _buyerProfileImage = profileImage;
+      });
+    } catch (e) {
+      print('Error loading profile image: $e');
+    }
+  }
+
+  Future<bool> _isRecipientValidCheck() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    try {
+      return await userProvider.doesUserExist(widget.recipientId);
+    } catch (e) {
+      print('Error checking recipient validity: $e');
+      return false; // 기본적으로 유효하지 않다고 설정
+    }
+  }
+
+  void _addRecipientInvalidMessage() {
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+
+    final systemMessage = ChatMessage(
+      id: '', // 임시 ID
+      chatRoomId: widget.chatRoomId,
+      senderId: 'system', // 시스템 메시지로 구분
+      recipientId: widget.senderId,
+      content: '상대방이 탈퇴하여 현재 채팅방을 이용할 수 없습니다.',
+      timestamp: DateTime.now(),
+    );
+
+    chatProvider.messages.add(systemMessage);
     setState(() {
-      _buyerProfileImage = profileImage;
+      _scrollToBottom();
     });
   }
 
   void _startTimer() {
-    _timer = Timer.periodic(Duration(milliseconds: 500), (timer) {
-      _loadMessages();  // 상태를 갱신할 필요 없음
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      try {
+        await _loadMessages();
+      } catch (e) {
+        print('Error reloading messages: $e');
+      }
     });
   }
 
   void _sendMessage() async {
+    if (!_isRecipientValid) {
+      return; // 상대방이 유효하지 않으면 메시지 전송을 막음
+    }
+
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
 
     final message = ChatMessage(
@@ -95,7 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
-          duration: Duration(milliseconds: 100),
+          duration: const Duration(milliseconds: 100),
           curve: Curves.easeOut,
         );
       }
@@ -115,8 +175,8 @@ class _ChatScreenState extends State<ChatScreen> {
               backgroundImage: NetworkImage(widget.itemImage),
               radius: 22,
             ),
-            SizedBox(width: 20),  // 크기 조정
-            Text(
+            const SizedBox(width: 20),
+            const Text(
               '낙찰가 : 20000원',
               style: TextStyle(
                 color: Color(0xFF36BA98),
@@ -126,11 +186,12 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ],
         ),
-        iconTheme: IconThemeData(
+        iconTheme: const IconThemeData(
           color: Color(0xFF36BA98),
         ),
         backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,
       body: Column(
         children: [
           Expanded(
@@ -139,100 +200,137 @@ class _ChatScreenState extends State<ChatScreen> {
               itemCount: chatProvider.messages.length,
               itemBuilder: (context, index) {
                 final message = chatProvider.messages[index];
-                final isMe = message.senderId == userProvider.id;
-                final bool isLastMessageFromSameUser = index < chatProvider.messages.length - 1 &&
+                final isSystemMessage = message.senderId == 'system';
+
+                bool showTime = true;
+                bool showProfile = true;
+
+                if (index < chatProvider.messages.length - 1 &&
+                    chatProvider.messages[index + 1].timestamp.hour == message.timestamp.hour &&
+                    chatProvider.messages[index + 1].timestamp.minute == message.timestamp.minute &&
+                    chatProvider.messages[index + 1].senderId == message.senderId) {
+                  showTime = false;
+                }
+
+                if (index < chatProvider.messages.length - 1 &&
                     chatProvider.messages[index + 1].senderId == message.senderId &&
-                    chatProvider.messages[index + 1].timestamp.difference(message.timestamp).inMinutes == 0;
+                    chatProvider.messages[index + 1].timestamp.hour == message.timestamp.hour &&
+                    chatProvider.messages[index + 1].timestamp.minute == message.timestamp.minute) {
+                  showProfile = false;
+                }
 
                 return Container(
-                  alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  margin: EdgeInsets.symmetric(horizontal: 1.0, vertical: 0.0),  // 상하단 간격 조정
-                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),  // 상하단 간격 조정
-                  child: Row(
+                  alignment: isSystemMessage
+                      ? Alignment.center
+                      : (message.senderId == userProvider.id
+                      ? Alignment.centerRight
+                      : Alignment.centerLeft),
+                  margin: const EdgeInsets.symmetric(horizontal: 1.0, vertical: 5.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5.0),
+                  child: isSystemMessage
+                      ? Text(
+                    message.content,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  )
+                      : Row(
                     mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      if (!isMe && !isLastMessageFromSameUser) ...[
+                      if (message.senderId != userProvider.id && showProfile) ...[
                         CircleAvatar(
                           backgroundImage: _buyerProfileImage != null
                               ? NetworkImage(_buyerProfileImage!)
-                              : AssetImage('assets/images/default_profile.png') as ImageProvider,
+                              : const AssetImage(
+                              'assets/images/default_profile.png')
+                          as ImageProvider,
                           radius: 15,
                         ),
-                        SizedBox(width: 10),
-                      ]else if(!(isMe && !isLastMessageFromSameUser))...[
-                SizedBox(width: 40),
-                ],
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: isMe
-                              ? BorderRadius.only(
-                            topLeft: Radius.circular(30.0),
-                            topRight: Radius.circular(30.0),
-                            bottomLeft: Radius.circular(30.0),
-                          )
-                              : BorderRadius.only(
-                            topLeft: Radius.circular(30.0),
-                            topRight: Radius.circular(30.0),
-                            bottomRight: Radius.circular(30.0),
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              spreadRadius: isMe ? 1 : 0,
-                              blurRadius: isMe ? 3 : 0,
-                              offset: isMe ? Offset(0, 3) : Offset(0, 0),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-                        constraints: BoxConstraints(maxWidth: 250),
-                        child: RichText(
-                          text: TextSpan(
+                        const SizedBox(width: 10),
+                      ] else if (message.senderId != userProvider.id) ...[
+                        const SizedBox(width: 40), // 프로필 공간 확보
+                      ],
+                      Column(
+                        crossAxisAlignment: message.senderId == userProvider.id
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              if (!isLastMessageFromSameUser) ...[
-                                TextSpan(
-                                  text: isMe ? '${message.timestamp.hour}:${message.timestamp.minute}   ' : '',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                              if (message.senderId == userProvider.id && showTime) ...[
+                                Text(
+                                  '${message.timestamp.hour}:${message.timestamp.minute.toString().padLeft(2, '0')}',
+                                  style: const TextStyle(
                                     fontSize: 10,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                const SizedBox(width: 5),
+                              ],
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: message.senderId == userProvider.id
+                                      ? const BorderRadius.only(
+                                    topLeft: Radius.circular(30.0),
+                                    topRight: Radius.circular(30.0),
+                                    bottomLeft: Radius.circular(30.0),
+                                  )
+                                      : const BorderRadius.only(
+                                    topLeft: Radius.circular(30.0),
+                                    topRight: Radius.circular(30.0),
+                                    bottomRight: Radius.circular(30.0),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      spreadRadius: 1,
+                                      blurRadius: 3,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                                constraints: const BoxConstraints(maxWidth: 250),
+                                child: Text(
+                                  message.content,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
                                     color: Colors.black,
                                   ),
                                 ),
-                              ],
-                              TextSpan(
-                                text: message.content,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
                               ),
-                              if (!isLastMessageFromSameUser) ...[
-                                TextSpan(
-                                  text: isMe ? '' : '  ${message.timestamp.hour}:${message.timestamp.minute}',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                              if (message.senderId != userProvider.id && showTime) ...[
+                                const SizedBox(width: 5),
+                                Text(
+                                  '${message.timestamp.hour}:${message.timestamp.minute.toString().padLeft(2, '0')}',
+                                  style: const TextStyle(
                                     fontSize: 10,
-                                    color: Colors.black,
+                                    color: Colors.grey,
                                   ),
                                 ),
                               ],
                             ],
                           ),
-                          softWrap: true,
-                        ),
+                        ],
                       ),
-                      if (isMe && !isLastMessageFromSameUser) ...[
-                        SizedBox(width: 10),
+                      if (message.senderId == userProvider.id && showProfile) ...[
+                        const SizedBox(width: 10),
                         CircleAvatar(
                           backgroundImage: userProvider.profileImage != null
                               ? NetworkImage(userProvider.profileImage!)
-                              : AssetImage('assets/images/default_profile.png') as ImageProvider,
+                              : const AssetImage(
+                              'assets/images/default_profile.png')
+                          as ImageProvider,
                           radius: 15,
                         ),
-                      ]else if(!(isMe && !isLastMessageFromSameUser))...[
-                        SizedBox(width: 40),
+                      ] else if (message.senderId == userProvider.id) ...[
+                        const SizedBox(width: 40), // 프로필 공간 확보
                       ],
                     ],
                   ),
@@ -244,31 +342,11 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(20.0),
             child: Row(
               children: [
-                // Center(
-                //   child: ElevatedButton(
-                //     onPressed: () {
-                //       // 버튼을 눌렀을 때의 동작을 정의
-                //       print('Button Pressed');
-                //     },
-                //     style: ElevatedButton.styleFrom(
-                //       foregroundColor: Colors.white,
-                //       backgroundColor: Color(0xFF36BA98),
-                //       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),  // 패딩 수정
-                //     ),
-                //     child: Text(
-                //       '거래\n완료',
-                //       textAlign: TextAlign.center,
-                //       style: TextStyle(
-                //         fontSize: 14,
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
                     controller: _messageController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: '메시지 입력',
                       labelStyle: TextStyle(
                         color: Colors.black,
@@ -276,14 +354,14 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       border: InputBorder.none,
                     ),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                     ),
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.send_rounded),
-                  onPressed: _sendMessage,
+                  icon: const Icon(Icons.send_rounded),
+                  onPressed: _isRecipientValid ? _sendMessage : null,
                 ),
               ],
             ),

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
-import 'package:testhandproduct/models/chatRoom.dart';
 import '../models/item.dart';
 import '../providers/chat_provider.dart';
 import '../providers/item_provider.dart';
@@ -13,11 +12,8 @@ import 'package:http/http.dart' as http;
 import 'ItemEditScreen.dart';
 import 'chat_screen.dart';
 import 'login_screen.dart';
-import 'purchase_history_screen.dart';
+
 //ItemDetailScreen페이지 상태를 가질 수 있는 Stateful위젯
-
-
-
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
 
@@ -40,6 +36,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   bool _isLoading = true; // 로딩 상태를 나타내는 변수
   bool _showPrice = false; // 판매 가격을 보여줄지 여부를 담는 변수
   bool _showCurrentPrice = false;
+  bool _isSellerDeleted = false; // 탈퇴한 회원 여부 확인 변수
 
   @override
   void initState() {
@@ -64,13 +61,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     }
 
     // 2초 후에 showPrice를 true로 설정
-    Timer(Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 2), () {
       setState(() {
         _showPrice = true;
       });
     });
 
-    Timer(Duration(milliseconds: 20), () {
+    Timer(const Duration(milliseconds: 20), () {
       setState(() {
         _showCurrentPrice = true;
       });
@@ -94,7 +91,11 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       setState(() {
         sellerNickname = user['nickname'];
       });
-      print('판매자 닉네임 : $sellerNickname');
+      // print('판매자 닉네임 : $sellerNickname');
+    } else if (response.statusCode == 404) { // 서버에서 판매자 닉네임을 찾을 수 없다는 뜻
+      setState(() {
+        _isSellerDeleted = true; // 판매자 탈퇴처리
+      });
     } else {
       print('판매자 닉네임 가져오기 실패');
     }
@@ -107,17 +108,41 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
     if (response.statusCode == 200) {
       final List<dynamic> bidList = json.decode(response.body);
+      List<Map<String, dynamic>> tempBids = [];
+
+      for (var bid in bidList) {
+        String bidderId = bid['bid']['bidderId'];
+        String nickname = await fetchUserNickname(bidderId);
+
+        tempBids.add({
+          'nickname': nickname, // 입찰자의 닉네임
+          'bidPrice': bid['bid']['bidAmount'], // 입찰 금액
+          'bidderId': bidderId, // 입찰자 ID 추가
+        });
+      }
+
       setState(() {
-        bids = bidList
-            .map((bid) => {
-                  'nickname': bid['nickname'], // 입찰자의 닉네임
-                  'bidPrice': bid['bid']['bidAmount'], // 입찰 금액
-                  'bidderId': bid['bid']['bidderId'], // 입찰자 ID 추가
-                })
-            .toList();
+        bids = tempBids;
       });
     } else {
       print('입찰 기록을 가져오기 실패');
+    }
+  }
+
+  // 사용자 닉네임을 가져오는 함수
+  Future<String> fetchUserNickname(String userId) async {
+    final url = Uri.parse('$baseUrl/users/$userId');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> user = json.decode(response.body);
+      return user['nickname'] ?? '알 수 없는 사용자';
+    } else if (response.statusCode == 404) {
+      // 사용자 정보를 찾을 수 없는 경우 탈퇴한 회원으로 간주
+      return '탈퇴한 회원';
+    } else {
+      print('사용자 닉네임 가져오기 실패');
+      return '알 수 없는 사용자';
     }
   }
 
@@ -283,8 +308,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             Positioned(
                 bottom: 0,
                 child: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
                     color: Colors.black26,
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.zero, topRight: Radius.circular(13)),
@@ -305,31 +330,31 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   // 입찰 버튼을 눌렀을 때 호출되는 함수
   void _showBidDialog() {
-    int _currentBidStep = 1;
+    int currentBidStep = 1;
     showDialog(
       context: context,
       builder: (ctx) {
         return StatefulBuilder(
           builder: (ctx, setState) {
             return AlertDialog(
-              title: Text('입찰하기'),
+              title: const Text('입찰하기'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '제안할 금액: \₩${currentPrice + widget.item.bidUnit * _currentBidStep}',
-                    style: TextStyle(fontSize: 18, color: Colors.red),
+                    '제안할 금액: ₩${currentPrice + widget.item.bidUnit * currentBidStep}',
+                    style: const TextStyle(fontSize: 18, color: Colors.red),
                   ),
                   const SizedBox(height: 10),
-                  Text('현재가: \₩${currentPrice}'),
+                  Text('현재가: ₩$currentPrice'),
                   const SizedBox(height: 10),
                   NumberPicker(
                     minValue: 1,
                     maxValue: 200,
-                    value: _currentBidStep,
+                    value: currentBidStep,
                     onChanged: (value) {
                       setState(() {
-                        _currentBidStep = value;
+                        currentBidStep = value;
                       });
                     },
                   ),
@@ -342,12 +367,12 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   onPressed: () {
                     Navigator.of(ctx).pop();
                   },
-                  child: Text('취소'),
+                  child: const Text('취소'),
                 ),
                 TextButton(
                   onPressed: () async {
                     final enteredBid =
-                        currentPrice + widget.item.bidUnit * _currentBidStep;
+                        currentPrice + widget.item.bidUnit * currentBidStep;
                     setState(() {
                       currentPrice = enteredBid;
                     });
@@ -357,13 +382,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       _showCurrentPrice = false; // 먼저 텍스트를 숨김
                     });
                     // 짧은 지연 후 텍스트를 다시 표시하여 애니메이션 효과를 줍니다.
-                    Timer(Duration(milliseconds: 100), () {
+                    Timer(const Duration(milliseconds: 100), () {
                       setState(() {
                         _showCurrentPrice = true;
                       });
                     });
                   },
-                  child: Text('입찰'),
+                  child: const Text('입찰'),
                 ),
               ],
             );
@@ -416,7 +441,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   void _startTimer() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final chatProvider = Provider.of<ChatProvider>(context, listen: false);
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         remainingTime = widget.item.endDateTime.difference(DateTime.now());
         if (remainingTime.isNegative || remainingTime.inSeconds == 0) {
@@ -437,7 +462,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               userProvider.nickname,
               widget.item.userId,
               sellerNickname,
-              lastMessage ?? '',
+              lastMessage,
               widget.item.itemImages.isNotEmpty
                   ? widget.item.itemImages[0]
                   : '',
@@ -492,7 +517,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           await itemProvider.deleteItem(widget.item.id);
           Navigator.of(context).pop();
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('삭제 완료')),
+            const SnackBar(content: Text('삭제 완료')),
           );
         } catch (error) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -526,12 +551,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         title: Row(
           children: [
             Text(
-              '\'' +
-                  sellerNickname +
-                  '\'' +
-                  '님이 판매하는 \'' +
-                  widget.item.title +
-                  '\'',
+              _isSellerDeleted
+                  ? '탈퇴한 회원이 올린 글입니다.'
+                  : '\'$sellerNickname\'님이 판매하는 \'${widget.item.title}\'',
               style: const TextStyle(fontSize: 18, color: Colors.black),
             ),
           ],
@@ -542,6 +564,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -556,22 +579,31 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       children: [
                         Text(
                           widget.item.title,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 22, fontWeight: FontWeight.bold),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         buildPopupMenuButton(isOwner, userProvider.isLoggedIn),
                       ],
                     ),
                     const SizedBox(height: 10),
-                    if (isLoggedInUserWinner ||
+                    if (_isSellerDeleted)
+                      const Text(
+                        '이 상품은 탈퇴한 회원이 올린 글입니다. 더 이상 입찰할 수 없습니다.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    if (!_isSellerDeleted && (isLoggedInUserWinner ||
                         (!isLoggedInUserWinner &&
                             !isLoggedInUserSeller &&
-                            _showChatButton))
-                      // AnimatedOpacity 추가
+                            _showChatButton)))
+                    // AnimatedOpacity 추가
                       AnimatedOpacity(
                         opacity: _showCurrentPrice ? 1.0 : 0.0,
-                        duration: Duration(seconds: 1),
+                        duration: const Duration(seconds: 1),
                         child: Text(
                           '현재 가격 : ${currentPrice}원',
                           style: const TextStyle(
@@ -580,18 +612,18 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                               fontWeight: FontWeight.bold),
                         ),
                       ),
-                    if (isLoggedInUserWinner ||
+                    if (!_isSellerDeleted && (isLoggedInUserWinner ||
                         (!isLoggedInUserWinner &&
                             !isLoggedInUserSeller &&
-                            _showChatButton))
+                            _showChatButton)))
                       const SizedBox(height: 10),
-                    if (isLoggedInUserWinner ||
+                    if (!_isSellerDeleted && (isLoggedInUserWinner ||
                         (!isLoggedInUserWinner &&
                             !isLoggedInUserSeller &&
-                            _showChatButton))
+                            _showChatButton)))
                       AnimatedOpacity(
                         opacity: _showCurrentPrice ? 1.0 : 0.0,
-                        duration: Duration(seconds: 4),
+                        duration: const Duration(seconds: 4),
                         child: Text(
                           '시작 가격 : ${widget.item.price}원',
                           style: const TextStyle(
@@ -599,40 +631,43 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         ),
                       ),
                     const SizedBox(height: 10),
-                    Text(
-                      '설명 : ' + widget.item.description,
-                      style: const TextStyle(fontSize: 16),
-                    ),
+                    if (!_isSellerDeleted)
+                      Text(
+                        '설명 : ${widget.item.description}',
+                        style: const TextStyle(fontSize: 16),
+                      ),
                     const SizedBox(height: 10),
-                    Row(
-                      children: [
-                        const Text(
-                          '입찰 기록',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        if (bids.length > 3 && !_showAllBids)
-                          TextButton(
-                            onPressed: () {
-                              setState(() {
-                                _showAllBids = true;
-                              });
-                              _showAllBidsDialog();
-                            },
-                            child: const Text('더보기'),
+                    if (!_isSellerDeleted)
+                      Row(
+                        children: [
+                          const Text(
+                            '입찰 기록',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                      ],
-                    ),
-                    _buildBidList(), // 입찰 기록 리스트 추가
+                          if (bids.length > 3 && !_showAllBids)
+                            TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _showAllBids = true;
+                                });
+                                _showAllBidsDialog();
+                              },
+                              child: const Text('더보기'),
+                            ),
+                        ],
+                      ),
+                    if (!_isSellerDeleted) _buildBidList(), // 입찰 기록 리스트 추가
                   ]),
             ),
           ],
         ),
       ),
-
-      //🟣 하단 앱바
-      bottomNavigationBar: BottomAppBar(
-        shape: CircularNotchedRectangle(),
+      // 하단 앱바는 탈퇴한 회원이 올린 글일 경우 숨김
+      bottomNavigationBar: _isSellerDeleted
+          ? null
+          : BottomAppBar(
+        shape: const CircularNotchedRectangle(),
         notchMargin: 5,
         child: Row(
           children: [
@@ -648,8 +683,8 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.transparent, // 배경색을 투명으로 설정
                           foregroundColor:
-                              primary_color, // 글자색을 primary_color로 설정
-                          padding: EdgeInsets.symmetric(
+                          primary_color, // 글자색을 primary_color로 설정
+                          padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 40), // 패딩 조절
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6), // 모서리 둥글기
@@ -675,74 +710,78 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             if (userProvider.isLoggedIn)
               Column(
                 children: [
-                  if (!(isLoggedInUserWinner ||
-                      (!isLoggedInUserWinner &&
-                          !isLoggedInUserSeller &&
-                          _showChatButton)))
-                    SizedBox(
+                  if (!_isSellerDeleted &&
+                      !(isLoggedInUserWinner ||
+                          (!isLoggedInUserWinner &&
+                              !isLoggedInUserSeller &&
+                              _showChatButton)))
+                    const SizedBox(
                       width: 200,
                     ),
-                  if ((isLoggedInUserWinner ||
-                      (!isLoggedInUserWinner &&
-                          !isLoggedInUserSeller &&
-                          _showChatButton)))
-                    SizedBox(
+                  if (!_isSellerDeleted &&
+                      (isLoggedInUserWinner ||
+                          (!isLoggedInUserWinner &&
+                              !isLoggedInUserSeller &&
+                              _showChatButton)))
+                    const SizedBox(
                       width: 30,
                     ),
-                  if (!(isLoggedInUserWinner ||
-                      (!isLoggedInUserWinner &&
-                          !isLoggedInUserSeller &&
-                          _showChatButton)))
-                    // AnimatedOpacity 추가
+                  if (!_isSellerDeleted &&
+                      !(isLoggedInUserWinner ||
+                          (!isLoggedInUserWinner &&
+                              !isLoggedInUserSeller &&
+                              _showChatButton)))
+                  // AnimatedOpacity 추가
                     AnimatedOpacity(
                       opacity: _showCurrentPrice ? 1.0 : 0.0,
-                      duration: Duration(seconds: 1),
+                      duration: const Duration(seconds: 1),
                       child: Text(
-                        '현재 가격 : ${currentPrice}원',
+                        '현재 가격 : $currentPrice원',
                         style: const TextStyle(
                             fontSize: 17,
                             color: Colors.red,
                             fontWeight: FontWeight.bold),
                       ),
                     ),
-                  if (!(isLoggedInUserWinner ||
-                      (!isLoggedInUserWinner &&
-                          !isLoggedInUserSeller &&
-                          _showChatButton)))
+                  if (!_isSellerDeleted &&
+                      !(isLoggedInUserWinner ||
+                          (!isLoggedInUserWinner &&
+                              !isLoggedInUserSeller &&
+                              _showChatButton)))
                     AnimatedOpacity(
                       opacity: _showCurrentPrice ? 1.0 : 0.0,
-                      duration: Duration(seconds: 4),
+                      duration: const Duration(seconds: 4),
                       child: Text(
                         '시작 가격 : ${widget.item.price}원',
                         style:
-                            const TextStyle(fontSize: 17, color: Colors.black),
+                        const TextStyle(fontSize: 17, color: Colors.black),
                       ),
                     ),
                 ],
               ),
             if (userProvider.isLoggedIn &&
+                !_isSellerDeleted &&
                 !(isLoggedInUserWinner ||
                     (!isLoggedInUserWinner &&
                         !isLoggedInUserSeller &&
                         _showChatButton)))
-              Spacer(),
+              const Spacer(),
             Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 if (userProvider.isLoggedIn && isLoggedInUserSeller)
-                  Center(
+                  const Center(
                     child: Text(
                       '내가 등록한 상품',
-                      style: const TextStyle(fontSize: 18, color: Colors.black),
+                      style: TextStyle(fontSize: 18, color: Colors.black),
                     ),
                   ),
                 if (userProvider.isLoggedIn &&
+                    _isSellerDeleted &&
                     !isOwner &&
-                    !isLoggedInUserWinner &&
-                    !userProvider.isLoggedIn &&
-                    !_showChatButton)
-                  Column(
+                    !isLoggedInUserWinner)
+                  const Column(
                     children: [
                       Center(
                         child: Text(
@@ -753,6 +792,23 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                     ],
                   ),
                 if (userProvider.isLoggedIn &&
+                    !_isSellerDeleted &&
+                    !isOwner &&
+                    !isLoggedInUserWinner &&
+                    !userProvider.isLoggedIn &&
+                    !_showChatButton)
+                  const Column(
+                    children: [
+                      Center(
+                        child: Text(
+                          "경매가 완료 되었습니다",
+                          style: TextStyle(fontSize: 18, color: Colors.black),
+                        ),
+                      ),
+                    ],
+                  ),
+                if (userProvider.isLoggedIn &&
+                    !_isSellerDeleted &&
                     !isOwner &&
                     !isLoggedInUserWinner &&
                     userProvider.isLoggedIn &&
@@ -764,14 +820,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: primary_color, // 배경색
                             foregroundColor: Colors.white, // 글자색
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                                 vertical: 10, horizontal: 20), // 패딩 조절
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8), // 모서리 둥글기
                             ),
                           ),
-                          onPressed: _showBidDialog,
-                          child: Text('입찰'),
+                          onPressed: _isSellerDeleted ? null : _showBidDialog,
+                          child: const Text('입찰'),
                         ),
                       ),
                     ],
@@ -779,29 +835,29 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                 if (userProvider.isLoggedIn && isLoggedInUserWinner)
                   Row(
                     children: [
-                      SizedBox(
+                      const SizedBox(
                         height: 30,
                       ),
-                      Column(
+                      const Column(
                         children: [
                           SizedBox(height: 10),
                           Center(child: Text("최종 상품 구매 대상자가 되셨습니다.")),
                           Center(child: Text("진심으로 축하드립니다.🎉")),
                         ],
                       ),
-                      SizedBox(width: 40),
+                      const SizedBox(width: 40),
                       Column(
                         children: [
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primary_color, // 배경색
                               foregroundColor: Colors.white, // 글자색
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   vertical: 10, horizontal: 20), // 패딩 조절
                               shape: RoundedRectangleBorder(
                                 borderRadius:
-                                    BorderRadius.circular(8), // 모서리 둥글기
+                                BorderRadius.circular(8), // 모서리 둥글기
                               ),
                             ),
                             onPressed: () async {
@@ -811,7 +867,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   .getLastMessageForChatRoom(chatRoomId);
                               if (winnerId.isNotEmpty &&
                                   widget.item.userId != winnerId &&
-                                  userProvider.id == winnerId)
+                                  userProvider.id == winnerId) {
                                 chatProvider.createChatRoom(
                                   userProvider.id,
                                   userProvider.nickname,
@@ -822,6 +878,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                       ? widget.item.itemImages[0]
                                       : '',
                                 );
+                              }
                               Navigator.of(context).push(MaterialPageRoute(
                                 builder: (context) => ChatScreen(
                                   senderId: userProvider.id,
@@ -833,13 +890,14 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                 ),
                               ));
                             },
-                            child: Text('대화하기'),
+                            child: const Text('대화하기'),
                           ),
                         ],
                       ),
                     ],
                   ),
                 if (userProvider.isLoggedIn &&
+                    !_isSellerDeleted &&
                     !isLoggedInUserWinner &&
                     !isLoggedInUserSeller &&
                     _showChatButton)
@@ -851,7 +909,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                   ),
               ],
             ),
-            SizedBox(
+            const SizedBox(
               width: 30,
             ),
           ],
