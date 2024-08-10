@@ -12,10 +12,8 @@ import 'package:http/http.dart' as http;
 import 'ItemEditScreen.dart';
 import 'chat_screen.dart';
 import 'login_screen.dart';
+
 //ItemDetailScreen페이지 상태를 가질 수 있는 Stateful위젯
-
-
-
 class ItemDetailScreen extends StatefulWidget {
   final Item item;
 
@@ -110,17 +108,41 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
     if (response.statusCode == 200) {
       final List<dynamic> bidList = json.decode(response.body);
+      List<Map<String, dynamic>> tempBids = [];
+
+      for (var bid in bidList) {
+        String bidderId = bid['bid']['bidderId'];
+        String nickname = await fetchUserNickname(bidderId);
+
+        tempBids.add({
+          'nickname': nickname, // 입찰자의 닉네임
+          'bidPrice': bid['bid']['bidAmount'], // 입찰 금액
+          'bidderId': bidderId, // 입찰자 ID 추가
+        });
+      }
+
       setState(() {
-        bids = bidList
-            .map((bid) => {
-                  'nickname': bid['nickname'], // 입찰자의 닉네임
-                  'bidPrice': bid['bid']['bidAmount'], // 입찰 금액
-                  'bidderId': bid['bid']['bidderId'], // 입찰자 ID 추가
-                })
-            .toList();
+        bids = tempBids;
       });
     } else {
       print('입찰 기록을 가져오기 실패');
+    }
+  }
+
+  // 사용자 닉네임을 가져오는 함수
+  Future<String> fetchUserNickname(String userId) async {
+    final url = Uri.parse('$baseUrl/users/$userId');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> user = json.decode(response.body);
+      return user['nickname'] ?? '알 수 없는 사용자';
+    } else if (response.statusCode == 404) {
+      // 사용자 정보를 찾을 수 없는 경우 탈퇴한 회원으로 간주
+      return '탈퇴한 회원';
+    } else {
+      print('사용자 닉네임 가져오기 실패');
+      return '알 수 없는 사용자';
     }
   }
 
@@ -440,7 +462,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               userProvider.nickname,
               widget.item.userId,
               sellerNickname,
-              lastMessage ?? '',
+              lastMessage,
               widget.item.itemImages.isNotEmpty
                   ? widget.item.itemImages[0]
                   : '',
@@ -542,6 +564,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -577,7 +600,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         (!isLoggedInUserWinner &&
                             !isLoggedInUserSeller &&
                             _showChatButton)))
-                      // AnimatedOpacity 추가
+                    // AnimatedOpacity 추가
                       AnimatedOpacity(
                         opacity: _showCurrentPrice ? 1.0 : 0.0,
                         duration: const Duration(seconds: 1),
@@ -634,15 +657,16 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             ),
                         ],
                       ),
-                     if (!_isSellerDeleted) _buildBidList(), // 입찰 기록 리스트 추가
+                    if (!_isSellerDeleted) _buildBidList(), // 입찰 기록 리스트 추가
                   ]),
             ),
           ],
         ),
       ),
-
-      //🟣 하단 앱바
-      bottomNavigationBar: BottomAppBar(
+      // 하단 앱바는 탈퇴한 회원이 올린 글일 경우 숨김
+      bottomNavigationBar: _isSellerDeleted
+          ? null
+          : BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 5,
         child: Row(
@@ -659,7 +683,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         style: TextButton.styleFrom(
                           backgroundColor: Colors.transparent, // 배경색을 투명으로 설정
                           foregroundColor:
-                              primary_color, // 글자색을 primary_color로 설정
+                          primary_color, // 글자색을 primary_color로 설정
                           padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 40), // 패딩 조절
                           shape: RoundedRectangleBorder(
@@ -707,7 +731,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                           (!isLoggedInUserWinner &&
                               !isLoggedInUserSeller &&
                               _showChatButton)))
-                    // AnimatedOpacity 추가
+                  // AnimatedOpacity 추가
                     AnimatedOpacity(
                       opacity: _showCurrentPrice ? 1.0 : 0.0,
                       duration: const Duration(seconds: 1),
@@ -730,7 +754,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       child: Text(
                         '시작 가격 : ${widget.item.price}원',
                         style:
-                            const TextStyle(fontSize: 17, color: Colors.black),
+                        const TextStyle(fontSize: 17, color: Colors.black),
                       ),
                     ),
                 ],
@@ -833,7 +857,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   vertical: 10, horizontal: 20), // 패딩 조절
                               shape: RoundedRectangleBorder(
                                 borderRadius:
-                                    BorderRadius.circular(8), // 모서리 둥글기
+                                BorderRadius.circular(8), // 모서리 둥글기
                               ),
                             ),
                             onPressed: () async {
