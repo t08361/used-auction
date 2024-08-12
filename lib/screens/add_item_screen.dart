@@ -58,8 +58,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
       Placemark place = placemarks[0];
       if (mounted) { // 위젯이 여전히 활성화되어 있는지 확인
         setState(() {
-           // 변환된 주소를 지역 필드에 설정
-          _regionController.text = '${place.locality}. ${place.subLocality}. ${place.name} ';
+          // 변환된 주소를 지역 필드에 설정
+          _regionController.text = '${place.name}, ${place.street}, ${place.subLocality}, ${place.locality}, '
+              '${place.subAdministrativeArea}, ${place.administrativeArea}, ${place.postalCode}, ${place.country}';
         });
       }
     } catch (e) {
@@ -110,11 +111,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     setState(() {
       _selectedImages = optimizedImages; // 최적화된 이미지 파일을 리스트에 추가
-      });
-    }
+    });
   }
-
-
 
   // 경매 종료일을 등록 시간 기준 1일 후로 설정하는 버튼 기능
   void _setEndDateTimeOneDayLater() {
@@ -270,7 +268,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
   }
 
-//🟡메인 화면
   @override
   Widget build(BuildContext context) {
     return Scaffold(

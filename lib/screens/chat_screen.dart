@@ -1,27 +1,15 @@
-import 'dart:async'; // 타이머 관련 라이브러리
-import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리
-import 'package:provider/provider.dart'; // 상태 관리를 위한 Provider 패키지
-import '../providers/chat_provider.dart'; // 채팅 관련 상태 관리 Provider
-import '../providers/user_provider.dart'; // 사용자 관련 상태 관리 Provider
-import '../models/chatMessage.dart'; // 채팅 메시지 모델
-
-//함수 구성
-// 메시지 로드 함수
-// 받는 사람 프로필 이미지 로드 함수
-// 타이머 시작 함수
-// 메시지 전송 함수
-// 처음에 화면 켜지면 제일 아래로 화면 스크롤 하는 험수
-
-// 🟡화면 Ui
-// 채팅방 상단 앱바 부분
-// 채팅방 바디 화면 부분
-// 🟢메세지 입력창
+import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/chat_provider.dart';
+import '../providers/user_provider.dart';
+import '../models/chatMessage.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String senderId; // 보낸 사람 ID
-  final String recipientId; // 받는 사람 ID
-  final String chatRoomId; // 채팅방 ID
-  final String itemImage; // 아이템 이미지 URL
+  final String senderId;
+  final String recipientId;
+  final String chatRoomId;
+  final String itemImage;
 
   const ChatScreen({
     super.key,
@@ -51,11 +39,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // 타이머 취소
+    _timer?.cancel();
     super.dispose();
   }
 
-  // 메시지 로드 함수
   Future<void> _initializeChat() async {
     try {
       await _loadMessages(); // 메시지 로드
@@ -86,7 +73,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // 받는 사람 프로필 이미지 로드 함수
   Future<void> _loadRecipientProfileImage() async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     try {
@@ -127,7 +113,6 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  // 타이머 시작 함수
   void _startTimer() {
     _timer = Timer.periodic(const Duration(seconds: 5), (timer) async {
       try {
@@ -138,7 +123,6 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  // 메시지 전송 함수
   void _sendMessage() async {
     if (!_isRecipientValid) {
       return; // 상대방이 유효하지 않으면 메시지 전송을 막음
@@ -166,7 +150,6 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollToBottom();
   }
 
-  // 처음에 화면 켜지면 제일 아래로 화면 스크롤 하는 기능
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -179,14 +162,12 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  // 🟡화면 Ui
   @override
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
-      // 채팅방 상단 앱바 부분
       appBar: AppBar(
         title: Row(
           children: [
@@ -210,11 +191,9 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         backgroundColor: Colors.white,
       ),
-      // 채팅방 바디 화면 부분
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // 메시지 리스트 표시
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -265,50 +244,27 @@ class _ChatScreenState extends State<ChatScreen> {
                         CircleAvatar(
                           backgroundImage: _buyerProfileImage != null
                               ? NetworkImage(_buyerProfileImage!)
-                              : AssetImage('assets/images/default_profile.png')
-                                  as ImageProvider,
+                              : const AssetImage(
+                              'assets/images/default_profile.png')
+                          as ImageProvider,
                           radius: 15,
                         ),
-                        SizedBox(width: 10),
-                      ] else if (!(isMe && !isLastMessageFromSameUser)) ...[
-                        SizedBox(width: 40),
+                        const SizedBox(width: 10),
+                      ] else if (message.senderId != userProvider.id) ...[
+                        const SizedBox(width: 40), // 프로필 공간 확보
                       ],
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: isMe
-                              ? BorderRadius.only(
-                                  topLeft: Radius.circular(30.0),
-                                  topRight: Radius.circular(30.0),
-                                  bottomLeft: Radius.circular(30.0),
-                                )
-                              : BorderRadius.only(
-                                  topLeft: Radius.circular(30.0),
-                                  topRight: Radius.circular(30.0),
-                                  bottomRight: Radius.circular(30.0),
-                                ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.3),
-                              spreadRadius: isMe ? 1 : 0,
-                              blurRadius: isMe ? 3 : 0,
-                              offset: isMe ? Offset(0, 3) : Offset(0, 0),
-                            ),
-                          ],
-                        ),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 10.0, vertical: 10.0),
-                        constraints: BoxConstraints(maxWidth: 250),
-                        child: RichText(
-                          text: TextSpan(
+                      Column(
+                        crossAxisAlignment: message.senderId == userProvider.id
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              if (!isLastMessageFromSameUser) ...[
-                                TextSpan(
-                                  text: isMe
-                                      ? '${message.timestamp.hour}:${message.timestamp.minute}   '
-                                      : '',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
+                              if (message.senderId == userProvider.id && showTime) ...[
+                                Text(
+                                  '${message.timestamp.hour}:${message.timestamp.minute.toString().padLeft(2, '0')}',
+                                  style: const TextStyle(
                                     fontSize: 10,
                                     color: Colors.grey,
                                   ),
@@ -382,7 +338,6 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          // 🟢메세지 입력창
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: Row(
