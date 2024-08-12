@@ -76,6 +76,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.red, // 기본 테마 색상
       ),
+      debugShowCheckedModeBanner: false, // "debug" 띠를 없애기 위해 추가
       home: MainScreen(), // 앱 시작 시 표시할 화면
       routes: {
         '/login': (context) => LoginScreen(), // 로그인 화면

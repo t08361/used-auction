@@ -11,5 +11,5 @@ Color primary_color=Color(0xFF36BA98);
 
 Color background_color=Colors.white;
 Color other_color=Colors.white;
-Color button_color=Color(0xFF729762);
+Color button_color=Color(0xFF729762); 
 

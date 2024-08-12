@@ -43,7 +43,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     final chatProvider = Provider.of<ChatProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
 
-    // 현재 사용자가 참여 중인 채팅방만 필터링
+    // 현재 사용자가 참여 중인 채팅방만 필터링( 수정해야할 부분 )
     final userChatRooms = chatProvider.chatRooms.where((chatRoom) =>
     chatRoom.sellerId == userProvider.id || chatRoom.buyerId == userProvider.id).toList();
 

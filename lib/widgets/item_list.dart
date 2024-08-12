@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/chat_provider.dart';
 import '../providers/item_provider.dart';
+import '../providers/user_provider.dart';
 import '../screens/item_detail_screen.dart';
 
 class ItemList extends StatefulWidget {
@@ -189,7 +191,6 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
   void initState() {
     super.initState();
     timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      setState(() {});
     });
   }
 
