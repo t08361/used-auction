@@ -11,7 +11,6 @@ import '../screens/notification_screen.dart'; // 알림 화면 import
 // 상품 리스트를 표시하는 영역 (widget/item_list.dart)
 // 상품 등록 화면으로 이동하는 버튼
 
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -37,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: AppBar(
           title: Text(
             '뚝딱', // 앱바 타이틀
+
             style: TextStyle(color: Colors.black), // 타이틀 색상 설정
           ),
           // 뒤로가기 버튼을 없애기
@@ -85,14 +85,15 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Colors.white, // 아이콘 색상 설정
         onPressed: () {
           Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => AddItemScreen()), // 아이템 추가 화면으로 이동
+            MaterialPageRoute(
+                builder: (context) => AddItemScreen()), // 아이템 추가 화면으로 이동
           );
         },
         backgroundColor: primary_color, // 버튼 배경색 설정
         child: const Icon(Icons.add), // 버튼 아이콘 설정
       ),
       floatingActionButtonLocation:
-      FloatingActionButtonLocation.endFloat, // 버튼 위치 설정
+          FloatingActionButtonLocation.endFloat, // 버튼 위치 설정
     );
   }
 }

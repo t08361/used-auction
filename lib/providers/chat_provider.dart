@@ -13,7 +13,6 @@ import 'constants.dart';
 // 새로운 채팅방을 생성하는 메서드
 // 두 사용자의 ID를 이용해 채팅방 ID를 생성하는 메서드
 
-
 // ChatProvider 클래스 정의: 채팅 관련 데이터와 로직을 관리
 class ChatProvider with ChangeNotifier {
   // 채팅 메시지와 채팅방 목록을 저장할 리스트
@@ -39,6 +38,7 @@ class ChatProvider with ChangeNotifier {
         for (var messageData in extractedData) {
           loadedMessages.add(ChatMessage.fromJson(messageData));
         }
+
         _messages = loadedMessages;
         notifyListeners(); // 상태 변경 알림
       } else {
@@ -78,7 +78,8 @@ class ChatProvider with ChangeNotifier {
   }
 
   // 새로운 메시지를 서버에 전송하고, 채팅방의 마지막 메시지를 업데이트하는 메서드
-  Future<void> sendMessage(String chatRoomId, String senderId, String recipientId, String content, DateTime timestamp) async {
+  Future<void> sendMessage(String chatRoomId, String senderId,
+      String recipientId, String content, DateTime timestamp) async {
     final url = Uri.parse('$baseUrl/chat/sendMessage');
     final messageData = {
       'chatRoomId': chatRoomId,
@@ -89,7 +90,10 @@ class ChatProvider with ChangeNotifier {
     };
 
     // 데이터 유효성 검사
-    if (chatRoomId.isEmpty || senderId.isEmpty || recipientId.isEmpty || content.isEmpty) {
+    if (chatRoomId.isEmpty ||
+        senderId.isEmpty ||
+        recipientId.isEmpty ||
+        content.isEmpty) {
       print('Invalid data: One of the required fields is empty');
       throw Exception('Invalid data: One of the required fields is empty');
     }
@@ -120,9 +124,11 @@ class ChatProvider with ChangeNotifier {
   }
 
   // 현재 채팅방의 마지막 메시지와 시간을 업데이트하는 메서드
-  Future<void> updateLastMessage(String chatRoomId, String lastMessage, DateTime lastMessageTime) async {
+  Future<void> updateLastMessage(
+      String chatRoomId, String lastMessage, DateTime lastMessageTime) async {
     // chatRoomId에 해당하는 채팅방의 인덱스를 찾음
-    final chatRoomIndex = _chatRooms.indexWhere((chatRoom) => chatRoom.id == chatRoomId);
+    final chatRoomIndex =
+        _chatRooms.indexWhere((chatRoom) => chatRoom.id == chatRoomId);
 
     // 해당 채팅방이 존재할 경우
     if (chatRoomIndex != -1) {
@@ -160,7 +166,8 @@ class ChatProvider with ChangeNotifier {
 
         // 성공이 아닌 경우 에러 처리
         if (response.statusCode != 200) {
-          print('Failed to update last message. Status code: ${response.statusCode}');
+          print(
+              'Failed to update last message. Status code: ${response.statusCode}');
           throw Exception('Failed to update last message');
         }
       } catch (error) {
@@ -172,7 +179,8 @@ class ChatProvider with ChangeNotifier {
 
   // 특정 채팅방의 마지막 메시지를 반환하는 메서드
   String getLastMessageForChatRoom(String chatRoomId) {
-    final messagesForRoom = _messages.where((message) => message.chatRoomId == chatRoomId).toList();
+    final messagesForRoom =
+        _messages.where((message) => message.chatRoomId == chatRoomId).toList();
     if (messagesForRoom.isNotEmpty) {
       return messagesForRoom.last.message;
     }
@@ -180,9 +188,16 @@ class ChatProvider with ChangeNotifier {
   }
 
   // 새로운 채팅방을 생성하는 메서드
-  Future<void> createChatRoom(String sellerId, String sellerNickname, String recipientId, String buyerNickname, String lastMessage, String imageUrl) async {
+  Future<void> createChatRoom(
+      String sellerId,
+      String sellerNickname,
+      String recipientId,
+      String buyerNickname,
+      String lastMessage,
+      String imageUrl) async {
     final chatRoomId = _getChatRoomId(sellerId, recipientId);
-    final existingChat = _chatRooms.any((chatRoom) => chatRoom.id == chatRoomId);
+    final existingChat =
+        _chatRooms.any((chatRoom) => chatRoom.id == chatRoomId);
     if (!existingChat) {
       final newChatRoom = ChatRoom(
         id: chatRoomId,

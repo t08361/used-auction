@@ -12,14 +12,11 @@ import 'screens/login_screen.dart';
 import 'screens/chat_list_screen.dart';
 import 'screens/user_mypage.dart';
 
-
 // 앱에서 사용할 provider 설정
 // 사용자 권한 요청 함수
 // 최상위 위젯인 MyApp
 // 하단 앱바를 포함한 홈화면
 // 하단 앱바 Ui
-
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Flutter 위젯 바인딩을 초기화
@@ -87,7 +84,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
 
 class MainScreen extends StatefulWidget {
   @override
