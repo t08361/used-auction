@@ -1,13 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../models/user.dart';
-import 'constants.dart';
+import 'package:flutter/material.dart'; // 플러터의 UI 라이브러리
+import 'package:shared_preferences/shared_preferences.dart'; // SharedPreferences 라이브러리
+import 'package:http/http.dart' as http; // HTTP 요청을 위한 라이브러리
+import 'dart:convert'; // JSON 변환을 위한 다트 라이브러리
+import '../models/user.dart'; // 사용자 모델을 불러옴
+import 'constants.dart'; // 상수 값을 불러옴
 
+// ChangeNotifier를 믹스인으로 사용하여 상태 변경을 관리하는 UserProvider 클래스 정의
 class UserProvider with ChangeNotifier {
-  List<User> _users = [];
+  List<User> _users = []; // 사용자 목록을 저장하는 리스트
 
+  // 사용자 정보 변수 정의
   String _id = ''; // 사용자 ID를 저장하는 변수
   String _username = ''; // 사용자 이름을 저장하는 변수
   String _email = ''; // 사용자 이메일을 저장하는 변수
@@ -28,8 +30,22 @@ class UserProvider with ChangeNotifier {
   bool _isLoggedIn = false; // 로그인 상태를 저장하는 변수
   bool get isLoggedIn => _isLoggedIn; // 로그인 상태에 대한 getter 정의
 
+  // 특정 ID로 사용자 닉네임을 가져오는 메서드
   String getNicknameById(String id) {
-    final user = _users.firstWhere((user) => user.id == id, orElse: () => User(id: '', username: '', password: '', nickname: 'Unknown', email: '', location: '', age: 0, profileImage: ''));
+    // 주어진 ID에 해당하는 사용자를 찾고 닉네임을 반환
+    final user = _users.firstWhere(
+          (user) => user.id == id,
+      orElse: () => User(
+        id: '',
+        username: '',
+        password: '',
+        nickname: 'Unknown',
+        email: '',
+        location: '',
+        age: 0,
+        profileImage: '',
+      ),
+    );
     return user.nickname;
   }
 
@@ -45,7 +61,9 @@ class UserProvider with ChangeNotifier {
     _isLoggedIn = true; // 로그인 상태로 설정
     notifyListeners(); // 상태 변경 알림
 
-    SharedPreferences prefs = await SharedPreferences.getInstance(); // SharedPreferences 인스턴스 가져오기
+    // SharedPreferences 인스턴스 가져오기
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    // 사용자 정보를 SharedPreferences에 저장
     await prefs.setString('id', _id);
     await prefs.setString('username', _username);
     await prefs.setString('email', _email);
@@ -70,16 +88,19 @@ class UserProvider with ChangeNotifier {
     _isLoggedIn = false; // 로그아웃 상태로 설정
     notifyListeners(); // 상태 변경 알림
 
-    SharedPreferences prefs = await SharedPreferences.getInstance(); // SharedPreferences 인스턴스 가져오기
+    // SharedPreferences 인스턴스 가져오기
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear(); // SharedPreferences 초기화
   }
 
   // 로그인 상태를 로드하는 메서드
   Future<void> loadUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance(); // SharedPreferences 인스턴스 가져오기
+    // SharedPreferences 인스턴스 가져오기
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     _isLoggedIn = prefs.getBool('isLoggedIn') ?? false; // SharedPreferences에서 로그인 상태 로드
-    notifyListeners();
+    notifyListeners(); // 상태 변경 알림
     if (_isLoggedIn) {
+      // SharedPreferences에서 사용자 정보 로드
       _id = prefs.getString('id') ?? '';
       _username = prefs.getString('username') ?? '';
       _email = prefs.getString('email') ?? '';
@@ -87,7 +108,7 @@ class UserProvider with ChangeNotifier {
       _location = prefs.getString('location') ?? '';
       _age = prefs.getInt('age') ?? 0;
       _profileImage = prefs.getString('profileImage'); // 프로필 이미지 로드
-      notifyListeners();
+      notifyListeners(); // 상태 변경 알림
     }
   }
 
@@ -95,7 +116,9 @@ class UserProvider with ChangeNotifier {
   void login() async {
     _isLoggedIn = true; // 로그인 상태로 설정
     notifyListeners(); // 상태 변경 알림
-    SharedPreferences prefs = await SharedPreferences.getInstance(); // SharedPreferences 인스턴스 가져오기
+
+    // SharedPreferences 인스턴스 가져오기
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', _isLoggedIn); // SharedPreferences에 로그인 상태 저장
   }
 
@@ -103,27 +126,47 @@ class UserProvider with ChangeNotifier {
   void logout() async {
     _isLoggedIn = false; // 로그아웃 상태로 설정
     _profileImage = null; // 프로필 이미지 초기화
-
     notifyListeners(); // 상태 변경 알림
-    SharedPreferences prefs = await SharedPreferences.getInstance(); // SharedPreferences 인스턴스 가져오기
+
+    // SharedPreferences 인스턴스 가져오기
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', _isLoggedIn); // SharedPreferences에 로그아웃 상태 저장
   }
 
-  //특정 아이디로 사용자 정보를 가져와 프로필 이미지를 반환하는 메서드
+  // 특정 아이디로 사용자 정보를 가져와 프로필 이미지를 반환하는 메서드
   Future<String?> getProfileImageById(String id) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/users/$id'));
+      final response = await http.get(Uri.parse('$baseUrl/users/$id')); // HTTP GET 요청
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        print(data['profileImage']);
-        return data['profileImage'];
+        final data = json.decode(response.body); // 응답 데이터를 JSON으로 변환
+        print(data['profileImage']); // 프로필 이미지 출력
+        return data['profileImage']; // 프로필 이미지 반환
       } else {
-        print('Failed to load user data');
+        print('유저 탈퇴함'); // 오류 메시지 출력
         return null;
       }
     } catch (e) {
-      print('Error fetching profile image: $e');
+      print('Error fetching profile image: $e'); // 예외 메시지 출력
       return null;
     }
   }
+
+  // 특정 아이디로 사용자가 존재하는지 확인하는 메서드
+  Future<bool> doesUserExist(String id) async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/users/$id')); // HTTP GET 요청
+      if (response.statusCode == 200) {
+        return true; // 사용자가 존재함
+      } else if (response.statusCode == 404) {
+        return false; // 사용자가 존재하지 않음
+      } else {
+        print('상대 유저 탈퇴 체크 중 오류'); // 오류 메시지 출력
+        return false;
+      }
+    } catch (e) {
+      print('상대 유저 탈퇴 체크 중 예외: $e'); // 예외 메시지 출력
+      return false;
+    }
+  }
+
 }
