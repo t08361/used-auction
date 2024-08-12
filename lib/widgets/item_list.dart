@@ -1,8 +1,10 @@
+
 import 'dart:async'; // 비동기 처리를 위한 패키지
 import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리
 import 'package:provider/provider.dart'; // 상태 관리를 위한 Provider 패키지
 import 'package:cached_network_image/cached_network_image.dart'; // 이미지 캐싱을 위한 패키지
 import '../providers/item_provider.dart';
+import '../providers/user_provider.dart';
 import '../screens/item_detail_screen.dart';
 
 // 아이템 목록을 보여주는 위젯
@@ -219,28 +221,29 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
 
     String displayText;
     if (days > 0) {
-      displayText = "$days일"; // 남은 시간이 1일 이상을 경우
+      displayText = "남은 시간 : $days일";
     } else if (hours > 0) {
-      displayText = "$hours시간"; // 남은 시간이 1시간 이상일 경우
+      displayText = "남은 시간 : $hours시간";
     } else if (minutes > 0) {
-      displayText = "$minutes분"; // 남은 시간이 1분 이상일 경우
+      displayText = "남은 시간 : $minutes분";
     } else {
-      displayText = seconds == 0 ? "경매 종료" : "$seconds초"; // 남은 시간이 초 단위일 경우
+      displayText = seconds == 0 ? "판매 완료" : "남은 시간 : $seconds초";
     }
 
     return Container(
       margin: const EdgeInsets.only(top: 0.0), // 그리드와 텍스트 간의 간격 추가
       decoration: BoxDecoration(
-        color: seconds == 0 ? Colors.black : Colors.redAccent, // 시간이 남아있으면 빨간색, 경매가 종료되면 검은색
+        color: seconds == 0 ? Colors.white : Colors.black,
         borderRadius: BorderRadius.circular(9.0), // 모서리를 둥글게 설정
       ),
-      child: Center(
+      child: Align(
+        alignment: seconds == 0 ?Alignment.centerLeft:Alignment.center, // 텍스트를 왼쪽으로 정렬
         child: Padding(
           padding: const EdgeInsets.all(3.0), // 텍스트와 컨테이너 간의 간격 추가
           child: Text(
-            displayText, // 남은 시간 텍스트 표시
-            style: const TextStyle(
-              color: Colors.white,
+            displayText,
+            style: TextStyle(
+              color: seconds == 0 ? Colors.black : Colors.white,
               fontSize: 14, // 텍스트 크기 설정
               fontWeight: FontWeight.bold, // 텍스트 굵기 설정
             ),

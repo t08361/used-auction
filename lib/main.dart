@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:testhandproduct/providers/chat_provider.dart';
-import 'package:testhandproduct/providers/constants.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'providers/chat_provider.dart';
+import 'providers/constants.dart';
 import 'providers/item_provider.dart';
 import 'providers/user_provider.dart';
 import 'screens/home_screen.dart';
@@ -10,36 +11,44 @@ import 'screens/add_item_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/chat_list_screen.dart';
 import 'screens/user_mypage.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+// 앱에서 사용할 provider 설정
+// 사용자 권한 요청 함수
+// 최상위 위젯인 MyApp
+// 하단 앱바를 포함한 홈화면
+// 하단 앱바 Ui
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // 바인딩 초기화
-  await Firebase.initializeApp(); // Firebase 초기화
+  WidgetsFlutterBinding.ensureInitialized(); // Flutter 위젯 바인딩을 초기화
+  await Firebase.initializeApp(); // Firebase를 초기화
 
-  // 권한 요청 함수 호출
-  await requestPermissions();
+  await requestPermissions(); // 앱 시작 시 권한 요청
 
   runApp(
+    // 앱에서 사용할 provider 설정
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ItemProvider()),
+        // 아이템 관련 상태 관리
         ChangeNotifierProvider(create: (context) => UserProvider()),
-        ChangeNotifierProvider(create: (context) => ChatProvider()), // 추가된 부분
+        // 사용자 관련 상태 관리
+        ChangeNotifierProvider(create: (context) => ChatProvider()),
+        // 채팅 관련 상태 관리
       ],
-      child: MyApp(),
+      child: MyApp(), // 최상위 위젯인 MyApp 실행
     ),
   );
 }
 
-// 처음에 화면 들어오면 사용자 권한 설정 받는 함수
+// 사용자 권한 요청 함수
 Future<void> requestPermissions() async {
   // 위치 권한 요청
-  PermissionStatus locationStatus = await Permission.locationWhenInUse.request();
-
+  PermissionStatus locationStatus =
+      await Permission.locationWhenInUse.request();
   // 알림 권한 요청 (iOS의 경우)
   PermissionStatus notificationStatus = await Permission.notification.request();
 
-  // 권한 상태를 확인하여 추가 작업을 수행할 수 있습니다.
+  // 권한 상태 확인
   if (locationStatus.isGranted) {
     print("위치 권한 허용됨");
   } else {
@@ -53,23 +62,24 @@ Future<void> requestPermissions() async {
   }
 }
 
+// 최상위 위젯인 MyApp
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Provider.of<UserProvider>(context, listen: false).loadUser();
+    Provider.of<UserProvider>(context, listen: false).loadUser(); // 사용자 정보 로드
 
     return MaterialApp(
-      title: '중고 거래 앱',
+      title: '중고 거래 앱', // 앱 제목
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.red, // 기본 테마 색상
       ),
-      home: MainScreen(),
+      debugShowCheckedModeBanner: false, // "debug" 띠를 없애기 위해 추가
+      home: MainScreen(), // 앱 시작 시 표시할 화면
       routes: {
-        '/login': (context) => LoginScreen(),
-        '/user': (context) => UserPage(),
-        '/home': (context) => HomeScreen(),
-        '/add-item': (context) => AddItemScreen(),
-        // Add other routes here
+        '/login': (context) => LoginScreen(), // 로그인 화면
+        '/user': (context) => UserPage(), // 사용자 페이지
+        '/home': (context) => HomeScreen(), // 홈 화면
+        '/add-item': (context) => AddItemScreen(), // 아이템 추가 화면
       },
     );
   }
@@ -80,70 +90,83 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
+// 하단 앱바를 포함한 홈화면
 class _MainScreenState extends State<MainScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 0; // 선택된 하단 네비게이션 바 인덱스
 
+  // 각 인덱스에 해당하는 위젯 리스트
   List<Widget> _widgetOptions(BuildContext context) {
     return <Widget>[
-      HomeScreen(),
-      ChatListScreen(),
+      HomeScreen(), // 홈 화면
+      ChatListScreen(), // 채팅 목록 화면
       Consumer<UserProvider>(
         builder: (context, userProvider, child) {
-          return userProvider.isLoggedIn ? UserPage() : LoginScreen();
+          return userProvider.isLoggedIn
+              ? UserPage()
+              : LoginScreen(); // 로그인 여부에 따라 화면 변경
         },
       ),
     ];
   }
 
+  // 하단 네비게이션 바 아이템 선택 시 호출되는 함수
   void _onItemTapped(int index) {
     setState(() {
-      _selectedIndex = index;
+      _selectedIndex = index; // 선택된 인덱스로 상태 업데이트
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // 화면 높이를 가져옴 ( 핸드폰 규격에 맞게 %로 설정 가능하여 반응형 Ui 적용이 가능해졌다. )
-    double screenHeight = MediaQuery.of(context).size.height;
-    // 화면 높이에 따라 BottomNavigationBar의 높이 설정
-    double bottomBarHeight = screenHeight * 0.1; // 예시: 화면 높이의 8%로 설정
+    double screenHeight = MediaQuery.of(context).size.height; // 화면 높이를 가져옴
+    double bottomBarHeight = screenHeight * 0.1; // 하단 네비게이션 바의 높이 설정
 
     return Scaffold(
-      backgroundColor: primary_color, // Scaffold 배경색 설정
-      body: _widgetOptions(context).elementAt(_selectedIndex),
+      backgroundColor: primary_color, // 앱의 기본 배경색
+      body: _widgetOptions(context).elementAt(_selectedIndex), // 선택된 인덱스의 위젯 표시
       bottomNavigationBar: Container(
-        height: bottomBarHeight, // 반응형 높이 설정
+        height: bottomBarHeight, // 하단 네비게이션 바 높이 설정
         decoration: const BoxDecoration(
-          color: Colors.white, // 하단바 배경색을 하얗게 설정
+          color: Colors.white, // 하단 네비게이션 바 배경색 설정
           border: Border(
             top: BorderSide(
-              color: Colors.grey, // 경계선 색을 설정
-              width: 0.2, // 경계선 너비를 설정
+              color: Colors.grey, // 상단 경계선 색상
+              width: 0.2, // 상단 경계선 너비
             ),
           ),
         ),
+
+        // 하단 앱바 Ui
         child: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined, size: 22), // 아이콘 크기 조절
-              label: '홈',
+              icon: Icon(Icons.home_outlined, size: 22), // 홈 아이콘
+              label: '홈', // 홈 라벨
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.chat_bubble_outline_outlined, size: 22), // 아이콘 크기 조절
-              label: '채팅',
+              icon: Icon(Icons.chat_bubble_outline_outlined, size: 22),
+              // 채팅 아이콘
+              label: '채팅', // 채팅 라벨
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline, size: 22), // 아이콘 크기 조절
-              label: '마이페이지',
+              icon: Icon(Icons.person_outline, size: 22), // 마이페이지 아이콘
+              label: '마이페이지', // 마이페이지 라벨
             ),
           ],
+          // 현재 선택된 인덱스
           currentIndex: _selectedIndex,
+          // 선택된 아이템 색상
           selectedItemColor: primary_color,
+          // 선택되지 않은 아이템 색상
           unselectedItemColor: Colors.grey,
+          // 아이템 탭 시 호출되는 함수
           onTap: _onItemTapped,
-          backgroundColor: Colors.white, // 네비게이션 바의 배경색 설정
-          selectedLabelStyle: TextStyle(fontSize: 12), // 선택된 아이템의 텍스트 크기 조절
-          unselectedLabelStyle: TextStyle(fontSize: 10), // 선택되지 않은 아이템의 텍스트 크기 조절
+          // 네비게이션 바 배경색
+          backgroundColor: Colors.white,
+          // 선택된 아이템의 텍스트 크기
+          selectedLabelStyle: TextStyle(fontSize: 12),
+          // 선택되지 않은 아이템의 텍스트 크기
+          unselectedLabelStyle: TextStyle(fontSize: 10),
         ),
       ),
     );

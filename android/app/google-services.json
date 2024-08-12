@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:204279765070:android:843e21b8e2f28cea640b1f",
+        "mobilesdk_app_id": "1:204279765070:android:2995ac24f9d59685640b1f",
         "android_client_info": {
-          "package_name": "com.example.testhandproduct"
+          "package_name": "com.usedauction.testhandproduct"
         }
       },
       "oauth_client": [],
