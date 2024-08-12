@@ -1,6 +1,7 @@
 import 'dart:async'; // 비동기 처리를 위한 패키지
 import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리
 import 'package:provider/provider.dart'; // 상태 관리를 위한 Provider 패키지
+import 'package:cached_network_image/cached_network_image.dart'; // 이미지 캐싱을 위한 패키지
 import '../providers/item_provider.dart';
 import '../screens/item_detail_screen.dart';
 
@@ -114,7 +115,12 @@ class _ItemListState extends State<ItemList> {
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(5.0),
                               child: item.itemImages.isNotEmpty // itemImages가 비어있지 않으면
-                                  ? Image.network(item.itemImages[0], fit: BoxFit.cover) // 첫 번째 이미지를 네트워크에서 로드
+                                  ? CachedNetworkImage(
+                                      imageUrl: item.itemImages[0], // 첫 번째 이미지를 캐싱하여 로드
+                                      fit: BoxFit.cover,
+                                      placeholder: (context, url) => const CircularProgressIndicator(), // 로딩 중일 때 표시할 위젯
+                                      errorWidget: (context, url, error) => const Icon(Icons.error), // 로드 실패 시 표시할 위젯
+                              )
                                   : const Placeholder(), // 이미지가 없을 경우 Placeholder 사용
                             ),
                           ),

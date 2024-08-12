@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
@@ -187,11 +188,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               itemCount: imageUrls.length,
               controller: PageController(initialPage: initialIndex),
               itemBuilder: (context, index) {
-                return Image.network(
-                  imageUrls[index],
+                return CachedNetworkImage(
+                  imageUrl: imageUrls[index],
                   fit: BoxFit.cover,
                   width: double.infinity,
                   height: double.infinity,
+                  placeholder: (context, url) => CircularProgressIndicator(), // 로딩 중일 때 표시할 위젯
+                  errorWidget: (context, url, error) => Icon(Icons.error), // 로드 실패 시 표시할 위젯
                 );
               },
             ),
@@ -296,11 +299,13 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               itemBuilder: (context, index) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(0.0),
-                  child: Image.network(
-                    widget.item.itemImages[index],
+                  child: CachedNetworkImage(
+                    imageUrl: widget.item.itemImages[index],
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
+                    placeholder: (context, url) => const CircularProgressIndicator(), // 로딩 중일 때 표시할 위젯
+                    errorWidget: (context, url, error) => const Icon(Icons.error), // 로드 실패 시 표시할 위젯
                   ),
                 );
               },
