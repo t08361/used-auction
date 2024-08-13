@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 
 import '../providers/constants.dart';
-import '../providers/user_provider.dart'; // HTTP 요청을 위한 라이브러리
+import '../providers/user_provider.dart';
 
 class EditProfilePage extends StatefulWidget {
   static const routeName = '/edit-profile';
@@ -16,7 +16,6 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
   File? _profileImage;
   double _mannerScore = 7.5; // 매너등급 (1~10)
 
@@ -63,26 +62,20 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  // 회원 탈퇴기능
   void _withdrawal(BuildContext context) async {
-    // UserProvider에서 현재 사용자의 ID를 가져오기
     final id = Provider.of<UserProvider>(context, listen: false).id;
 
     try {
-      // 서버에 DELETE 요청 보내기
       final response = await http.delete(Uri.parse('$baseUrl/users/$id'));
 
       if (response.statusCode == 204) { // 서버가 성공적으로 삭제한 경우
-        // 사용자 정보 초기화 및 로그아웃 처리
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         userProvider.clearUser();
 
-        // 성공 메시지를 사용자에게 표시
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('탈퇴가 완료되었습니다.')),
         );
 
-        // 로그인 페이지로 이동 또는 홈 화면으로 이동
         Navigator.of(context).pushReplacementNamed('/login');
       } else {
         print('탈퇴중 서버에서 오류 발생');
@@ -106,14 +99,38 @@ class _EditProfilePageState extends State<EditProfilePage> {
               onTap: _pickImage,
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: _profileImage != null ? FileImage(_profileImage!) : AssetImage('assets/profile.jpg') as ImageProvider,
+                backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
                 child: _profileImage == null ? Icon(Icons.camera_alt, size: 50, color: Colors.grey) : null,
               ),
             ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: const Text('이미지 수정'),
+            ),
             const SizedBox(height: 20),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(labelText: '닉네임'),
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(labelText: '닉네임'),
+                  ),
+                ),
+                const SizedBox(width: 10), // 버튼과 텍스트 필드 사이의 간격
+                ElevatedButton(
+                  onPressed: () async {
+                    final newNickname = _nameController.text;
+                    if (newNickname.isNotEmpty) {
+                      await Provider.of<UserProvider>(context, listen: false).updateNickname(newNickname);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('닉네임이 수정되었습니다.')),
+                      );
+                    }
+                  },
+                  child: const Text('닉네임 수정'),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
             const Text(
@@ -122,7 +139,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             const SizedBox(height: 10),
             LinearProgressIndicator(
-              value: _mannerScore / 10, // 1~10 범위를 0.0~1.0 범위로 변환
+              value: _mannerScore / 10,
               backgroundColor: Colors.grey[300],
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
               minHeight: 10,
@@ -132,23 +149,18 @@ class _EditProfilePageState extends State<EditProfilePage> {
               '등급: $_mannerScore/10',
               style: const TextStyle(fontSize: 16),
             ),
-            const SizedBox(height: 20),
+            const Spacer(),
             ElevatedButton(
-              onPressed: () => _saveProfile(context),
-              child: const Text('저장'),
-            ),
-            const Spacer(), // 여백을 추가해서 회원탈퇴 버튼 아래로 밀기
-            ElevatedButton(
-              onPressed: () => _showWithdrawalConfirmation(context), // 회원 탈퇴 확인 다이얼로그 표시
+              onPressed: () => _showWithdrawalConfirmation(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red, // 빨간버튼
+                backgroundColor: Colors.red,
               ),
               child: const Text(
                 '탈퇴하기',
-                style: TextStyle(color: Colors.white), // 하얀글씨
+                style: TextStyle(color: Colors.white),
               ),
             ),
-            const SizedBox(height: 20), // 아래 여백
+            const SizedBox(height: 20),
           ],
         ),
       ),
