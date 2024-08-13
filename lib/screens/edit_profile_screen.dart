@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:firebase_storage/firebase_storage.dart'; // Firebase Storage
 import 'package:provider/provider.dart';
+import 'package:image/image.dart' as img; // 이미지 처리 패키지
 
 import '../providers/constants.dart';
 import '../providers/user_provider.dart';
@@ -29,9 +33,74 @@ class _EditProfilePageState extends State<EditProfilePage> {
     });
   }
 
-  void _saveProfile(BuildContext context) {
-    // 프로필 저장 로직
-    // 예를 들어, 서버에 요청을 보내고 응답을 처리합니다.
+  Future<File> _optimizeImage(File imageFile) async {
+    final img.Image? image = img.decodeImage(imageFile.readAsBytesSync());
+
+    if (image == null) {
+      throw Exception("이미지 디코딩에 실패했습니다.");
+    }
+
+    final resizedImage = img.copyResize(image, width: 300);
+    final compressedImageBytes = img.encodeJpg(resizedImage, quality: 70);
+
+    final tempDir = Directory.systemTemp;
+    final tempFile = File('${tempDir.path}/${DateTime.now().millisecondsSinceEpoch}.jpg');
+    await tempFile.writeAsBytes(compressedImageBytes);
+
+    return tempFile;
+  }
+
+  Future<String?> _uploadImageToFirebase(File image) async {
+    try {
+      final optimizedImage = await _optimizeImage(image);
+
+      final storageRef = FirebaseStorage.instance.ref();
+      final imageRef = storageRef.child('profile_images/${optimizedImage.path.split('/').last}');
+      await imageRef.putFile(optimizedImage);
+      final imageUrl = await imageRef.getDownloadURL();
+      return imageUrl;
+    } catch (e) {
+      print('이미지 업로드 실패: $e');
+      return null;
+    }
+  }
+
+  Future<void> _updateProfileImage(BuildContext context) async {
+    if (_profileImage != null) {
+      final imageUrl = await _uploadImageToFirebase(_profileImage!);
+
+      if (imageUrl != null) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        final id = userProvider.id;
+
+        final response = await http.patch(
+          Uri.parse('$baseUrl/users/$id'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({'profileImage': imageUrl}),
+        );
+
+        if (response.statusCode == 200) {
+          // 프로필 이미지 업데이트
+          userProvider.setUser({
+            'id': id,
+            'username': userProvider.username,
+            'email': userProvider.email,
+            'nickname': userProvider.nickname,
+            'location': userProvider.location,
+            'age': userProvider.age,
+            'profileImage': imageUrl,
+          });
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('프로필 이미지가 수정되었습니다.')),
+          );
+        } else {
+          print('프로필 이미지 수정 실패: ${response.statusCode}');
+        }
+      }
+    } else {
+      print('선택된 이미지가 없습니다.');
+    }
   }
 
   void _showWithdrawalConfirmation(BuildContext context) {
@@ -78,10 +147,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
         Navigator.of(context).pushReplacementNamed('/login');
       } else {
-        print('탈퇴중 서버에서 오류 발생');
+        print('탈퇴 중 서버에서 오류 발생');
       }
     } catch (e) {
-      print('탈퇴중 예외 발생');
+      print('탈퇴 중 예외 발생');
     }
   }
 
@@ -105,7 +174,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             const SizedBox(height: 10),
             ElevatedButton(
-              onPressed: _pickImage,
+              onPressed: () async {
+                await _updateProfileImage(context);
+              },
               child: const Text('이미지 수정'),
             ),
             const SizedBox(height: 20),
