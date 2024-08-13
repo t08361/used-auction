@@ -14,10 +14,6 @@ class UserPage extends StatelessWidget {
   // UserPage 라우트 이름 정의 (라우팅 시 사용될 이름)
   static const routeName = '/social-signup';
 
-  // 사용자 입력을 받기 위한 컨트롤러들 생성 (사용자 이름과 이메일을 입력받기 위한 TextEditingController)
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-
   // 내 정보 수정 페이지로 이동하는 함수 (Navigator를 사용하여 EditProfilePage로 이동)
   void _showMyStatus(BuildContext context) {
     Navigator.push(
@@ -79,7 +75,7 @@ class UserPage extends StatelessWidget {
     final userProvider = Provider.of<UserProvider>(context);
 
     return Scaffold(
-      //backgroundColor: background_color,
+      backgroundColor: background_color,
       body: Padding(
         padding: const EdgeInsets.all(16.0), // 화면의 모든 가장자리에서 16.0의 패딩을 적용
         child: SingleChildScrollView( // 화면을 스크롤 가능하게 하는 위젯
@@ -87,7 +83,7 @@ class UserPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start, // Column 안의 모든 위젯을 왼쪽 정렬
             children: [
               const SizedBox(height: 40), // 상단 여백
-              Row(
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween, // Row 안의 위젯들을 양 끝으로 정렬
                 children: [
                   Text(
@@ -136,7 +132,7 @@ class UserPage extends StatelessWidget {
               Center(
                 child: Column(
                   children: [
-                    Text(
+                    const Text(
                       '나의 거래', // '나의 거래' 텍스트
                       style: TextStyle(
                         fontSize: 20, // 텍스트 크기 설정
@@ -182,26 +178,26 @@ class UserPage extends StatelessWidget {
                   child: Column(
                     children: [
                       ListTile( // 카드 내에서 개별 항목을 나타내는 ListTile 위젯
-                        leading: Icon(Icons.person, color: Colors.black), // 왼쪽에 아이콘 설정
-                        title: Text('내 정보', style: TextStyle(color: Colors.black)), // 항목 이름 설정
+                        leading: const Icon(Icons.person, color: Colors.black), // 왼쪽에 아이콘 설정
+                        title: const Text('내 정보', style: TextStyle(color: Colors.black)), // 항목 이름 설정
                         onTap: () => _showMyStatus(context), // 탭할 때 내 정보 수정 페이지로 이동
                       ),
-                      Divider(), // 항목들 사이에 구분선을 표시
+                      const Divider(), // 항목들 사이에 구분선을 표시
                       ListTile(
-                        leading: Icon(Icons.help_outline, color: Colors.black), // 왼쪽에 아이콘 설정
-                        title: Text('FAQ', style: TextStyle(color: Colors.black)), // 항목 이름 설정
+                        leading: const Icon(Icons.help_outline, color: Colors.black), // 왼쪽에 아이콘 설정
+                        title: const Text('FAQ', style: TextStyle(color: Colors.black)), // 항목 이름 설정
                         onTap: () => _showFAQ(context), // 탭할 때 FAQ 페이지로 이동
                       ),
-                      Divider(),
+                      const Divider(),
                       ListTile(
-                        leading: Icon(Icons.policy, color: Colors.black), // 왼쪽에 아이콘 설정
-                        title: Text('약관 및 정책', style: TextStyle(color: Colors.black)), // 항목 이름 설정
+                        leading: const Icon(Icons.policy, color: Colors.black), // 왼쪽에 아이콘 설정
+                        title: const Text('약관 및 정책', style: TextStyle(color: Colors.black)), // 항목 이름 설정
                         onTap: () => _showTermsAndPolicies(context), // 탭할 때 약관 및 정책 페이지로 이동
                       ),
-                      Divider(),
+                      const Divider(),
                       ListTile(
-                        leading: Icon(Icons.logout, color: Colors.black), // 왼쪽에 아이콘 설정
-                        title: Text('로그아웃', style: TextStyle(color: Colors.black)), // 항목 이름 설정
+                        leading: const Icon(Icons.logout, color: Colors.black), // 왼쪽에 아이콘 설정
+                        title: const Text('로그아웃', style: TextStyle(color: Colors.black)), // 항목 이름 설정
                         onTap: () => _logout(context), // 탭할 때 로그아웃 기능 실행
                       ),
                     ],
@@ -223,7 +219,7 @@ class UserPage extends StatelessWidget {
         children: [
           Container( // 아이콘을 담는 컨테이너
             decoration: BoxDecoration(
-              color: button_color, // 버튼의 배경색 설정
+              color: primary_color, // 버튼의 배경색 설정
               borderRadius: BorderRadius.circular(12), // 버튼 모서리를 둥글게 설정
             ),
             width: 80, // 버튼의 너비 설정
@@ -231,7 +227,7 @@ class UserPage extends StatelessWidget {
             child: Icon(icon, size: 40, color: Colors.black), // 아이콘 설정
           ),
           const SizedBox(height: 8), // 아이콘과 텍스트 사이 여백
-          Text(text, style: TextStyle(color: Colors.black)), // 버튼 텍스트 설정
+          Text(text, style: const TextStyle(color: Colors.black)), // 버튼 텍스트 설정
         ],
       ),
     );

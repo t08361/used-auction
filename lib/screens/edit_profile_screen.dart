@@ -20,8 +20,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   File? _profileImage;
   double _mannerScore = 7.5; // 매너등급 (1~10)
 
-
-
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
@@ -35,6 +33,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void _saveProfile(BuildContext context) {
     // 프로필 저장 로직
     // 예를 들어, 서버에 요청을 보내고 응답을 처리합니다.
+  }
+
+  void _showWithdrawalConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('탈퇴 확인'),
+        content: const Text('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(); // 다이얼로그 닫기
+            },
+            child: const Text('취소'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop(); // 다이얼로그 닫기
+              _withdrawal(context); // 탈퇴 기능 실행
+            },
+            child: const Text(
+              '탈퇴하기',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // 회원 탈퇴기능
@@ -61,10 +87,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
       } else {
         print('탈퇴중 서버에서 오류 발생');
       }
-    } catch(e) {
+    } catch (e) {
       print('탈퇴중 예외 발생');
     }
-
   }
 
   @override
@@ -99,7 +124,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             LinearProgressIndicator(
               value: _mannerScore / 10, // 1~10 범위를 0.0~1.0 범위로 변환
               backgroundColor: Colors.grey[300],
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.green),
               minHeight: 10,
             ),
             const SizedBox(height: 10),
@@ -112,15 +137,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
               onPressed: () => _saveProfile(context),
               child: const Text('저장'),
             ),
-
             const Spacer(), // 여백을 추가해서 회원탈퇴 버튼 아래로 밀기
             ElevatedButton(
-              onPressed: () => _withdrawal(context), // 회원 탈퇴 기능 실행
+              onPressed: () => _showWithdrawalConfirmation(context), // 회원 탈퇴 확인 다이얼로그 표시
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red, // 빨간버튼
               ),
               child: const Text(
-                  '탈퇴하기',
+                '탈퇴하기',
                 style: TextStyle(color: Colors.white), // 하얀글씨
               ),
             ),
