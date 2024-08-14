@@ -159,12 +159,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const Spacer(),
                     Center(
-                      child: TextUtil(
-                        text: "로그인", weight: true, size: 30, color: Colors.black,
+                      child: Text(
+                        "로그인",
+                        style: TextStyle(
+                          fontSize: 30,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w400, // 가벼운 두께로 설정
+                        ),
                       ),
                     ),
                     const Spacer(),
-                    TextUtil(text: "아이디", color: Colors.black,),
+                    Text(
+                      "아이디",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400, // 가벼운 두께로 설정
+                      ),
+                    ),
                     Container(
                       height: 40,
                       decoration: const BoxDecoration(
@@ -182,7 +193,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const Spacer(),
-                    TextUtil(text: "비밀번호", color: Colors.black,),
+                    Text(
+                      "비밀번호",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w400, // 가벼운 두께로 설정
+                      ),
+                    ),
                     Container(
                       height: 40,
                       decoration: const BoxDecoration(
@@ -211,7 +228,16 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(30)
                         ),
                         alignment: Alignment.center,
-                        child: TextUtil(text: "로그인", color: Colors.white,),
+                        child: Center(
+                          child: Text(
+                            "로그인",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600, // 기존에 true로 설정되어 있던 부분을 bold로 대체
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -224,8 +250,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       },
                       child: Center(
-                        child: TextUtil(
-                          text: "회원가입", size: 16, weight: true, color: Colors.black,
+                        child: Center(
+                          child: Text(
+                            "회원가입",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600, // 기존에 true로 설정되어 있던 부분을 bold로 대체
+                              color: Colors.black,
+                            ),
+                          ),
                         ),
                       ),
                     ),
