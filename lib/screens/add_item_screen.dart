@@ -121,6 +121,20 @@ class _AddItemScreenState extends State<AddItemScreen> {
     });
   }
 
+  // 3시간 후로 경매 종료일 설정하는 함수
+  void _setEndDateTimeThreeHoursLater() {
+    setState(() {
+      _endDateTime = DateTime.now().add(const Duration(hours: 3)); // 현재 시간에서 3시간 더한 시간 설정
+    });
+  }
+
+// 6시간 후로 경매 종료일 설정하는 함수
+  void _setEndDateTimeSixHoursLater() {
+    setState(() {
+      _endDateTime = DateTime.now().add(const Duration(hours: 6)); // 현재 시간에서 6시간 더한 시간 설정
+    });
+  }
+
   // 선택된 이미지를 Firebase에 업로드하고 URL을 반환하는 함수
   Future<List<String?>> _uploadImagesToFirebase(List<File> images) async {
     List<String?> imageUrls = [];
@@ -372,6 +386,16 @@ class _AddItemScreenState extends State<AddItemScreen> {
                     onPressed: _setEndDateTimeOneDayLater, // 1일 후로 경매 종료일 설정
                     child: const Text('1일'),
                   ),
+                  // 새로 추가된 3시간 버튼
+                  TextButton(
+                    onPressed: _setEndDateTimeThreeHoursLater,
+                    child: const Text('3시간'),
+                  ),
+                  // 새로 추가된 6시간 버튼
+                  TextButton(
+                    onPressed: _setEndDateTimeSixHoursLater,
+                    child: const Text('6시간'),
+                  )
                 ],
               ),
               const SizedBox(height: 20),
