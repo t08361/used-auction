@@ -54,9 +54,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
       appBar: AppBar(
         title: Text('채팅'), // 앱바 타이틀 설정
         centerTitle: false, // 타이틀을 왼쪽으로 정렬
-        backgroundColor: primary_color, // 앱바 배경색 설정
+        backgroundColor: Colors.white, // 앱바 배경색 설정
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(0.5), // 원하는 높이로 설정
+          child: Container(
+            color: Colors.grey, // 밑줄 색상
+            height: 0.2, // 밑줄 두께
+          ),
+        ),
       ),
+
       backgroundColor: Colors.white, // 배경색 설정
+
       // 🟡채팅방 리스트 Ui
       body: ListView.builder(
         itemCount: userChatRooms.length, // 채팅방 개수 설정
