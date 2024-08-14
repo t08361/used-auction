@@ -169,4 +169,31 @@ class UserProvider with ChangeNotifier {
     }
   }
 
+  // 닉네임 수정 메서드
+  Future<void> updateNickname(String newNickname) async {
+    final id = _id; // 현재 사용자 ID
+    if (id.isEmpty) return;
+
+    try {
+      final response = await http.patch(
+        Uri.parse('$baseUrl/users/$id'), // 사용자 ID를 이용해 PATCH 요청
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'nickname': newNickname}),
+      );
+
+      if (response.statusCode == 200) {
+        // 서버에서 성공적으로 업데이트한 경우
+        _nickname = newNickname;
+        notifyListeners(); // 상태 변경 알림
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('nickname', newNickname); // SharedPreferences에 닉네임 저장
+      } else {
+        print('닉네임 수정 실패');
+      }
+    } catch (e) {
+      print('닉네임 수정 중 오류 발생: $e');
+    }
+  }
+
+
 }
