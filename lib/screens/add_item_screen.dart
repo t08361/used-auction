@@ -255,7 +255,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
         }
       }
 
+
+
       if (userProvider.isLoggedIn) {
+        // JWT 토큰을 Authorization 헤더에 추가
+        request.headers['Authorization'] = 'Bearer ${userProvider.token}';
+
         var response = await request.send(); // 요청 전송
 
         if (response.statusCode == 201) { // 서버가 성공적으로 응답한 경우
