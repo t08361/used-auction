@@ -17,6 +17,7 @@ class UserProvider with ChangeNotifier {
   String _location = ''; // 사용자 위치를 저장하는 변수
   int _age = 0; // 사용자 나이를 저장하는 변수
   String? _profileImage; // 프로필 이미지를 저장하는 변수
+  String? _token; // JWT 토큰 저장 변수
 
   // 각 변수에 대한 getter 정의
   String get id => _id;
@@ -26,9 +27,9 @@ class UserProvider with ChangeNotifier {
   String get location => _location;
   int get age => _age;
   String? get profileImage => _profileImage; // 프로필 이미지 getter
-
   bool _isLoggedIn = false; // 로그인 상태를 저장하는 변수
   bool get isLoggedIn => _isLoggedIn; // 로그인 상태에 대한 getter 정의
+  String? get token => _token; // 토큰에 대한 getter 정의
 
   // 특정 ID로 사용자 닉네임을 가져오는 메서드
   String getNicknameById(String id) {
@@ -59,6 +60,7 @@ class UserProvider with ChangeNotifier {
     _age = userData['age']; // 사용자 나이 설정
     _profileImage = userData['profileImage']; // 프로필 이미지 설정
     _isLoggedIn = true; // 로그인 상태로 설정
+    _token = userData['token']; // JWT 토큰 설정
     notifyListeners(); // 상태 변경 알림
 
     // SharedPreferences 인스턴스 가져오기
@@ -74,6 +76,7 @@ class UserProvider with ChangeNotifier {
       await prefs.setString('profileImage', _profileImage!); // 프로필 이미지 저장
     }
     await prefs.setBool('isLoggedIn', true); // SharedPreferences에 로그인 상태 저장
+    await prefs.setString('token', _token!); // JWT 토큰 저장
   }
 
   // 사용자 정보를 초기화하는 메서드
@@ -86,6 +89,7 @@ class UserProvider with ChangeNotifier {
     _age = 0; // 사용자 나이 초기화
     _profileImage = null; // 프로필 이미지 초기화
     _isLoggedIn = false; // 로그아웃 상태로 설정
+    _token = null; // 토큰 초기화
     notifyListeners(); // 상태 변경 알림
 
     // SharedPreferences 인스턴스 가져오기
@@ -108,6 +112,7 @@ class UserProvider with ChangeNotifier {
       _location = prefs.getString('location') ?? '';
       _age = prefs.getInt('age') ?? 0;
       _profileImage = prefs.getString('profileImage'); // 프로필 이미지 로드
+      _token = prefs.getString('token'); // JWT 토큰 로드
       notifyListeners(); // 상태 변경 알림
     }
   }
@@ -126,11 +131,13 @@ class UserProvider with ChangeNotifier {
   void logout() async {
     _isLoggedIn = false; // 로그아웃 상태로 설정
     _profileImage = null; // 프로필 이미지 초기화
+    _token = null; // 토큰 초기화
     notifyListeners(); // 상태 변경 알림
 
     // SharedPreferences 인스턴스 가져오기
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', _isLoggedIn); // SharedPreferences에 로그아웃 상태 저장
+    await prefs.remove('token'); // 저장된 JWT 토큰 삭제
   }
 
   // 특정 아이디로 사용자 정보를 가져와 프로필 이미지를 반환하는 메서드
