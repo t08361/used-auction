@@ -27,7 +27,6 @@ class _LoginScreenState extends State<LoginScreen> {
   int selectedIndex = 0;
   bool showOption = false;
 
-  // 로그인 버튼 클릭 시 실행되는 함수
   void _login(BuildContext context) async {
     final email = _emailController.text; // 입력받은 이메일
     final password = _passwordController.text; // 입력받은 패스워드
@@ -42,11 +41,12 @@ class _LoginScreenState extends State<LoginScreen> {
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
 
-        log(
-            '로그인 성공: ID = ${responseBody['id']}, 닉네임 = ${responseBody['nickname']}, 이메일 = ${responseBody['email']}');
+        // JSON에서 user 객체 안의 값을 가져오기
+        final user = responseBody['user'];
+        log('로그인 성공: ID = ${user['id']}, 닉네임 = ${user['nickname']}, 이메일 = ${user['email']}');
 
         Provider.of<UserProvider>(context, listen: false).login();
-        Provider.of<UserProvider>(context, listen: false).setUser(responseBody);
+        Provider.of<UserProvider>(context, listen: false).setUser(user);
 
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
           borderRadius: BorderRadius.circular(15.0),
           side: BorderSide(color: Colors.red, width: 1),
         ),
-        title: Text(
+        title: const Text(
           '오류',
           style: TextStyle(color: Colors.white),
         ),
@@ -97,7 +97,7 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () {
               Navigator.of(ctx).pop();
             },
-            child: Text(
+            child: const Text(
               '확인',
               style: TextStyle(color: Colors.red),
             ),
@@ -158,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Spacer(),
-                    Center(
+                    const Center(
                       child: Text(
                         "로그인",
                         style: TextStyle(
@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const Spacer(),
-                    Text(
+                    const Text(
                       "아이디",
                       style: TextStyle(
                         color: Colors.black,
@@ -193,7 +193,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const Spacer(),
-                    Text(
+                    const Text(
                       "비밀번호",
                       style: TextStyle(
                         color: Colors.black,
@@ -228,7 +228,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             borderRadius: BorderRadius.circular(30)
                         ),
                         alignment: Alignment.center,
-                        child: Center(
+                        child: const Center(
                           child: Text(
                             "로그인",
                             style: TextStyle(
@@ -249,7 +249,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         );
                       },
-                      child: Center(
+                      child: const Center(
                         child: Center(
                           child: Text(
                             "회원가입",
