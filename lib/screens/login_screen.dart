@@ -43,7 +43,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
         // JSON에서 user 객체 안의 값을 가져오기
         final user = responseBody['user'];
+        user['token'] = responseBody['token']; // JWT 토큰을 userData에 추가
+
         log('로그인 성공: ID = ${user['id']}, 닉네임 = ${user['nickname']}, 이메일 = ${user['email']}');
+        // log('토큰: ${user['token']}');
 
         Provider.of<UserProvider>(context, listen: false).login();
         Provider.of<UserProvider>(context, listen: false).setUser(user);
