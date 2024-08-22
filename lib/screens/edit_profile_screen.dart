@@ -75,7 +75,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
         final response = await http.patch(
           Uri.parse('$baseUrl/users/$id'),
-          headers: {'Content-Type': 'application/json'},
+          headers: {'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${userProvider.token}'
+          },
           body: json.encode({'profileImage': imageUrl}),
         );
 
@@ -133,9 +135,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   void _withdrawal(BuildContext context) async {
     final id = Provider.of<UserProvider>(context, listen: false).id;
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     try {
-      final response = await http.delete(Uri.parse('$baseUrl/users/$id'));
+
+      final response = await http.delete(Uri.parse('$baseUrl/users/$id'),
+        headers: {
+          'Authorization': 'Bearer ${userProvider.token}' // JWT 토큰 추가
+        },
+      );
 
       if (response.statusCode == 204) { // 서버가 성공적으로 삭제한 경우
         final userProvider = Provider.of<UserProvider>(context, listen: false);
