@@ -52,20 +52,18 @@ class UserProvider with ChangeNotifier {
 
   // 사용자 정보를 설정하는 메서드
   void setUser(Map<String, dynamic> userData) async {
-    _id = userData['id']; // 사용자 ID 설정
-    _username = userData['username']; // 사용자 이름 설정
-    _email = userData['email']; // 사용자 이메일 설정
-    _nickname = userData['nickname']; // 사용자 닉네임 설정
-    _location = userData['location']; // 사용자 위치 설정
-    _age = userData['age']; // 사용자 나이 설정
-    _profileImage = userData['profileImage']; // 프로필 이미지 설정
+    _id = userData['id'] ?? ''; // 사용자 ID 설정
+    _username = userData['username'] ?? ''; // 사용자 이름 설정
+    _email = userData['email'] ?? ''; // 사용자 이메일 설정
+    _nickname = userData['nickname'] ?? ''; // 사용자 닉네임 설정
+    _location = userData['location'] ?? ''; // 사용자 위치 설정
+    _age = userData['age'] ?? 0; // 사용자 나이 설정
+    _profileImage = userData['profileImage']; // 프로필 이미지 설정 (nullable)
+    _token = userData['token']; // JWT 토큰 설정 (nullable)
     _isLoggedIn = true; // 로그인 상태로 설정
-    _token = userData['token']; // JWT 토큰 설정
     notifyListeners(); // 상태 변경 알림
 
-    // SharedPreferences 인스턴스 가져오기
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    // 사용자 정보를 SharedPreferences에 저장
     await prefs.setString('id', _id);
     await prefs.setString('username', _username);
     await prefs.setString('email', _email);
@@ -73,11 +71,14 @@ class UserProvider with ChangeNotifier {
     await prefs.setString('location', _location);
     await prefs.setInt('age', _age);
     if (_profileImage != null) {
-      await prefs.setString('profileImage', _profileImage!); // 프로필 이미지 저장
+      await prefs.setString('profileImage', _profileImage!);
     }
-    await prefs.setBool('isLoggedIn', true); // SharedPreferences에 로그인 상태 저장
-    await prefs.setString('token', _token!); // JWT 토큰 저장
+    await prefs.setBool('isLoggedIn', true);
+    if (_token != null) {
+      await prefs.setString('token', _token!);
+    }
   }
+
 
   // 사용자 정보를 초기화하는 메서드
   void clearUser() async {

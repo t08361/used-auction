@@ -3,6 +3,7 @@ import 'dart:developer'; // 디버깅을 위한 라이브러리
 import 'dart:ui'; // 블러 효과를 위한 라이브러리
 
 import 'package:flutter/material.dart'; // Flutter UI 프레임워크
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart'; // 상태 관리를 위한 Provider 패키지
 import '../main.dart'; // MainScreen 클래스를 가져오기 위해 import
 import '../providers/constants.dart'; // baseUrl 등 상수를 가져오기 위해 import
@@ -24,8 +25,65 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController(); // 이메일 입력 필드 컨트롤러
   final TextEditingController _passwordController = TextEditingController(); // 비밀번호 입력 필드 컨트롤러
 
+  // 소셜 로그인(구글) 구현
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'],
+  );
+
   int selectedIndex = 0;
   bool showOption = false;
+
+  // 구글 로그인 메소드
+  void _googleLogin() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser != null) {
+        final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+        // 서버에 ID 토큰을 보내고 JWT 토큰을 요청하는 부분
+        final response = await http.post(
+          Uri.parse('$baseUrl/social-login'), // 서버의 소셜 로그인 엔드포인트
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'idToken': googleAuth.idToken!,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          final responseBody = json.decode(response.body);
+
+          // 서버에서 받은 JWT 토큰과 사용자 정보
+          final user = responseBody['user'];
+          user['token'] = responseBody['token']; // JWT 토큰을 user 데이터에 추가
+
+          log('로그인 성공: ID = ${user['id']}, 닉네임 = ${user['nickname']}, 이메일 = ${user['email']}');
+
+          // UserProvider에 사용자 정보 저장 및 로그인 처리
+          Provider.of<UserProvider>(context, listen: false).setUser(user);
+          Provider.of<UserProvider>(context, listen: false).login();
+
+          // 로그인 성공 후, 메인 화면으로 이동
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => MainScreen(),
+            ),
+          );
+        } else {
+          _showErrorDialog(context, '서버와의 통신 중 오류가 발생했습니다.');
+        }
+      }
+    } catch (error) {
+      log('Google 로그인 중 오류 발생 : $error');
+      _showErrorDialog(context, 'Google 로그인 중 오류가 발생했습니다.');
+    }
+  }
+
+
+
+
 
   void _login(BuildContext context) async {
     final email = _emailController.text; // 입력받은 이메일
@@ -110,13 +168,14 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: Container(
         margin: const EdgeInsets.symmetric(vertical: 10),
-        height:49,
+        height: 49,
         width: double.infinity,
         child: Row(
           children: [
@@ -143,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
         width: double.infinity,
         alignment: Alignment.center,
         child: Container(
-          height: 400,
+          height: 450, // 높이를 50 더 늘림
           width: double.infinity,
           margin: const EdgeInsets.symmetric(horizontal: 30),
           decoration: BoxDecoration(
@@ -266,6 +325,29 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const Spacer(),
+                    GestureDetector(
+                      onTap: _googleLogin, // Google 로그인 메소드 연결
+                      child: Container(
+                        height: 40,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            color: Colors.redAccent,
+                            borderRadius: BorderRadius.circular(30)
+                        ),
+                        alignment: Alignment.center,
+                        child: const Center(
+                          child: Text(
+                            "Google 로그인",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
                   ],
                 ),
               ),
@@ -275,4 +357,5 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
   }
+
 }

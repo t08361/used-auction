@@ -23,6 +23,21 @@
     <string>App requires notification permission</string>
     <!-- 권한 설명 추가 끝 -->
 
+    <!-- Google 로그인 관련 설정 추가 -->
+    <key>GIDClientID</key>
+    <string>882104702900-n52kolmobiihpmap1gjdso5qr27p5fcj.apps.googleusercontent.com</string> <!-- 여기에는 정방향 클라이언트 ID를 입력하세요 -->
+    <key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.882104702900-n52kolmobiihpmap1gjdso5qr27p5fcj</string> <!-- 여기에 리버스 클라이언트 ID를 추가하세요 -->
+        </array>
+      </dict>
+    </array>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
