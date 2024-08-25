@@ -74,6 +74,7 @@ class ChatProvider with ChangeNotifier {
       print('Error: $error');
       throw Exception('Failed to load chat rooms');
     }
+    notifyListeners();
   }
 
   // 새로운 메시지를 서버에 전송하고, 채팅방의 마지막 메시지를 업데이트하는 메서드
@@ -193,7 +194,9 @@ class ChatProvider with ChangeNotifier {
       String recipientId,
       String buyerNickname,
       String lastMessage,
-      String imageUrl) async {
+      String imageUrl,
+      int finalPrice
+      ) async {
     final chatRoomId = _getChatRoomId(sellerId, recipientId);
     final existingChat =
         _chatRooms.any((chatRoom) => chatRoom.id == chatRoomId);
@@ -204,7 +207,7 @@ class ChatProvider with ChangeNotifier {
         sellerNickname: sellerNickname,
         buyerId: recipientId,
         buyerNickname: buyerNickname,
-        finalPrice: 0,
+        finalPrice: finalPrice,
         lastMessage: lastMessage,
         lastMessageTime: DateTime.now(),
         itemImage: imageUrl,
@@ -242,5 +245,12 @@ class ChatProvider with ChangeNotifier {
   String _getChatRoomId(String userId1, String userId2) {
     final sortedIds = [userId1, userId2]..sort();
     return sortedIds.join('_');
+  }
+
+  // 채팅방 목록을 초기화하는 메서드
+  void clearChatRooms() {
+    _chatRooms = [];  // 채팅 목록을 비웁니다.
+    print("Chat rooms cleared");
+    notifyListeners();  // 상태 변경을 알립니다.
   }
 }

@@ -85,13 +85,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   // 판매자의 닉네임과 지역 정보 가져오기
   Future<void> fetchSellerNickname() async {
     final url = Uri.parse('$baseUrl/users/${widget.item.userId}');
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-    final response = await http.get(url,
-      headers: {
-        'Authorization': 'Bearer ${userProvider.token}',  // 여기에 토큰 추가
-      },
-    );
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> user = json.decode(response.body);
@@ -111,12 +105,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   // 현재 상품의 입찰 기록을 가져오기
   Future<void> fetchBids() async {
     final url = Uri.parse('$baseUrl/bids/${widget.item.id}');
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final response = await http.get(url,
-      headers: {
-        'Authorization': 'Bearer ${userProvider.token}',  // 여기에 토큰 추가
-      },
-    );
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final List<dynamic> bidList = json.decode(response.body);
@@ -144,13 +133,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   // 사용자 닉네임을 가져오는 함수
   Future<String> fetchUserNickname(String userId) async {
     final url = Uri.parse('$baseUrl/users/$userId');
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-    final response = await http.get(url,
-      headers: {
-        'Authorization': 'Bearer ${userProvider.token}',  // 여기에 토큰 추가
-      },
-    );
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> user = json.decode(response.body);
@@ -296,7 +279,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             final bid = bidsToShow[index];
             return ListTile(
               title: Text(bid['nickname'] as String),
-              subtitle: Text('입찰가: \$${bid['bidPrice']}'),
+              subtitle: Text('입찰가: \₩${bid['bidPrice']}'),
             );
           },
         ),
@@ -361,6 +344,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         return StatefulBuilder(
           builder: (ctx, setState) {
             return AlertDialog(
+              backgroundColor: Colors.white,
               title: const Text('입찰하기'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -412,7 +396,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       });
                     });
                   },
-                  child: const Text('입찰'),
+                  child: Text('입찰',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             );
@@ -459,9 +445,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
 
     if (response.statusCode == 200) {
-      print('낙찰가 업데이트 성공');
+      // print('낙찰가 업데이트 성공');
     } else {
-      print('낙찰가 업데이트 실패: ${response.body}');
+      // print('낙찰가 업데이트 실패: ${response.body}');
     }
   }
 
@@ -493,6 +479,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               widget.item.itemImages.isNotEmpty
                   ? widget.item.itemImages[0]
                   : '',
+              currentPrice,
             );
           }
         }
@@ -502,6 +489,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   Widget buildPopupMenuButton(bool isOwner, bool isLoggedIn) {
     return PopupMenuButton<String>(
+      color: Colors.white,
       onSelected: _handleMenuSelection,
       itemBuilder: (BuildContext context) {
         if (isOwner && isLoggedIn) {
@@ -597,8 +585,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildImageSlider(), // 이미지 슬라이더 추가
+            SizedBox(height: 10,),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -663,7 +652,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         '설명 : ${widget.item.description}',
                         style: const TextStyle(fontSize: 16),
                       ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
                     if (!_isSellerDeleted)
                       Row(
                         children: [
@@ -694,6 +683,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       bottomNavigationBar: _isSellerDeleted
           ? null
           : BottomAppBar(
+        color: Colors.black12,
         shape: const CircularNotchedRectangle(),
         notchMargin: 5,
         child: Row(
@@ -854,7 +844,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             ),
                           ),
                           onPressed: _isSellerDeleted ? null : _showBidDialog,
-                          child: const Text('입찰'),
+                          child: const Text('입찰',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ],
@@ -904,6 +896,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   widget.item.itemImages.isNotEmpty
                                       ? widget.item.itemImages[0]
                                       : '',
+                                    currentPrice
                                 );
                               }
                               Navigator.of(context).push(MaterialPageRoute(
@@ -914,6 +907,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   itemImage: widget.item.itemImages.isNotEmpty
                                       ? widget.item.itemImages[0]
                                       : '',
+                                  finalPrice: currentPrice,
                                 ),
                               ));
                             },

@@ -43,60 +43,65 @@ class _ChatListScreenState extends State<ChatListScreen> {
     final chatProvider = Provider.of<ChatProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
 
-    // 현재 사용자가 참여 중인 채팅방만 필터링( 수정해야할 부분 )
+    // 현재 사용자가 참여 중인 채팅방만 필터링
     final userChatRooms = chatProvider.chatRooms.where((chatRoom) =>
     chatRoom.sellerId == userProvider.id || chatRoom.buyerId == userProvider.id).toList();
 
-    // 채팅방을 마지막 메시지 시간으로 정렬
+    // 상태 확인용 로그 출력
+    print("User Chat Rooms: ${userChatRooms.length}");
+
     userChatRooms.sort((a, b) => b.lastMessageTime.compareTo(a.lastMessageTime));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('채팅'), // 앱바 타이틀 설정
-        centerTitle: false, // 타이틀을 왼쪽으로 정렬
-        backgroundColor: Colors.white, // 앱바 배경색 설정
+        title: Text('채팅'),
+        centerTitle: false,
+        backgroundColor: Colors.white,
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(0.5), // 원하는 높이로 설정
+          preferredSize: Size.fromHeight(0.5),
           child: Container(
-            color: Colors.grey, // 밑줄 색상
-            height: 0.2, // 밑줄 두께
+            color: Colors.grey,
+            height: 0.2,
           ),
         ),
       ),
-
-      backgroundColor: Colors.white, // 배경색 설정
-
-      // 🟡채팅방 리스트 Ui
-      body: ListView.builder(
-        itemCount: userChatRooms.length, // 채팅방 개수 설정
+      backgroundColor: Colors.white,
+      body: userChatRooms.isEmpty
+          ? Center(
+        child: Text(
+          "채팅방이 없습니다.",
+          style: TextStyle(fontSize: 18, color: Colors.black),
+        ),
+      )
+          : ListView.builder(
+        itemCount: userChatRooms.length,
         itemBuilder: (context, index) {
           final chatRoom = userChatRooms[index];
           final isMe = chatRoom.sellerId == userProvider.id;
           final chatPartnerId = isMe ? chatRoom.buyerId : chatRoom.sellerId;
-          final chatPartnerNickname = isMe ? chatRoom.buyerNickname : chatRoom.sellerNickname; // 실제로는 닉네임을 가져와야 함
+          final chatPartnerNickname = isMe ? chatRoom.buyerNickname : chatRoom.sellerNickname;
 
-          return Container(
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(chatRoom.itemImage), // 상대방 프로필 이미지 사용
-                radius: 24, // 원형 이미지의 반지름
-              ),
-              title: Text(chatPartnerNickname, style: TextStyle(color: Colors.black)), // 채팅 상대방 닉네임
-              subtitle: Text(chatRoom.lastMessage, style: TextStyle(color: Colors.black)), // 마지막 메시지
-              trailing: Text('${chatRoom.lastMessageTime.hour}:${chatRoom.lastMessageTime.minute}'), // 마지막 메시지 시간
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => ChatScreen(
-                      senderId: userProvider.id,
-                      recipientId: chatPartnerId,
-                      chatRoomId: chatRoom.id,
-                      itemImage: chatRoom.itemImage,
-                    ),
-                  ),
-                );
-              },
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(chatRoom.itemImage),
+              radius: 24,
             ),
+            title: Text(chatPartnerNickname, style: TextStyle(color: Colors.black)),
+            subtitle: Text(chatRoom.lastMessage, style: TextStyle(color: Colors.black)),
+            trailing: Text('${chatRoom.lastMessageTime.hour}:${chatRoom.lastMessageTime.minute}'),
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(
+                    senderId: userProvider.id,
+                    recipientId: chatPartnerId,
+                    chatRoomId: chatRoom.id,
+                    itemImage: chatRoom.itemImage,
+                      finalPrice: chatRoom.finalPrice,
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

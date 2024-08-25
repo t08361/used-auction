@@ -131,15 +131,26 @@ class UserProvider with ChangeNotifier {
   // 로그아웃 메서드
   void logout() async {
     _isLoggedIn = false; // 로그아웃 상태로 설정
+    _id = '';
+    _username = '';
+    _email = '';
+    _nickname = '';
+    _location = '';
+    _age = 0;
     _profileImage = null; // 프로필 이미지 초기화
     _token = null; // 토큰 초기화
     notifyListeners(); // 상태 변경 알림
 
     // SharedPreferences 인스턴스 가져오기
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', _isLoggedIn); // SharedPreferences에 로그아웃 상태 저장
-    await prefs.remove('token'); // 저장된 JWT 토큰 삭제
+    await prefs.clear(); // 모든 SharedPreferences 데이터 초기화
+
+    // 디버깅을 위한 로그 출력
+    print('로그아웃 완료');
+    print('로그인 상태: ${prefs.getBool('isLoggedIn')}');
+    print('토큰 상태: ${prefs.getString('token')}');
   }
+
 
   // 특정 아이디로 사용자 정보를 가져와 프로필 이미지를 반환하는 메서드
   Future<String?> getProfileImageById(String id) async {

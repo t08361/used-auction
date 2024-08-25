@@ -10,6 +10,7 @@ class ChatScreen extends StatefulWidget {
   final String recipientId;
   final String chatRoomId;
   final String itemImage;
+  final int finalPrice;
 
   const ChatScreen({
     super.key,
@@ -17,6 +18,7 @@ class ChatScreen extends StatefulWidget {
     required this.recipientId,
     required this.chatRoomId,
     required this.itemImage,
+    required this.finalPrice
   });
 
   @override
@@ -176,9 +178,9 @@ class _ChatScreenState extends State<ChatScreen> {
               radius: 22,
             ),
             const SizedBox(width: 20),
-            const Text(
-              '낙찰가 : 20000원',
-              style: TextStyle(
+            Text(
+              '낙찰가 : ${widget.finalPrice}원',
+              style: const TextStyle(
                 color: Color(0xFF36BA98),
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
