@@ -85,13 +85,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   // 판매자의 닉네임과 지역 정보 가져오기
   Future<void> fetchSellerNickname() async {
     final url = Uri.parse('$baseUrl/users/${widget.item.userId}');
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-    final response = await http.get(url,
-      headers: {
-        'Authorization': 'Bearer ${userProvider.token}',  // 여기에 토큰 추가
-      },
-    );
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> user = json.decode(response.body);
@@ -111,12 +105,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   // 현재 상품의 입찰 기록을 가져오기
   Future<void> fetchBids() async {
     final url = Uri.parse('$baseUrl/bids/${widget.item.id}');
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    final response = await http.get(url,
-      headers: {
-        'Authorization': 'Bearer ${userProvider.token}',  // 여기에 토큰 추가
-      },
-    );
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final List<dynamic> bidList = json.decode(response.body);
@@ -144,13 +133,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
   // 사용자 닉네임을 가져오는 함수
   Future<String> fetchUserNickname(String userId) async {
     final url = Uri.parse('$baseUrl/users/$userId');
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-    final response = await http.get(url,
-      headers: {
-        'Authorization': 'Bearer ${userProvider.token}',  // 여기에 토큰 추가
-      },
-    );
+    final response = await http.get(url);
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> user = json.decode(response.body);
@@ -462,9 +445,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
     );
 
     if (response.statusCode == 200) {
-      print('낙찰가 업데이트 성공');
+      // print('낙찰가 업데이트 성공');
     } else {
-      print('낙찰가 업데이트 실패: ${response.body}');
+      // print('낙찰가 업데이트 실패: ${response.body}');
     }
   }
 
