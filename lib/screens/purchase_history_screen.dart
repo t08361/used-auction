@@ -27,8 +27,10 @@ class PurchaseHistoryPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('구매내역'), // 앱바 제목 설정
+        title: const Text('구매내역'), // 앱바 제목 설정
+        backgroundColor: Colors.white,
       ),
+      backgroundColor: Colors.white,
       body: ListView.builder(
         itemCount: purchasedItems.length, // 리스트의 아이템 개수 설정
         // 리스트의 각 아이템을 구성하는 빌더 함수

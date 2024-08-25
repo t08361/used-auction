@@ -296,7 +296,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
             final bid = bidsToShow[index];
             return ListTile(
               title: Text(bid['nickname'] as String),
-              subtitle: Text('입찰가: \$${bid['bidPrice']}'),
+              subtitle: Text('입찰가: \₩${bid['bidPrice']}'),
             );
           },
         ),
@@ -361,6 +361,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
         return StatefulBuilder(
           builder: (ctx, setState) {
             return AlertDialog(
+              backgroundColor: Colors.white,
               title: const Text('입찰하기'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -412,7 +413,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                       });
                     });
                   },
-                  child: const Text('입찰'),
+                  child: Text('입찰',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             );
@@ -502,6 +505,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
 
   Widget buildPopupMenuButton(bool isOwner, bool isLoggedIn) {
     return PopupMenuButton<String>(
+      color: Colors.white,
       onSelected: _handleMenuSelection,
       itemBuilder: (BuildContext context) {
         if (isOwner && isLoggedIn) {
@@ -597,8 +601,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildImageSlider(), // 이미지 슬라이더 추가
+            SizedBox(height: 10,),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -663,7 +668,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                         '설명 : ${widget.item.description}',
                         style: const TextStyle(fontSize: 16),
                       ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 20),
                     if (!_isSellerDeleted)
                       Row(
                         children: [
@@ -694,6 +699,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
       bottomNavigationBar: _isSellerDeleted
           ? null
           : BottomAppBar(
+        color: Colors.black12,
         shape: const CircularNotchedRectangle(),
         notchMargin: 5,
         child: Row(
@@ -854,7 +860,9 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                             ),
                           ),
                           onPressed: _isSellerDeleted ? null : _showBidDialog,
-                          child: const Text('입찰'),
+                          child: const Text('입찰',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ],

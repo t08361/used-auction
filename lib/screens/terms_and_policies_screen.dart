@@ -6,9 +6,12 @@ class TermsAndPoliciesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('약관 및 정책'),
+        title: const Text('약관 및 정책'),
+        backgroundColor: Colors.white,
       ),
-      body: const Padding(
+      backgroundColor: Colors.white,
+      body:
+      const Padding(
         padding: EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(

@@ -24,8 +24,9 @@ class SaleHistoryPage extends StatelessWidget {
 
       appBar: AppBar(
         title: Text('판매내역'),
+        backgroundColor: Colors.white,
       ),
-
+      backgroundColor: Colors.white,
       body: ListView.builder(
         itemCount: userItems.length, // 아이템 개수 설정
         itemBuilder: (context, index) {// 아이템을 어떻게 표시할지 정의

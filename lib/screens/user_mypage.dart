@@ -169,6 +169,7 @@ class UserPage extends StatelessWidget {
               ),
               const SizedBox(height: 30), // 거래 정보와 카드 사이 여백
               Card( // 정보들을 보여줄 카드 위젯
+                color: Colors.white70,
                 elevation: 2, // 카드의 그림자 높이 설정
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16), // 카드의 모서리를 둥글게 설정
