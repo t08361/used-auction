@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart'; // Flutter의 Material 디자인 라이브러리 import
 import 'package:provider/provider.dart'; // Provider 패키지 import
+import '../providers/chat_provider.dart';
 import '../providers/user_provider.dart'; // UserProvider import (사용자 데이터를 관리하는 Provider)
 import 'ongoing_auction_screen.dart'; // 진행 중인 경매 화면 import
 import 'edit_profile_screen.dart'; // 프로필 수정 화면 import
@@ -65,7 +66,11 @@ class UserPage extends StatelessWidget {
   // 로그아웃 함수 (UserProvider의 logout 메서드를 호출하고 로그인 화면으로 이동)
   void _logout(BuildContext context) {
     Provider.of<UserProvider>(context, listen: false).logout(); // UserProvider의 logout 메서드 호출
-    Navigator.of(context).pushReplacementNamed('/homescreen'); // 로그인 화면으로 이동
+    Provider.of<ChatProvider>(context, listen: false).clearChatRooms(); // ChatProvider의 채팅 목록 초기화
+    // ChatProvider의 상태가 제대로 초기화되었는지 확인
+    final chatProvider = Provider.of<ChatProvider>(context, listen: false);
+    print("Chat rooms after logout: ${chatProvider.chatRooms.length}");
+    Navigator.of(context).pushNamedAndRemoveUntil('/homescreen', (Route<dynamic> route) => false);
   }
 
   // 사용자 페이지의 UI 빌드

@@ -80,6 +80,7 @@ class MyApp extends StatelessWidget {
         '/user': (context) => UserPage(), // 사용자 페이지
         '/home': (context) => HomeScreen(), // 홈 화면
         '/add-item': (context) => AddItemScreen(), // 아이템 추가 화면
+        '/homescreen' : (context) => MainScreen(),
       },
     );
   }
@@ -97,13 +98,13 @@ class _MainScreenState extends State<MainScreen> {
   // 각 인덱스에 해당하는 위젯 리스트
   List<Widget> _widgetOptions(BuildContext context) {
     return <Widget>[
-      HomeScreen(), // 홈 화면
+      const HomeScreen(), // 홈 화면
       ChatListScreen(), // 채팅 목록 화면
       Consumer<UserProvider>(
         builder: (context, userProvider, child) {
           return userProvider.isLoggedIn
               ? UserPage()
-              : LoginScreen(); // 로그인 여부에 따라 화면 변경
+              : const LoginScreen(); // 로그인 여부에 따라 화면 변경
         },
       ),
     ];
