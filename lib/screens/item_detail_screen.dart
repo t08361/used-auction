@@ -479,6 +479,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
               widget.item.itemImages.isNotEmpty
                   ? widget.item.itemImages[0]
                   : '',
+              currentPrice,
             );
           }
         }
@@ -895,6 +896,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   widget.item.itemImages.isNotEmpty
                                       ? widget.item.itemImages[0]
                                       : '',
+                                    currentPrice
                                 );
                               }
                               Navigator.of(context).push(MaterialPageRoute(
@@ -905,6 +907,7 @@ class _ItemDetailScreenState extends State<ItemDetailScreen> {
                                   itemImage: widget.item.itemImages.isNotEmpty
                                       ? widget.item.itemImages[0]
                                       : '',
+                                  finalPrice: currentPrice,
                                 ),
                               ));
                             },

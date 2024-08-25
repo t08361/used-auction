@@ -97,6 +97,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     recipientId: chatPartnerId,
                     chatRoomId: chatRoom.id,
                     itemImage: chatRoom.itemImage,
+                      finalPrice: chatRoom.finalPrice,
                   ),
                 ),
               );

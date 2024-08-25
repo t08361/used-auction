@@ -194,7 +194,9 @@ class ChatProvider with ChangeNotifier {
       String recipientId,
       String buyerNickname,
       String lastMessage,
-      String imageUrl) async {
+      String imageUrl,
+      int finalPrice
+      ) async {
     final chatRoomId = _getChatRoomId(sellerId, recipientId);
     final existingChat =
         _chatRooms.any((chatRoom) => chatRoom.id == chatRoomId);
@@ -205,7 +207,7 @@ class ChatProvider with ChangeNotifier {
         sellerNickname: sellerNickname,
         buyerId: recipientId,
         buyerNickname: buyerNickname,
-        finalPrice: 0,
+        finalPrice: finalPrice,
         lastMessage: lastMessage,
         lastMessageTime: DateTime.now(),
         itemImage: imageUrl,
