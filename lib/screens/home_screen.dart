@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
         preferredSize: Size.fromHeight(40.0), // 원하는 높이로 설정
         child: AppBar(
           title: Text(
-            '뚝딱', // 앱바 타이틀
+            '사종🔔', // 앱바 타이틀
             style: TextStyle(color: Colors.black), // 타이틀 색상 설정
           ),
           // 뒤로가기 버튼을 없애기
