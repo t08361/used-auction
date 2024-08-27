@@ -233,7 +233,7 @@ class _RemainingTimeGridState extends State<RemainingTimeGrid> {
     return Container(
       margin: const EdgeInsets.only(top: 0.0), // 그리드와 텍스트 간의 간격 추가
       decoration: BoxDecoration(
-        color: seconds == 0 ? Colors.white : Colors.black,
+        color: seconds == 0 ? Colors.white : Colors.redAccent,
         borderRadius: BorderRadius.circular(9.0), // 모서리를 둥글게 설정
       ),
       child: Align(
